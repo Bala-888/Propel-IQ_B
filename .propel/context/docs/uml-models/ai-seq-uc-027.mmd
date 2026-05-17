@@ -1,0 +1,40 @@
+﻿sequenceDiagram
+    participant TRIGGER as Conflict Detector
+    participant DB as PostgreSQL
+    participant CONFLICTSVC as Conflict Service
+    participant OL as Ollama (Llama 3.1 8B)
+    participant STAFF as Staff (Browser)
+    participant SPA as React SPA
+    participant API as .NET API
+    participant SEQ as Seq Logger
+
+    Note over TRIGGER,SEQ: UC-027 -- Data Conflict Detected and Surfaced [HYBRID]
+
+    TRIGGER->>DB: SELECT ExtractedRecords WHERE patientId=? AND entityType IN (Medication, Diagnosis)
+    DB-->>TRIGGER: extracted records from all documents
+    TRIGGER->>CONFLICTSVC: DetectConflicts(extractedRecords)
+    CONFLICTSVC->>CONFLICTSVC: Rule-based pass: group by entityType + flag contradictory values
+
+    alt Conflicts found
+        CONFLICTSVC->>OL: POST /api/chat { system: conflict_analysis_prompt, records: conflicting_pairs }
+        OL-->>CONFLICTSVC: { conflicts: [{field, value_a, source_a, value_b, source_b, confidence, explanation}] }
+        CONFLICTSVC->>DB: INSERT ConflictFlags (linked to ExtractedRecord IDs)
+        CONFLICTSVC->>SEQ: conflicts_detected { patientId, count, critical_count }
+
+        STAFF->>SPA: View 360 Patient View
+        SPA->>API: GET /patients/{id}/view (JWT Staff)
+        API->>DB: SELECT ExtractedRecords + ConflictFlags WHERE patientId=?
+        DB-->>API: merged view with conflict highlights
+        API-->>SPA: { patientView, conflicts: [{field, valueA, sourceA, valueB, sourceB, confidence}] }
+        SPA-->>STAFF: 360 view with conflict banners
+
+        STAFF->>SPA: Resolve conflict (choose value A or B)
+        SPA->>API: PATCH /conflicts/{id}/resolve { chosenValue, chosenSource }
+        API->>DB: UPDATE ConflictFlag status=Resolved, resolvedBy, resolvedAt
+        API->>DB: UPDATE ExtractedRecord (accepted value)
+        API->>SEQ: conflict_resolved { conflictId, staffId, chosenSource }
+        API-->>SPA: 200 OK
+        SPA-->>STAFF: Conflict resolved
+    else No conflicts
+        CONFLICTSVC->>SEQ: no_conflicts_detected { patientId }
+    end

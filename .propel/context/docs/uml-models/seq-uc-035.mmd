@@ -1,0 +1,20 @@
+﻿sequenceDiagram
+    participant S as Staff
+    participant SPA as React SPA
+    participant API as .NET API
+    participant HUB as SignalR Hub
+    participant DB as PostgreSQL
+
+    Note over S,DB: UC-035 -- Staff Views Daily Operations Dashboard
+
+    S->>SPA: Navigate to Staff Dashboard
+    SPA->>API: GET /dashboard/staff?date=today (JWT Staff)
+    API->>DB: SELECT Booking JOIN Patient WHERE date=today\ninclude status, noShowRiskScore, arrivedAt
+    DB-->>API: today appointments + walk-ins
+    API-->>SPA: { scheduled: [...], walkins: [...], queue: [...] }
+    SPA-->>S: Daily appointments table + live queue
+
+    SPA->>HUB: Connect SignalR /hubs/queue
+    HUB-->>SPA: Real-time connection established
+
+    Note over SPA,HUB: Queue updates arrive in real-time (see UC-021, UC-022)\nNo manual refresh required

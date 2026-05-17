@@ -1,0 +1,28 @@
+﻿sequenceDiagram
+    participant U as User (Any Role)
+    participant SPA as React SPA
+    participant API as .NET API
+    participant AUTH as Auth Module
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over U,SEQ: UC-004 -- Login Failure
+
+    U->>SPA: Submit login credentials
+    SPA->>API: POST /auth/login { email, password }
+    API->>AUTH: VerifyCredentials()
+    AUTH->>DB: SELECT User WHERE email = ?
+    DB-->>AUTH: no row OR inactive
+    AUTH->>DB: INSERT AuditLog (action=login_failed, ip, timestamp)
+    AUTH->>SEQ: login_failed { ip, attempt_count }
+    AUTH-->>API: 401 generic
+    API-->>SPA: 401 { error: "Invalid email or password" }
+    SPA-->>U: Generic error (no field specifics)
+
+    alt Progressive rate limiting triggered (5 attempts per 15 min)
+        AUTH->>DB: UPDATE User failedAttempts++ WHERE email=?
+        AUTH->>AUTH: Check threshold exceeded
+        AUTH-->>API: 429 Too Many Requests
+        API-->>SPA: 429 { error: "Account locked -- contact admin" }
+        SPA-->>U: Account locked message
+    end

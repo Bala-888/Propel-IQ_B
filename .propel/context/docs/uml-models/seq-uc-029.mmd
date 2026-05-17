@@ -1,0 +1,28 @@
+﻿sequenceDiagram
+    participant JOB as Extraction Job
+    participant API as .NET API
+    participant OL as Ollama
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over JOB,SEQ: UC-029 -- Extraction Failure / Low AI Confidence
+
+    JOB->>API: ProcessDocument(docId)
+    API->>OL: POST /api/chat { extraction_prompt, text }
+    OL-->>API: JSON response
+
+    alt Schema validation fails (malformed JSON)
+        API->>DB: UPDATE ClinicalDocument status=Failed
+        API->>SEQ: extraction_validation_failed { docId, reason: malformed_output }
+        API-->>JOB: ExtractionFailedException
+    else Low confidence (all entities confidence < 0.5)
+        API->>DB: INSERT ExtractedRecords [confidence < 0.5, flagged=low_confidence]
+        API->>DB: UPDATE ClinicalDocument status=Complete (partial)
+        API->>SEQ: extraction_low_confidence { docId, entityCount, avgConfidence }
+        API-->>JOB: LowConfidenceWarning
+        Note over DB: Low-confidence records visible in 360 view with confidence indicator
+    else Ollama timeout (AIR-008 > 120s)
+        API->>DB: UPDATE ClinicalDocument status=Failed
+        API->>SEQ: extraction_timeout { docId, elapsed }
+        API-->>JOB: TimeoutException
+    end

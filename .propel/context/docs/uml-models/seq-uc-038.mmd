@@ -1,0 +1,31 @@
+﻿sequenceDiagram
+    participant ATT as Attacker / Unauthorized User
+    participant API as .NET API
+    participant AUTH as Auth Middleware
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over ATT,SEQ: UC-038 -- Unauthorized Access Attempt Blocked and Logged
+
+    ATT->>API: Request to protected endpoint (missing token, expired token, wrong role)
+
+    alt Missing or malformed JWT
+        API->>AUTH: ValidateToken() invalid
+        AUTH-->>ATT: 401 Unauthorized
+        AUTH->>SEQ: auth_failure { ip, endpoint, reason: missing_token }
+    else Expired JWT
+        API->>AUTH: ValidateToken() expired
+        AUTH-->>ATT: 401 Unauthorized
+        AUTH->>SEQ: auth_failure { ip, endpoint, reason: token_expired }
+    else Valid JWT but insufficient role
+        API->>AUTH: CheckRole(requiredRole) mismatch
+        AUTH-->>ATT: 403 Forbidden
+        AUTH->>DB: INSERT AuditLog (action=unauthorized_access, actorId, ip, endpoint)
+        AUTH->>SEQ: rbac_violation { actorId, endpoint, requiredRole, actualRole }
+    end
+
+    opt Rate limit exceeded
+        AUTH->>AUTH: ThrottleCheck(ip) over limit
+        AUTH-->>ATT: 429 Too Many Requests
+        AUTH->>SEQ: rate_limit_exceeded { ip, endpoint }
+    end

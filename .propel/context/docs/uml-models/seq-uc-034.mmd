@@ -1,0 +1,16 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-034 -- Insurance Pre-Check -- Validation Fails
+
+    P->>SPA: Enter insurance provider + ID
+    SPA->>API: POST /insurance/validate { provider, insuranceId } (JWT)
+    API->>DB: SELECT InsuranceRecord WHERE providerName = ? AND insuranceId LIKE pattern
+    DB-->>API: no matching record
+    API-->>SPA: 200 { valid: false, warning: "Insurance details could not be verified" }
+    SPA-->>P: Warning: "Insurance details could not be verified. Booking can still proceed."
+    Note over P: Warning shown -- booking NOT blocked (soft validation)
+    P->>SPA: Continue to slot booking

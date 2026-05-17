@@ -1,0 +1,52 @@
+﻿@startuml deployment-architecture
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName Arial
+skinparam NodeBorderColor #336699
+skinparam DatabaseBorderColor #336699
+skinparam ComponentBorderColor #999999
+
+title Unified Patient Access & Clinical Intelligence Platform\nDeployment Architecture -- Docker Compose (Single Host)
+
+node "Docker Host\n(On-premises / Free Cloud VM)" as HOST #E8F4FD {
+    node "frontend_net" as FRONTNET #F0F8E8 {
+        component "nginx:1.25-alpine\n:443 (HTTPS TLS 1.2+)\n:80 -> 443 redirect\n. React SPA static files\n. /api/* reverse proxy" as NGINX
+    }
+    node "backend_net" as BACKNET #FFF8E8 {
+        component "api (.NET 8.0)\n:8080 (internal)\n. REST endpoints\n. SignalR /hubs/queue\n. /metrics Prometheus\n. Serilog -> Seq" as API
+        database "db (PostgreSQL 15.3+)\n:5432 (internal)\n. pgcrypto (AES-256 PHI)\n. pgvector 0.5+ (embeddings)\n. Volume: db_data" as DB
+        component "ollama:0.1.29\n:11434 (internal)\n. Llama 3.1 8B Q4_K_M\n. CPU inference\n. Volume: ollama_models" as OLLAMA
+        component "seq:2023.4\n:5341 API / :80 UI\n. Structured log ingestion\n. Volume: seq_data" as SEQ
+    }
+    node "monitoring_net" as MONNET #FFF0F0 {
+        component "prometheus:2.45\n:9090 (internal)\n. Scrapes api:8080/metrics\n. Volume: prometheus_data" as PROM
+        component "grafana:10\n:3000\n. Datasource: Prometheus\n. Volume: grafana_data" as GRAF
+    }
+    note right of DB
+        Named Volumes:
+        db_data, ollama_models,
+        seq_data, prometheus_data,
+        grafana_data
+        Restart: always
+    end note
+}
+
+cloud "External APIs (Free Tier)" as EXT {
+    component "Email/SMS Gateway\n(SMTP + Twilio)" as GW
+    component "Google Calendar API\n(OAuth 2.0)" as GCAL
+    component "Microsoft Graph API\n(OAuth 2.0)" as MSCAL
+}
+
+actor "Patient / Staff / Admin\n(Browser)" as USER
+
+USER -right-> NGINX : HTTPS :443
+NGINX -right-> API : HTTP :8080\n(Docker network)
+API -down-> DB : Npgsql / EF Core\n:5432
+API -right-> OLLAMA : HTTP :11434
+API -down-> SEQ : Serilog sink
+PROM -up-> API : scrape /metrics
+GRAF -left-> PROM : PromQL queries
+API -right-> GW : SMTP / REST
+API -right-> GCAL : REST OAuth 2.0
+API -right-> MSCAL : REST OAuth 2.0
+@enduml

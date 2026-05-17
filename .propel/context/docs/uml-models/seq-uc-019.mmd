@@ -1,0 +1,31 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant MSCAL as Microsoft Graph API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-019 -- Outlook Calendar Sync
+
+    P->>SPA: Click "Sync to Outlook Calendar" post-booking
+    SPA->>API: POST /calendar/outlook/sync { bookingId } (JWT)
+    API->>DB: SELECT Patient.outlookOAuthToken WHERE patientId=?
+
+    alt Token exists and valid
+        API->>MSCAL: POST /me/events { subject, start, end, body }
+        MSCAL-->>API: 201 { id }
+        API->>DB: UPDATE Booking outlookCalEventId=?
+        API-->>SPA: 200 { synced: true }
+        SPA-->>P: Outlook sync confirmed
+    else No token (not authorised)
+        API-->>SPA: 302 { authUrl: Microsoft OAuth consent URL }
+        SPA-->>P: Redirect to Microsoft OAuth
+        P->>MSCAL: Consent granted
+        MSCAL-->>SPA: OAuth callback with code
+        SPA->>API: POST /auth/microsoft/callback { code }
+        API->>MSCAL: Exchange code for tokens
+        API->>DB: UPDATE Patient outlookOAuthToken (encrypted)
+        API->>MSCAL: Create calendar event
+        MSCAL-->>API: 201 eventId
+        API-->>SPA: 200 { synced: true }
+    end

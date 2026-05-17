@@ -1,0 +1,23 @@
+﻿sequenceDiagram
+    participant S as Staff
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over S,SEQ: UC-028 -- Staff Views 360-Degree Patient View
+
+    S->>SPA: Open patient record
+    SPA->>API: GET /patients/{id}/view (JWT Staff)
+    API->>API: AuthorizeRole(Staff)
+    API->>DB: SELECT Patient, IntakeRecord, ExtractedRecords, MedicalCodeSuggestions, ConflictFlags WHERE patientId=?
+    DB-->>API: aggregated patient data
+    API->>DB: INSERT AuditLog (action=patient_view_accessed, actorId, patientId)
+    API->>SEQ: patient_360_viewed { staffId, patientId }
+    API-->>SPA: 200 { patient, intake, extractedData, codes[Pending], conflicts[] }
+    SPA-->>S: 360 view with vitals, meds, diagnoses, conflict banners, pending codes
+
+    opt Patient (unauthorized attempt)
+        API->>API: AuthorizeRole(Staff) -- Patient token rejected
+        API-->>SPA: 403 Forbidden
+    end

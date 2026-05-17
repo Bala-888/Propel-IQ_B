@@ -1,0 +1,28 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-009 -- Intake Mode Switch Mid-Session
+
+    P->>SPA: Click "Switch to Manual Form" (from AI mode)
+    SPA->>API: POST /intake/mode-switch { sessionId, targetMode: manual }
+    API->>API: MapAIDataToManualFields(sessionId partial data)
+    API->>DB: UPDATE IntakeRecord [mode=Manual, data=mapped fields]
+    API-->>SPA: { manualFormData: pre-populated }
+    SPA-->>P: Manual form with prior data intact
+
+    alt Switch back to AI
+        P->>SPA: Click "Switch to AI Intake"
+        SPA->>API: POST /intake/mode-switch { sessionId, targetMode: ai }
+        API->>API: MapManualDataToAIHistory()
+        API-->>SPA: { aiHistory: reconstructed }
+        SPA-->>P: AI continues from last known state
+    end
+
+    opt Unmapped field
+        API->>DB: Store in neutral buffer field
+        API-->>SPA: { unmappedFields: [{field, value}] }
+        SPA-->>P: Review unmapped items shown separately
+    end

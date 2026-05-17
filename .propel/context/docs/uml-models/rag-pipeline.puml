@@ -1,0 +1,85 @@
+﻿@startuml rag-pipeline
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName Arial
+skinparam ArrowColor #555555
+skinparam SequenceBoxBorderColor #336699
+skinparam ParticipantBorderColor #336699
+skinparam NoteBackgroundColor #FFFFF0
+skinparam NoteBorderColor #CCCCCC
+
+title Trust-First RAG Pipeline\nClinical Document Ingestion & Inference
+
+== INGESTION PHASE (Background -- triggered on document upload) ==
+participant "ClinicalDocument\n(status: Pending)" as DOC
+participant "PdfPig\nText Extractor" as PDF
+participant "Text Chunker\n(~500 token windows\n50 token overlap)" as CHUNK
+participant "Ollama\nEmbedding Model" as EMBED
+participant "pgvector\n(PostgreSQL)" as VEC
+participant "AuditLog" as AUDIT
+
+DOC -> PDF : Extract raw text
+PDF -> CHUNK : Raw text string
+CHUNK -> CHUNK : Sliding window chunking
+CHUNK -> EMBED : POST /api/embeddings { text: chunk_i }
+EMBED --> CHUNK : float[1536] vector
+CHUNK -> VEC : INSERT ChunkEmbedding\n(patientId, docId, seq, chunkText[enc], vector)
+CHUNK -> AUDIT : document_chunk_embedded event
+
+note right of VEC
+    pgvector index:
+    ivfflat cosine
+    (lists=100)
+end note
+
+DOC -> DOC : status -> Extracting
+
+== ENTITY EXTRACTION (Inline with ingestion) ==
+participant "Ollama\nLlama 3.1 8B" as LLM
+participant "Output Schema\nValidator" as VAL
+participant "ExtractedRecord\n(status: Pending)" as ER
+
+CHUNK -> LLM : Structured extraction prompt + chunk context
+LLM --> VAL : JSON output { entity_type, value, confidence, chunk_ref }
+VAL -> VAL : JSON schema validation
+alt Validation passes
+    VAL -> ER : INSERT ExtractedRecord [encrypted, Pending]
+else Validation fails
+    VAL -> AUDIT : extraction_validation_failed
+end
+
+DOC -> DOC : status -> Complete (or Failed)
+
+== QUERY / INFERENCE PHASE (On-demand -- staff request) ==
+participant "Staff Request" as STAFF
+participant "RAG Orchestrator\n(.NET API)" as ORCH
+participant "CodeSuggestion\n(status: Pending)" as CS
+
+STAFF -> ORCH : GET /patients/{id}/codes
+ORCH -> EMBED : POST /api/embeddings { text: query_intent }
+EMBED --> ORCH : query_vector float[1536]
+ORCH -> VEC : SELECT TOP-K chunks WHERE patient_id=?\nORDER BY cosine_dist(vector, ?)
+VEC --> ORCH : TopK { chunkText, docId, seq }
+
+ORCH -> LLM : Inference prompt with context chunks
+LLM --> VAL : JSON [{ code, description, source_chunk_refs[], confidence }]
+VAL -> VAL : Schema + code format validation
+alt Output valid
+    VAL -> CS : INSERT MedicalCodeSuggestion (Pending, source_chunk_refs)
+    CS --> ORCH : suggestion_id list
+    ORCH --> STAFF : Suggestions [Pending review]
+else Output invalid
+    VAL -> AUDIT : code_suggestion_validation_failed
+    ORCH --> STAFF : Suggestions unavailable -- manual coding required
+end
+
+== GUARDRAILS ==
+note over CS
+    Human-in-the-Loop Enforcement (AIR-007)
+    MedicalCodeSuggestion.reviewStatus = Pending
+    No downstream record update until:
+    Staff calls PATCH /suggestions/{id}
+    { action: "accept" | "reject" }
+    Auto-finalization is architecturally blocked
+end note
+@enduml

@@ -1,0 +1,56 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant INTSVC as Intake Service
+    participant OL as Ollama (Llama 3.1 8B)
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over P,SEQ: UC-007 -- AI Conversational Intake [AI-CANDIDATE]
+
+    P->>SPA: Select "Start AI Intake"
+    SPA->>API: POST /intake/ai/start (JWT)
+    API->>INTSVC: InitiateAISession(patientId)
+    INTSVC->>OL: POST /api/chat { role:system, content: intake_system_prompt }
+    OL-->>INTSVC: { role:assistant, content: "Hello! Let s start..." }
+    INTSVC-->>SPA: { sessionId, message: greeting }
+    SPA-->>P: Display AI greeting
+
+    loop Multi-turn dialogue
+        P->>SPA: Type response
+        SPA->>API: POST /intake/ai/message { sessionId, userMessage }
+        API->>INTSVC: ProcessTurn(sessionId, userMessage)
+        INTSVC->>OL: POST /api/chat { history: [...], user: message }
+        OL-->>INTSVC: { assistant: next_question_or_summary }
+        INTSVC-->>SPA: { message, isComplete: false }
+        SPA-->>P: Display next question
+    end
+
+    Note over OL: All collected fields complete
+    INTSVC->>OL: POST /api/chat { request: structured_summary_prompt }
+    OL-->>INTSVC: JSON intake summary
+    INTSVC-->>SPA: { summary: { demographics, history, meds, allergies, complaint }, isComplete: true }
+    SPA-->>P: Show summary for review
+
+    alt Patient confirms summary
+        P->>SPA: Confirm intake
+        SPA->>API: POST /intake/ai/confirm { sessionId }
+        API->>DB: INSERT IntakeRecord [encrypted JSONB, status=Complete]
+        API->>SEQ: intake_completed { patientId, mode:AI }
+        API-->>SPA: 201 Created
+        SPA-->>P: Intake saved
+    else Patient edits a field
+        P->>SPA: Edit field X
+        SPA->>API: PATCH /intake/ai/field { sessionId, field, value }
+        API->>DB: UPDATE IntakeRecord field
+        API-->>SPA: 200 OK updated summary
+        SPA-->>P: Updated summary shown
+    else Patient switches to manual
+        P->>SPA: "Switch to Manual Form"
+        SPA->>API: POST /intake/mode-switch { sessionId, targetMode: manual }
+        API->>INTSVC: MapAIDataToManualFields(sessionId)
+        INTSVC-->>API: pre-populated manual fields
+        API-->>SPA: { manualFormData: pre-populated }
+        SPA-->>P: Manual form with data intact
+    end

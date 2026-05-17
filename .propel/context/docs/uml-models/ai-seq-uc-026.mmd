@@ -1,0 +1,45 @@
+﻿sequenceDiagram
+    participant TRIGGER as Extraction Job
+    participant DOCSVC as Document Service
+    participant PDFPIG as PdfPig Extractor
+    participant CHUNKER as Text Chunker
+    participant OL as Ollama (Llama 3.1 8B)
+    participant VEC as pgvector (PostgreSQL)
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over TRIGGER,SEQ: UC-026 -- AI Extracts and De-duplicates Clinical Data [AI-CANDIDATE]
+
+    TRIGGER->>DOCSVC: ProcessPendingDocuments(patientId)
+    DOCSVC->>DB: SELECT documents WHERE status=Pending AND patientId=?
+    DB-->>DOCSVC: [doc1, doc2, ...]
+
+    loop For each document
+        DOCSVC->>DB: UPDATE ClinicalDocument status=Extracting
+        DOCSVC->>PDFPIG: ExtractText(storagePath)
+        PDFPIG-->>CHUNKER: rawText (all pages)
+        CHUNKER->>CHUNKER: SlidingWindowChunk(500 tokens, 50 overlap)
+        loop For each chunk
+            CHUNKER->>OL: POST /api/embeddings { text: chunk }
+            OL-->>CHUNKER: float[1536] vector
+            CHUNKER->>VEC: INSERT ChunkEmbedding (patientId, docId, seq, chunkText[enc], vector)
+        end
+        CHUNKER->>OL: POST /api/chat { system: extraction_prompt, user: allChunks }
+        OL-->>CHUNKER: JSON [{entityType, value, confidence, chunkRef}]
+        CHUNKER->>CHUNKER: JSON schema validation
+        CHUNKER->>DB: INSERT ExtractedRecord[] [encrypted, status=Pending]
+        DOCSVC->>DB: UPDATE ClinicalDocument status=Complete
+        DOCSVC->>SEQ: document_extracted { docId, entityCount, patientId }
+    end
+
+    Note over DB: De-duplication step
+    DOCSVC->>DB: SELECT all ExtractedRecords WHERE patientId=?
+    DOCSVC->>DOCSVC: De-duplicate by (entityType + normalised value)
+    DOCSVC->>DB: Soft-delete duplicate ExtractedRecords (isDuplicate=true)
+    DOCSVC->>SEQ: deduplication_complete { patientId, removed_count }
+
+    alt Extraction fails (PDF corrupt)
+        PDFPIG-->>DOCSVC: ExtractionException
+        DOCSVC->>DB: UPDATE ClinicalDocument status=Failed
+        DOCSVC->>SEQ: extraction_failed { docId, reason }
+    end

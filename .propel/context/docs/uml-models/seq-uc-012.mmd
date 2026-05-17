@@ -1,0 +1,26 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-012 -- No Slots Available / Booking Conflict
+
+    P->>SPA: Attempt to book slot X
+    SPA->>API: POST /bookings { slotId: X }
+    API->>DB: SELECT slot X FOR UPDATE
+    DB-->>API: status=Booked (conflict)
+    API-->>SPA: 409 { error: "Slot no longer available", alternatives: [...] }
+    SPA-->>P: "This slot is no longer available" + show nearest alternatives
+
+    alt Patient selects alternative
+        P->>SPA: Select alternative slot Y
+        SPA->>API: POST /bookings { slotId: Y }
+        API->>DB: Transaction -- book slot Y
+        API-->>SPA: 201 Created
+    else No alternatives available
+        API->>DB: SELECT COUNT(*) WHERE status=Available
+        DB-->>API: 0
+        API-->>SPA: { noSlotsAvailable: true }
+        SPA-->>P: "No slots currently available" + waitlist option
+    end

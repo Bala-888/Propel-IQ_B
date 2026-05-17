@@ -1,0 +1,35 @@
+﻿sequenceDiagram
+    participant SCHED as Reminder Scheduler
+    participant DB as PostgreSQL
+    participant GW as Email/SMS Gateway
+    participant SEQ as Seq Logger
+
+    Note over SCHED,SEQ: UC-017 -- Patient Receives Automated Reminders
+
+    SCHED->>DB: SELECT ReminderSchedule WHERE scheduledAt <= NOW() AND status=Pending
+    DB-->>SCHED: due reminders
+
+    loop For each due reminder
+        SCHED->>DB: SELECT Booking, Patient (contact, opt-out prefs)
+        DB-->>SCHED: booking details
+
+        alt SMS channel + not opted out
+            SCHED->>GW: Send SMS reminder (appointment time, location)
+            GW-->>SCHED: 200 OK
+            SCHED->>DB: UPDATE ReminderSchedule status=Sent, sentAt=NOW()
+        else Email channel + not opted out
+            SCHED->>GW: Send email reminder
+            GW-->>SCHED: 200 OK
+            SCHED->>DB: UPDATE ReminderSchedule status=Sent
+        else Channel opted out
+            SCHED->>DB: UPDATE ReminderSchedule status=Skipped
+        end
+        SCHED->>SEQ: reminder_sent { bookingId, channel, patientId }
+    end
+
+    opt Delivery fails (retry)
+        GW-->>SCHED: delivery failure
+        SCHED->>SCHED: Retry up to 3x exponential back-off
+        SCHED->>DB: UPDATE ReminderSchedule status=Failed, attemptCount=3
+        SCHED->>SEQ: reminder_failed { bookingId, reason }
+    end

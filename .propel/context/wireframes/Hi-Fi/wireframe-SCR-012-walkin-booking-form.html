@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                      |
+|----------------------|--------|----------------------------------------------------|
+| save-walkin-btn      | click  | wireframe-SCR-011-staff-queue-dashboard.html       |
+| cancel-btn           | click  | wireframe-SCR-011-staff-queue-dashboard.html       |
+| account-toggle       | click  | Reveals MOD-004 inline section                     |
+UCR: UXR-601 (inline validation), UXR-204 (labels)
+UC: UC-002, UC-021
+Flows: FL-002 (walk-in booking path)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCR-012 — Walk-in Booking Form | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-disabled:#94A3B8;--color-text-inverse:#FFFFFF;--color-bg-page:#F8FAFC;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-border:#E2E8F0;--color-border-strong:#94A3B8;--color-border-focus:#1A56DB;--color-status-success:#16A34A;--color-status-error:#DC2626;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-xs:2px;--radius-sm:4px;--radius-md:8px;--shadow-1:0 1px 3px rgba(15,23,42,0.08);--sidebar-width:240px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg-page);color:var(--color-text-primary);height:100vh;display:flex;overflow:hidden;}
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--color-bg-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:var(--space-6);font-size:18px;font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);}
+.sidebar-nav{flex:1;padding:var(--space-4) var(--space-3);}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;min-height:44px;margin-bottom:4px;}
+.nav-item:hover{background:var(--color-bg-subtle);}
+.nav-item.active{background:var(--color-primary-subtle);color:var(--color-primary);}
+.nav-item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-border);}
+.user-info{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.app-header{height:56px;background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;padding:0 var(--space-8);gap:var(--space-4);}
+.content-area{flex:1;overflow-y:auto;display:flex;justify-content:center;padding:var(--space-10) var(--space-8);}
+.form-container{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-10);box-shadow:var(--shadow-1);width:100%;max-width:640px;}
+.form-title{font-size:22px;font-weight:700;margin-bottom:var(--space-2);}
+.form-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:var(--space-8);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);}
+.form-group{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-5);}
+.form-label{font-size:14px;font-weight:500;}
+.form-label .optional{font-size:12px;color:var(--color-text-disabled);font-weight:400;margin-left:4px;}
+.form-input,.form-select{font-family:var(--font-sans);font-size:15px;padding:var(--space-3) var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-bg-surface);color:var(--color-text-primary);outline:none;transition:border-color 0.15s;width:100%;}
+.form-input:focus,.form-select:focus{border-color:var(--color-border-focus);box-shadow:0 0 0 3px rgba(26,86,219,0.18);}
+.form-input.error{border-color:var(--color-status-error);}
+.field-error{font-size:12px;color:var(--color-status-error);margin-top:4px;display:flex;align-items:flex-start;gap:4px;}
+.section-divider{border:none;border-top:1px solid var(--color-border);margin:var(--space-8) 0;}
+.section-title{font-size:16px;font-weight:600;margin-bottom:var(--space-5);}
+/* CHECKBOX TOGGLE (MOD-004 reveal) */
+.check-row{display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-4);background:var(--color-bg-subtle);border-radius:var(--radius-sm);margin-bottom:var(--space-5);}
+.check-row input[type="checkbox"]{width:18px;height:18px;margin-top:2px;accent-color:var(--color-primary);}
+.check-row label{font-size:14px;cursor:pointer;line-height:1.5;}
+/* MOD-004 inline section */
+.account-section{background:var(--color-bg-subtle);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-5);margin-bottom:var(--space-5);}
+.account-section-title{font-size:14px;font-weight:600;margin-bottom:var(--space-4);}
+/* BUTTONS */
+.btn{font-family:var(--font-sans);font-size:14px;font-weight:600;padding:var(--space-3) var(--space-5);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2);min-height:44px;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.form-actions{display:flex;gap:var(--space-3);justify-content:flex-end;margin-top:var(--space-6);}
+@media(max-width:1279px){.sidebar{display:none;}}
+@media(max-width:600px){.form-row{grid-template-columns:1fr;}.form-container{padding:var(--space-6);}.content-area{padding:var(--space-6) var(--space-4);}}
+</style>
+</head>
+<body>
+<aside class="sidebar" role="navigation" aria-label="Staff navigation">
+  <div class="sidebar-logo">UPACIP</div>
+  <nav class="sidebar-nav">
+    <a href="wireframe-SCR-011-staff-queue-dashboard.html" class="nav-item">Queue</a>
+    <a href="wireframe-SCR-012-walkin-booking-form.html" class="nav-item active" aria-current="page">Walk-in</a>
+    <a href="wireframe-SCR-013-patient-search.html" class="nav-item">Patient search</a>
+    <a href="wireframe-SCR-015-medical-code-review.html" class="nav-item">Code review</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar">RN</div><div><div style="font-size:14px;font-weight:500;">Rebecca Nguyen</div><div style="font-size:12px;color:var(--color-text-secondary);">Staff · Suite 3B</div></div></div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="app-header">
+    <a href="wireframe-SCR-011-staff-queue-dashboard.html" style="color:var(--color-text-secondary);text-decoration:none;font-size:14px;" aria-label="Back to queue">← Back</a>
+    <span style="font-size:16px;font-weight:600;">New walk-in booking</span>
+  </header>
+  <main class="content-area" id="main-content">
+    <div class="form-container" role="main">
+      <h1 class="form-title">Walk-in booking</h1>
+      <p class="form-sub">Register a new walk-in patient and add them to today's queue.</p>
+
+      <div class="section-title">Patient information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="wf-first">First name</label>
+          <input id="wf-first" type="text" class="form-input" placeholder="First name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="wf-last">Last name</label>
+          <input id="wf-last" type="text" class="form-input error" placeholder="Last name" aria-invalid="true" aria-describedby="wf-last-err" value="">
+          <div id="wf-last-err" class="field-error" role="alert"><span aria-hidden="true">⚠</span> Last name is required.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="wf-dob">Date of birth</label>
+          <input id="wf-dob" type="date" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="wf-phone">Phone <span class="optional">(optional)</span></label>
+          <input id="wf-phone" type="tel" class="form-input" placeholder="+1 (555) 000-0000">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="wf-insurance">Insurance <span class="optional">(optional)</span></label>
+        <select id="wf-insurance" class="form-select">
+          <option value="">-- Select insurance --</option>
+          <option>Aetna PPO</option>
+          <option>United Healthcare</option>
+          <option>Blue Cross Blue Shield</option>
+          <option>Medicare</option>
+          <option>Medicaid</option>
+          <option>Self-pay</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="wf-chief">Chief complaint <span class="optional">(optional)</span></label>
+        <textarea id="wf-chief" class="form-input" rows="3" placeholder="Brief description of the reason for visit…" style="resize:vertical;line-height:1.5;"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="wf-slot">Assign to time slot</label>
+        <select id="wf-slot" class="form-select">
+          <option value="">-- Select available slot --</option>
+          <option>10:00 AM — Available (Dr. M. Nguyen)</option>
+          <option>11:00 AM — Available (Dr. M. Nguyen)</option>
+          <option>02:00 PM — Available (Dr. T. Patel)</option>
+        </select>
+      </div>
+
+      <div class="section-divider" role="separator"></div>
+
+      <!-- MOD-004: Optional account creation toggle (UC-002) -->
+      <div class="check-row">
+        <input type="checkbox" id="create-account-toggle" onchange="toggleAccount(this)" aria-controls="account-create-section" aria-expanded="false">
+        <label for="create-account-toggle">
+          <strong>Create a patient portal account</strong><br>
+          <span style="font-size:13px;color:var(--color-text-secondary);">Allows the patient to log in and manage appointments. This step is optional.</span>
+        </label>
+      </div>
+
+      <!-- MOD-004 inline section (hidden by default) -->
+      <div class="account-section" id="account-create-section" hidden aria-live="polite">
+        <div class="account-section-title">Account credentials (optional)</div>
+        <div class="form-group">
+          <label class="form-label" for="acc-email">Email address</label>
+          <input id="acc-email" type="email" class="form-input" placeholder="patient@example.com">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="acc-password">Temporary password</label>
+          <input id="acc-password" type="password" class="form-input" placeholder="Minimum 8 characters">
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:var(--space-2);">Patient will be prompted to change on first login.</div>
+        </div>
+        <div style="margin-top:var(--space-4);text-align:right;"><button type="button" class="btn btn-secondary" style="font-size:13px;padding:8px 16px;height:auto;" onclick="document.getElementById('create-account-toggle').checked=false;toggleAccount(document.getElementById('create-account-toggle'))">Skip account creation</button></div>
+      </div>
+
+      <div class="form-actions">
+        <a href="wireframe-SCR-011-staff-queue-dashboard.html" id="cancel-btn" class="btn btn-secondary">Cancel</a>
+        <a href="wireframe-SCR-011-staff-queue-dashboard.html" id="save-walkin-btn" class="btn btn-primary">Add to queue</a>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+function toggleAccount(cb){
+  var sec=document.getElementById('account-create-section');
+  sec.hidden=!cb.checked;
+  cb.setAttribute('aria-expanded', String(cb.checked));
+}
+</script>
+</body>
+</html>

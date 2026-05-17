@@ -1,0 +1,28 @@
+﻿sequenceDiagram
+    participant U as User (Any Role)
+    participant SPA as React SPA
+    participant API as .NET API
+    participant AUTH as Auth Module
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over U,SEQ: UC-003 -- Multi-Role User Login
+
+    U->>SPA: Navigate to /login
+    SPA-->>U: Login form
+    U->>SPA: Enter email + password
+    SPA->>API: POST /auth/login { email, password }
+    API->>AUTH: VerifyCredentials()
+    AUTH->>DB: SELECT User WHERE email = ? AND isActive = true
+    DB-->>AUTH: User row (role, passwordHash)
+    AUTH->>AUTH: bcrypt.Verify(password, passwordHash)
+    AUTH->>DB: INSERT AuditLog (action=login_success)
+    AUTH-->>API: JWT { sub, role, exp: +15min }
+    API-->>SPA: 200 { token, role }
+    SPA->>SPA: Store token, read role
+    SPA-->>U: Redirect to role dashboard (Patient or Staff or Admin)
+
+    alt Invalid credentials
+        AUTH-->>API: 401
+        API-->>SPA: 401 { error: "Invalid email or password" }
+    end

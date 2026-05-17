@@ -1,0 +1,42 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant OL as Ollama
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-007 -- AI Conversational Intake
+    Note over P,DB: See also: ai-seq-uc-007.mmd for full AI architecture view
+
+    P->>SPA: Select "AI Intake"
+    SPA->>API: POST /intake/ai/start (JWT)
+    API->>OL: POST /api/chat { system: intake_prompt }
+    OL-->>API: greeting message
+    API-->>SPA: { sessionId, message }
+    SPA-->>P: AI greeting shown
+
+    loop Dialogue turns
+        P->>SPA: Response
+        SPA->>API: POST /intake/ai/message { sessionId, message }
+        API->>OL: POST /api/chat { history, user }
+        OL-->>API: follow-up question
+        API-->>SPA: next question
+        SPA-->>P: Display question
+    end
+
+    API->>OL: Summarise collected data
+    OL-->>API: JSON summary
+    API-->>SPA: Summary for review
+    SPA-->>P: Review screen
+
+    alt Confirm
+        P->>SPA: Confirm
+        SPA->>API: POST /intake/ai/confirm { sessionId }
+        API->>DB: INSERT IntakeRecord [Complete, encrypted]
+        API-->>SPA: 201 Created
+    else Edit field
+        P->>SPA: Edit field
+        SPA->>API: PATCH /intake/ai/field
+        API->>DB: UPDATE IntakeRecord field
+        API-->>SPA: 200 Updated
+    end

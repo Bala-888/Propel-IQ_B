@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                         |
+|----------------------|--------|-------------------------------------------------------|
+| back-btn             | click  | wireframe-SCR-014-360-patient-view.html               |
+| reject-btn           | click  | ConfirmDialog (inline, UXR-404)                       |
+| accept-btn           | click  | Action placeholder (marks as Accepted inline)         |
+| correct-btn          | click  | Reveals inline text field                             |
+UCR: UXR-402 (AILabel), UXR-404 (destructive confirm), UXR-601 (inline validation for ICD-10)
+UC: UC-030, UC-031, UC-032
+Flows: FL-010 (all steps)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCR-015 — Medical Code Review | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-disabled:#94A3B8;--color-text-inverse:#FFFFFF;--color-bg-page:#F8FAFC;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-bg-overlay:rgba(15,23,42,0.48);--color-border:#E2E8F0;--color-border-strong:#94A3B8;--color-border-focus:#1A56DB;--color-status-success:#16A34A;--color-status-error:#DC2626;--color-ai-accent:#6366F1;--color-ai-bg:#EEF2FF;--color-destructive:#DC2626;--color-destructive-hover:#B91C1C;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-xs:2px;--radius-sm:4px;--radius-md:8px;--radius-full:9999px;--shadow-1:0 1px 3px rgba(15,23,42,0.08);--shadow-3:0 8px 24px rgba(15,23,42,0.14);--sidebar-width:240px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg-page);color:var(--color-text-primary);height:100vh;display:flex;overflow:hidden;}
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--color-bg-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:var(--space-6);font-size:18px;font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);}
+.sidebar-nav{flex:1;padding:var(--space-4) var(--space-3);}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;min-height:44px;margin-bottom:4px;}
+.nav-item:hover{background:var(--color-bg-subtle);}
+.nav-item.active{background:var(--color-primary-subtle);color:var(--color-primary);}
+.nav-item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-border);}
+.user-info{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.app-header{height:56px;background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;padding:0 var(--space-8);gap:var(--space-4);}
+.content-area{flex:1;overflow-y:auto;padding:var(--space-8);}
+.page-title{font-size:24px;font-weight:700;margin-bottom:var(--space-2);}
+.page-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:var(--space-8);display:flex;align-items:center;gap:var(--space-3);}
+/* AI LABEL */
+.ai-label{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--color-ai-accent);background:var(--color-ai-bg);padding:2px 8px;border-radius:var(--radius-full);}
+/* CODE SUGGESTION CARD */
+.suggestion-cards{display:flex;flex-direction:column;gap:var(--space-4);max-width:800px;}
+.suggestion-card{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);box-shadow:var(--shadow-1);}
+.suggestion-card.accepted{border-color:#BBF7D0;background:#F0FDF4;}
+.suggestion-card.rejected{opacity:0.5;border-style:dashed;}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--space-4);}
+.card-code{font-family:var(--font-mono);font-size:18px;font-weight:400;color:var(--color-text-primary);}
+.card-description{font-size:16px;font-weight:600;margin-top:4px;}
+.card-meta{font-size:13px;color:var(--color-text-secondary);margin-top:4px;}
+/* CONFIDENCE METER */
+.confidence-row{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-4);}
+.confidence-bar{flex:1;height:6px;background:var(--color-border);border-radius:9999px;overflow:hidden;max-width:200px;}
+.confidence-fill{height:100%;border-radius:9999px;}
+.conf-high{background:var(--color-status-success);}
+.conf-med{background:var(--color-status-warning);}
+/* STATUS BADGE */
+.status-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:var(--radius-full);}
+.status-badge.pending{background:var(--color-bg-subtle);color:var(--color-text-secondary);}
+.status-badge.accepted{background:#DCFCE7;color:var(--color-status-success);}
+.status-badge.rejected{background:#FEF2F2;color:var(--color-status-error);}
+/* ACTIONS */
+.card-actions{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center;}
+/* INLINE CORRECT FIELD */
+.correct-field{margin-top:var(--space-3);padding:var(--space-4);background:var(--color-bg-subtle);border-radius:var(--radius-sm);display:none;}
+.correct-field.open{display:block;}
+.correct-input{font-family:var(--font-mono);font-size:15px;padding:var(--space-2) var(--space-3);border:1px solid var(--color-border-strong);border-radius:var(--radius-xs);width:180px;outline:none;}
+.correct-input:focus{border-color:var(--color-border-focus);box-shadow:0 0 0 3px rgba(26,86,219,0.18);}
+.correct-hint{font-size:12px;color:var(--color-text-secondary);margin-top:4px;}
+/* BUTTONS */
+.btn{font-family:var(--font-sans);font-size:13px;font-weight:600;padding:var(--space-2) var(--space-4);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2);min-height:40px;min-width:44px;transition:background 0.15s;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-accept{background:#DCFCE7;color:var(--color-status-success);border:1px solid #BBF7D0;}
+.btn-accept:hover{background:#BBF7D0;}
+.btn-reject{background:#FEF2F2;color:var(--color-status-error);border:1px solid #FECACA;}
+.btn-reject:hover{background:#FEE2E2;}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-destructive{background:var(--color-destructive);color:white;}
+.btn-destructive:hover{background:var(--color-destructive-hover);}
+/* CONFIRM DIALOG (UXR-404) */
+.dialog-overlay{position:fixed;inset:0;background:var(--color-bg-overlay);display:flex;align-items:center;justify-content:center;z-index:200;display:none;}
+.dialog-overlay.open{display:flex;}
+.dialog{background:var(--color-bg-surface);border-radius:var(--radius-md);padding:var(--space-8);box-shadow:var(--shadow-3);max-width:420px;width:90%;}
+.dialog-title{font-size:18px;font-weight:700;margin-bottom:var(--space-3);}
+.dialog-body{font-size:14px;color:var(--color-text-secondary);margin-bottom:var(--space-8);}
+.dialog-actions{display:flex;gap:var(--space-3);justify-content:flex-end;}
+@media(max-width:1279px){.sidebar{display:none;}}
+@media(max-width:768px){.content-area{padding:var(--space-4);}}
+</style>
+</head>
+<body>
+<aside class="sidebar" role="navigation" aria-label="Staff navigation">
+  <div class="sidebar-logo">UPACIP</div>
+  <nav class="sidebar-nav">
+    <a href="wireframe-SCR-011-staff-queue-dashboard.html" class="nav-item">Queue</a>
+    <a href="wireframe-SCR-012-walkin-booking-form.html" class="nav-item">Walk-in</a>
+    <a href="wireframe-SCR-013-patient-search.html" class="nav-item">Patient search</a>
+    <a href="wireframe-SCR-015-medical-code-review.html" class="nav-item active" aria-current="page">Code review</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar">RN</div><div><div style="font-size:14px;font-weight:500;">Rebecca Nguyen</div><div style="font-size:12px;color:var(--color-text-secondary);">Staff · Suite 3B</div></div></div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="app-header">
+    <a href="wireframe-SCR-014-360-patient-view.html" id="back-btn" style="color:var(--color-text-secondary);text-decoration:none;font-size:14px;min-height:44px;display:flex;align-items:center;" aria-label="Back to patient record">← Back</a>
+    <span style="font-size:16px;font-weight:600;">Medical code review — Sarah Mitchell</span>
+  </header>
+
+  <main class="content-area" id="main-content">
+    <h1 class="page-title">Medical code review</h1>
+    <div class="page-sub">
+      <span class="ai-label">✦ AI suggested</span>
+      Review and accept, reject, or correct AI-suggested medical codes for Sarah Mitchell's encounter.
+    </div>
+
+    <div class="suggestion-cards" role="list" aria-label="Medical code suggestions">
+
+      <!-- cs-001: J18.9 Pending -->
+      <div class="suggestion-card" id="card-cs001" role="listitem" aria-label="J18.9 Pneumonia — pending">
+        <div class="card-header">
+          <div>
+            <div class="card-code">J18.9</div>
+            <div class="card-description">Pneumonia, unspecified organism</div>
+            <div class="card-meta">ICD-10-CM · Source: chest-xray-report-2026-03.pdf</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-2);">
+            <span class="ai-label">✦ AI</span>
+            <span class="status-badge pending" id="badge-cs001">Pending</span>
+          </div>
+        </div>
+        <div class="confidence-row">
+          <span style="font-size:13px;color:var(--color-text-secondary);">Confidence:</span>
+          <div class="confidence-bar" role="meter" aria-valuenow="91" aria-valuemin="0" aria-valuemax="100" aria-label="AI confidence 91%"><div class="confidence-fill conf-high" style="width:91%;"></div></div>
+          <span style="font-size:13px;font-weight:600;">0.91</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-accept" onclick="acceptCode('cs001')" aria-label="Accept J18.9">Accept</button>
+          <button class="btn btn-reject" onclick="openRejectDialog('cs001','J18.9')" aria-label="Reject J18.9">Reject</button>
+          <button class="btn btn-secondary" onclick="toggleCorrect('cs001')" aria-label="Correct J18.9" aria-expanded="false" id="correct-btn-cs001">Correct</button>
+        </div>
+        <div class="correct-field" id="correct-cs001" aria-label="Code correction for J18.9">
+          <div style="font-size:13px;font-weight:600;margin-bottom:var(--space-2);">Enter corrected ICD-10 code:</div>
+          <div style="display:flex;gap:var(--space-3);align-items:flex-start;flex-wrap:wrap;">
+            <div>
+              <input type="text" class="correct-input" id="correct-input-cs001" placeholder="e.g. J18.1" aria-label="Corrected ICD-10 code" pattern="[A-Z][0-9]{2}\.?[0-9]{0,4}">
+              <div class="correct-hint">Format: [A-Z][0-9]{2}.[0-9]{0,4}</div>
+            </div>
+            <button class="btn btn-primary" onclick="submitCorrection('cs001')" style="margin-top:0;">Submit</button>
+            <button class="btn btn-secondary" onclick="toggleCorrect('cs001')" aria-label="Cancel correction">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- cs-002: D50.9 Pending -->
+      <div class="suggestion-card" id="card-cs002" role="listitem" aria-label="D50.9 Iron deficiency anaemia — pending">
+        <div class="card-header">
+          <div>
+            <div class="card-code">D50.9</div>
+            <div class="card-description">Iron deficiency anaemia, unspecified</div>
+            <div class="card-meta">ICD-10-CM · Source: lab-results-cbc-2026-04.pdf</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-2);">
+            <span class="ai-label">✦ AI</span>
+            <span class="status-badge pending" id="badge-cs002">Pending</span>
+          </div>
+        </div>
+        <div class="confidence-row">
+          <span style="font-size:13px;color:var(--color-text-secondary);">Confidence:</span>
+          <div class="confidence-bar" role="meter" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100" aria-label="AI confidence 83%"><div class="confidence-fill conf-high" style="width:83%;"></div></div>
+          <span style="font-size:13px;font-weight:600;">0.83</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-accept" onclick="acceptCode('cs002')" aria-label="Accept D50.9">Accept</button>
+          <button class="btn btn-reject" onclick="openRejectDialog('cs002','D50.9')" aria-label="Reject D50.9">Reject</button>
+          <button class="btn btn-secondary" onclick="toggleCorrect('cs002')" id="correct-btn-cs002" aria-expanded="false">Correct</button>
+        </div>
+        <div class="correct-field" id="correct-cs002">
+          <div style="font-size:13px;font-weight:600;margin-bottom:var(--space-2);">Enter corrected ICD-10 code:</div>
+          <div style="display:flex;gap:var(--space-3);align-items:flex-start;flex-wrap:wrap;">
+            <div><input type="text" class="correct-input" id="correct-input-cs002" placeholder="e.g. D50.0" aria-label="Corrected ICD-10 code"><div class="correct-hint">Format: [A-Z][0-9]{2}.[0-9]{0,4}</div></div>
+            <button class="btn btn-primary" onclick="submitCorrection('cs002')">Submit</button>
+            <button class="btn btn-secondary" onclick="toggleCorrect('cs002')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- cs-003: Z87.891 Pending -->
+      <div class="suggestion-card" id="card-cs003" role="listitem" aria-label="Z87.891 — pending">
+        <div class="card-header">
+          <div>
+            <div class="card-code">Z87.891</div>
+            <div class="card-description">Personal history of nicotine dependence</div>
+            <div class="card-meta">ICD-10-CM · Source: chest-xray-report-2026-03.pdf</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-2);">
+            <span class="ai-label">✦ AI</span>
+            <span class="status-badge pending" id="badge-cs003">Pending</span>
+          </div>
+        </div>
+        <div class="confidence-row">
+          <span style="font-size:13px;color:var(--color-text-secondary);">Confidence:</span>
+          <div class="confidence-bar" role="meter" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100" aria-label="AI confidence 78%"><div class="confidence-fill conf-med" style="width:78%;"></div></div>
+          <span style="font-size:13px;font-weight:600;">0.78</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-accept" onclick="acceptCode('cs003')" aria-label="Accept Z87.891">Accept</button>
+          <button class="btn btn-reject" onclick="openRejectDialog('cs003','Z87.891')" aria-label="Reject Z87.891">Reject</button>
+          <button class="btn btn-secondary" onclick="toggleCorrect('cs003')" id="correct-btn-cs003" aria-expanded="false">Correct</button>
+        </div>
+        <div class="correct-field" id="correct-cs003">
+          <div style="font-size:13px;font-weight:600;margin-bottom:var(--space-2);">Enter corrected ICD-10 code:</div>
+          <div style="display:flex;gap:var(--space-3);align-items:flex-start;flex-wrap:wrap;">
+            <div><input type="text" class="correct-input" id="correct-input-cs003" placeholder="e.g. Z87.891" aria-label="Corrected ICD-10 code"><div class="correct-hint">Format: [A-Z][0-9]{2}.[0-9]{0,4}</div></div>
+            <button class="btn btn-primary" onclick="submitCorrection('cs003')">Submit</button>
+            <button class="btn btn-secondary" onclick="toggleCorrect('cs003')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- cs-004: 99213 CPT Already Accepted -->
+      <div class="suggestion-card accepted" id="card-cs004" role="listitem" aria-label="99213 Office or outpatient visit — accepted">
+        <div class="card-header">
+          <div>
+            <div class="card-code">99213</div>
+            <div class="card-description">Office or outpatient visit, established patient, low complexity</div>
+            <div class="card-meta">CPT · Auto-generated for encounter type</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-2);">
+            <span class="ai-label">✦ AI</span>
+            <span class="status-badge accepted" id="badge-cs004">Accepted</span>
+          </div>
+        </div>
+        <div class="confidence-row">
+          <span style="font-size:13px;color:var(--color-text-secondary);">Confidence:</span>
+          <div class="confidence-bar" role="meter" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="AI confidence 88%"><div class="confidence-fill conf-high" style="width:88%;"></div></div>
+          <span style="font-size:13px;font-weight:600;">0.88</span>
+        </div>
+        <div style="font-size:13px;color:var(--color-status-success);font-weight:500;">✓ Accepted by Rebecca Nguyen · 17 May 2026</div>
+      </div>
+
+      <!-- cs-005: J06.9 Pending -->
+      <div class="suggestion-card" id="card-cs005" role="listitem" aria-label="J06.9 — pending">
+        <div class="card-header">
+          <div>
+            <div class="card-code">J06.9</div>
+            <div class="card-description">Acute upper respiratory infection, unspecified</div>
+            <div class="card-meta">ICD-10-CM · Source: previous-rx-notes.docx</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-2);">
+            <span class="ai-label">✦ AI</span>
+            <span class="status-badge pending" id="badge-cs005">Pending</span>
+          </div>
+        </div>
+        <div class="confidence-row">
+          <span style="font-size:13px;color:var(--color-text-secondary);">Confidence:</span>
+          <div class="confidence-bar" role="meter" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100" aria-label="AI confidence 72%"><div class="confidence-fill conf-med" style="width:72%;"></div></div>
+          <span style="font-size:13px;font-weight:600;">0.72</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-accept" onclick="acceptCode('cs005')" aria-label="Accept J06.9">Accept</button>
+          <button class="btn btn-reject" onclick="openRejectDialog('cs005','J06.9')" aria-label="Reject J06.9">Reject</button>
+          <button class="btn btn-secondary" onclick="toggleCorrect('cs005')" id="correct-btn-cs005" aria-expanded="false">Correct</button>
+        </div>
+        <div class="correct-field" id="correct-cs005">
+          <div style="font-size:13px;font-weight:600;margin-bottom:var(--space-2);">Enter corrected ICD-10 code:</div>
+          <div style="display:flex;gap:var(--space-3);align-items:flex-start;flex-wrap:wrap;">
+            <div><input type="text" class="correct-input" id="correct-input-cs005" placeholder="e.g. J06.9" aria-label="Corrected ICD-10 code"><div class="correct-hint">Format: [A-Z][0-9]{2}.[0-9]{0,4}</div></div>
+            <button class="btn btn-primary" onclick="submitCorrection('cs005')">Submit</button>
+            <button class="btn btn-secondary" onclick="toggleCorrect('cs005')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /suggestion-cards -->
+  </main>
+</div>
+
+<!-- REJECT CONFIRM DIALOG (UXR-404) -->
+<div class="dialog-overlay" id="reject-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-body">
+  <div class="dialog">
+    <h2 class="dialog-title" id="dialog-title">Reject code <span id="dialog-code-label">J18.9</span>?</h2>
+    <p class="dialog-body" id="dialog-body">This AI suggestion will be marked as rejected and removed from the billing queue. This action can be reviewed in the audit log.</p>
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" onclick="closeRejectDialog()" aria-label="Cancel rejection">Cancel</button>
+      <button class="btn btn-destructive" onclick="confirmReject()" id="dialog-confirm-btn" aria-label="Confirm rejection">Reject code</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var _rejectTarget = null;
+function acceptCode(id){
+  var b=document.getElementById('badge-'+id);
+  b.textContent='Accepted';b.className='status-badge accepted';
+  document.getElementById('card-'+id).classList.add('accepted');
+  var actions=document.querySelector('#card-'+id+' .card-actions');
+  if(actions) actions.innerHTML='<span style="font-size:13px;color:var(--color-status-success);font-weight:500;">✓ Accepted</span>';
+}
+function toggleCorrect(id){
+  var f=document.getElementById('correct-'+id);
+  var btn=document.getElementById('correct-btn-'+id);
+  var isOpen=f.classList.contains('open');
+  f.classList.toggle('open');
+  btn.setAttribute('aria-expanded', String(!isOpen));
+  if(!isOpen){ setTimeout(function(){document.getElementById('correct-input-'+id).focus();},50); }
+}
+function submitCorrection(id){
+  var val=document.getElementById('correct-input-'+id).value.trim().toUpperCase();
+  var pattern=/^[A-Z][0-9]{2}\.?[0-9]{0,4}$/;
+  var input=document.getElementById('correct-input-'+id);
+  if(!pattern.test(val)){input.style.borderColor='var(--color-status-error)';input.setAttribute('aria-invalid','true');return;}
+  input.style.borderColor='';input.removeAttribute('aria-invalid');
+  document.getElementById('badge-'+id).textContent='Corrected';
+  document.getElementById('badge-'+id).className='status-badge accepted';
+  document.getElementById('card-'+id).classList.add('accepted');
+  document.getElementById('card-'+id).querySelector('.card-code').textContent=val;
+  var actions=document.querySelector('#card-'+id+' .card-actions');
+  if(actions) actions.innerHTML='<span style="font-size:13px;color:var(--color-status-success);font-weight:500;">✓ Corrected to '+val+'</span>';
+  document.getElementById('correct-'+id).classList.remove('open');
+}
+function openRejectDialog(id,code){
+  _rejectTarget=id;
+  document.getElementById('dialog-code-label').textContent=code;
+  document.getElementById('reject-dialog').classList.add('open');
+  document.getElementById('dialog-confirm-btn').focus();
+}
+function closeRejectDialog(){
+  document.getElementById('reject-dialog').classList.remove('open');
+  _rejectTarget=null;
+}
+function confirmReject(){
+  if(!_rejectTarget) return;
+  var b=document.getElementById('badge-'+_rejectTarget);
+  b.textContent='Rejected';b.className='status-badge rejected';
+  document.getElementById('card-'+_rejectTarget).classList.add('rejected');
+  var actions=document.querySelector('#card-'+_rejectTarget+' .card-actions');
+  if(actions) actions.innerHTML='<span style="font-size:13px;color:var(--color-status-error);font-weight:500;">✗ Rejected</span>';
+  closeRejectDialog();
+}
+document.getElementById('reject-dialog').addEventListener('keydown',function(e){if(e.key==='Escape') closeRejectDialog();});
+</script>
+</body>
+</html>

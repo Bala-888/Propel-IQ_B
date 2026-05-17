@@ -1,0 +1,23 @@
+﻿sequenceDiagram
+    participant S as Staff
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over S,SEQ: UC-031 -- Staff Reviews and Approves Medical Codes
+
+    S->>SPA: View pending code suggestions in 360 patient view
+    SPA->>API: GET /patients/{id}/codes?status=Pending (JWT Staff)
+    API->>DB: SELECT MedicalCodeSuggestion WHERE patientId=? AND reviewStatus=Pending
+    DB-->>API: code suggestions with sourceChunkRefs
+    API-->>SPA: code list with source text links
+    SPA-->>S: Code suggestions table (code, description, source excerpt, confidence)
+
+    S->>SPA: Click "Accept" on suggestion X
+    SPA->>API: PATCH /suggestions/{id} { action: accept } (JWT Staff)
+    API->>DB: UPDATE MedicalCodeSuggestion reviewStatus=Accepted, reviewedBy=staffId, reviewedAt=NOW()
+    API->>DB: INSERT AuditLog (action=code_accepted, actorId, resourceId)
+    API->>SEQ: code_suggestion_accepted { suggestionId, codeValue, staffId }
+    API-->>SPA: 200 OK
+    SPA-->>S: Code marked Accepted

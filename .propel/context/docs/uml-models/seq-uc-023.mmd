@@ -1,0 +1,16 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over P,SEQ: UC-023 -- Unauthorized Attempt to Self-Check-In
+
+    P->>SPA: Attempt PATCH /bookings/{id}/status { status: Arrived } (JWT Patient role)
+    SPA->>API: PATCH /bookings/{id}/status { status: Arrived }
+    API->>API: CheckAuthorization(user.role == Staff or Admin)
+    API-->>SPA: 403 Forbidden { error: "Insufficient permissions" }
+    API->>DB: INSERT AuditLog (action=unauthorized_checkin_attempt, actorId, ip)
+    API->>SEQ: unauthorized_action_attempt { userId, action: self_checkin, ip }
+    SPA-->>P: 403 error -- action not permitted

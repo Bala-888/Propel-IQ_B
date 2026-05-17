@@ -1,0 +1,15 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-033 -- Insurance Pre-Check -- Validation Passes
+
+    P->>SPA: Enter insurance provider + insurance ID in booking flow
+    SPA->>API: POST /insurance/validate { provider, insuranceId } (JWT)
+    API->>DB: SELECT InsuranceRecord WHERE providerName = ? AND insuranceId LIKE pattern
+    DB-->>API: matching record found
+    API-->>SPA: 200 { valid: true }
+    SPA-->>P: Insurance validated (soft check, non-blocking)
+    Note over P: Booking flow continues to slot selection

@@ -1,0 +1,25 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-014 -- Patient Designates Preferred Slot at Booking
+
+    P->>SPA: During booking, click "I would prefer a different slot"
+    SPA-->>P: Show calendar with unavailable slots highlighted
+    P->>SPA: Select preferred (unavailable) slot
+    SPA->>SPA: Store preferredSlotId alongside current booking selection
+    P->>SPA: Confirm booking
+    SPA->>API: POST /bookings { slotId: X, preferredSlotId: Y }
+    API->>DB: INSERT Booking { slotId: X, preferredSlotId: Y, status: Confirmed }
+    API->>DB: INSERT SlotMonitor (bookingId, monitoredSlotId: Y, active: true)
+    API-->>SPA: 201 { bookingId }
+    SPA-->>P: Booking confirmed on slot X -- "We will notify you if slot Y opens"
+
+    opt Patient cancels preferred slot designation
+        P->>SPA: Cancel preferred slot from profile
+        SPA->>API: DELETE /bookings/{id}/preferred-slot
+        API->>DB: UPDATE Booking preferredSlotId=null\nUPDATE SlotMonitor active=false
+        API-->>SPA: 200 OK
+    end

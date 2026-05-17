@@ -1,0 +1,22 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-008 -- Manual Intake Form Submission
+
+    P->>SPA: Select "Manual Intake"
+    SPA-->>P: Multi-section form (demographics, history, meds, allergies, complaint)
+    P->>SPA: Fill all sections
+    P->>SPA: Submit
+    SPA->>API: POST /intake/manual { formData } (JWT)
+    API->>API: Validate mandatory fields
+    API->>DB: INSERT IntakeRecord [mode=Manual, status=Complete, data=encrypted JSONB]
+    API-->>SPA: 201 Created
+    SPA-->>P: Intake saved
+
+    alt Missing mandatory field
+        API-->>SPA: 400 { errors: [{ field, message }] }
+        SPA-->>P: Highlight fields, data preserved
+    end

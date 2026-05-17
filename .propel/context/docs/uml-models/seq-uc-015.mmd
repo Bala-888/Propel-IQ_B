@@ -1,0 +1,33 @@
+﻿sequenceDiagram
+    participant MONITOR as Slot Monitor (Background Job)
+    participant DB as PostgreSQL
+    participant API as .NET API
+    participant GW as Email/SMS Gateway
+    participant PDF as QuestPDF
+    participant SEQ as Seq Logger
+
+    Note over MONITOR,SEQ: UC-015 -- System Auto-Executes Preferred Slot Swap
+
+    MONITOR->>DB: Poll: SELECT monitors WHERE active=true AND monitoredSlotId IN (newly-freed slots)
+    DB-->>MONITOR: [{ bookingId, patientId, originalSlotId, preferredSlotId }]
+
+    loop For each triggered monitor
+        MONITOR->>DB: BEGIN TRANSACTION
+        MONITOR->>DB: UPDATE Booking slotId=preferredSlotId
+        MONITOR->>DB: UPDATE Slot (originalSlot) status=Available
+        MONITOR->>DB: UPDATE Slot (preferredSlot) status=Booked
+        MONITOR->>DB: UPDATE SlotMonitor active=false
+        MONITOR->>DB: COMMIT
+        MONITOR->>PDF: GenerateUpdatedPDF(bookingId)
+        PDF-->>MONITOR: byte[] updated pdf
+        MONITOR->>GW: Send email (swap notification + new PDF)
+        MONITOR->>GW: Send SMS (swap notification)
+        MONITOR->>DB: INSERT AuditLog (action=slot_swap_executed)
+        MONITOR->>SEQ: slot_swap_executed { bookingId, patientId }
+    end
+
+    alt Notification delivery fails
+        GW-->>MONITOR: delivery error
+        MONITOR->>MONITOR: Retry up to 3x exponential back-off
+        MONITOR->>SEQ: notification_retry { attempt, bookingId }
+    end

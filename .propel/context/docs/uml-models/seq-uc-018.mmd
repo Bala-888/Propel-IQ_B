@@ -1,0 +1,35 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant GCAL as Google Calendar API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-018 -- Google Calendar Sync
+
+    P->>SPA: Click "Sync to Google Calendar" post-booking
+    SPA->>API: POST /calendar/google/sync { bookingId } (JWT)
+    API->>DB: SELECT Patient.googleOAuthToken WHERE patientId=?
+
+    alt Token exists and valid
+        API->>GCAL: POST /calendars/primary/events { summary, start, end, description }
+        GCAL-->>API: 201 { eventId }
+        API->>DB: UPDATE Booking googleCalEventId=?
+        API-->>SPA: 200 { synced: true }
+        SPA-->>P: Calendar sync confirmed
+    else No token (not yet authorised)
+        API-->>SPA: 302 { authUrl: Google OAuth consent URL }
+        SPA-->>P: Redirect to Google OAuth
+        P->>GCAL: Consent granted
+        GCAL-->>SPA: OAuth callback with code
+        SPA->>API: POST /auth/google/callback { code }
+        API->>GCAL: Exchange code for access + refresh tokens
+        API->>DB: UPDATE Patient googleOAuthToken (encrypted)
+        API->>GCAL: Create calendar event
+        GCAL-->>API: 201 eventId
+        API-->>SPA: 200 { synced: true }
+    end
+
+    opt Patient opted out of calendar sync
+        API-->>SPA: 200 { synced: false, reason: "opted_out" }
+    end

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element               | Action | Target Screen                                          |
+|-----------------------|--------|--------------------------------------------------------|
+| confirm-slot-btn      | click  | wireframe-MOD-002-booking-confirmation-dialog.html     |
+| preferred-slot-link   | click  | wireframe-MOD-003-preferred-slot-selection.html        |
+| back-to-dashboard     | click  | wireframe-SCR-003-patient-home-dashboard.html          |
+| nav links             | click  | respective screens                                     |
+UCR: UXR-105 (slot state shape+pattern), UXR-302 (responsive nav), UXR-601 (inline errors), UXR-602 (409 conflict), UXR-604 (insurance soft warning)
+UC: UC-011, UC-012, UC-014, UC-033, UC-034
+Flows: FL-005 (steps 1-7)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCR-006 — Appointment Slot Calendar | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-disabled:#94A3B8;--color-text-inverse:#FFFFFF;--color-bg-page:#F8FAFC;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-border:#E2E8F0;--color-border-strong:#94A3B8;--color-border-focus:#1A56DB;--color-status-success:#16A34A;--color-status-warning:#D97706;--color-status-error:#DC2626;--color-status-info:#0284C7;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-xs:2px;--radius-sm:4px;--radius-md:8px;--shadow-1:0 1px 3px rgba(15,23,42,0.08);--shadow-2:0 4px 12px rgba(15,23,42,0.10);--sidebar-width:240px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg-page);color:var(--color-text-primary);height:100vh;display:flex;overflow:hidden;}
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--color-bg-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:var(--space-6);font-size:18px;font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);}
+.sidebar-nav{flex:1;padding:var(--space-4) var(--space-3);}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;min-height:44px;margin-bottom:var(--space-1);}
+.nav-item:hover{background:var(--color-bg-subtle);}
+.nav-item.active{background:var(--color-primary-subtle);color:var(--color-primary);}
+.nav-item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-border);}
+.user-info{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.app-header{height:56px;background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 var(--space-8);}
+.header-title{font-size:16px;font-weight:600;}
+.content-area{flex:1;overflow-y:auto;padding:var(--space-8);}
+/* ALERT BANNER */
+.alert-banner{display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);border:1px solid;margin-bottom:var(--space-6);font-size:14px;}
+.alert-banner.warning{background:#FFFBEB;border-color:#FEF3C7;color:var(--color-status-warning);}
+.alert-banner.info{background:#F0F9FF;border-color:#E0F2FE;color:var(--color-status-info);}
+.alert-banner.error-box{background:#FEF2F2;border-color:#FEE2E2;color:var(--color-status-error);}
+/* CALENDAR LAYOUT */
+.calendar-wrapper{display:grid;grid-template-columns:1fr auto;gap:var(--space-8);max-width:960px;}
+.calendar-main{min-width:0;}
+/* DATE NAV */
+.date-nav{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);}
+.date-nav-title{font-size:18px;font-weight:700;}
+.btn{font-family:var(--font-sans);font-size:14px;font-weight:600;padding:var(--space-3) var(--space-5);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2);transition:background 0.15s;min-height:44px;min-width:44px;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.btn-icon{background:var(--color-bg-surface);border:1px solid var(--color-border);padding:var(--space-2);color:var(--color-text-secondary);}
+.btn-icon:hover{background:var(--color-bg-subtle);}
+/* SLOT GRID */
+.slot-legend{display:flex;gap:var(--space-5);margin-bottom:var(--space-5);flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:var(--space-2);font-size:13px;color:var(--color-text-secondary);}
+.legend-swatch{width:16px;height:16px;border-radius:var(--radius-xs);}
+.swatch-available{background:var(--color-bg-surface);border:2px solid var(--color-border);}
+.swatch-booked{background:var(--color-bg-subtle);border:2px solid var(--color-bg-subtle);}
+.swatch-selected{background:var(--color-primary-subtle);border:2px solid var(--color-primary);}
+/* UXR-105: shape + pattern + label (not color alone) */
+.swatch-preferred{background:repeating-linear-gradient(45deg,var(--color-bg-subtle),var(--color-bg-subtle) 2px,#fff 2px,#fff 6px);border:2px dashed var(--color-border-strong);}
+.slots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-3);margin-bottom:var(--space-6);}
+.slot-btn{padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:13px;font-weight:500;cursor:pointer;text-align:left;min-height:60px;display:flex;flex-direction:column;gap:4px;transition:border-color 0.15s,background 0.15s;}
+.slot-btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.slot-available{background:var(--color-bg-surface);border:2px solid var(--color-border);color:var(--color-text-primary);}
+.slot-available:hover{border-color:var(--color-primary);background:var(--color-primary-subtle);}
+.slot-selected{background:var(--color-primary-subtle);border:2px solid var(--color-primary);color:var(--color-primary);}
+/* UXR-105: booked = grey + X label (not just grey color) */
+.slot-booked{background:var(--color-bg-subtle);border:2px solid var(--color-bg-subtle);color:var(--color-text-disabled);cursor:not-allowed;}
+.slot-blocked{background:var(--color-bg-subtle);border:2px dashed var(--color-border);color:var(--color-text-disabled);cursor:not-allowed;}
+/* UXR-105: preferred (unavailable but designated) = diagonal pattern + "Preferred" label */
+.slot-preferred{background:repeating-linear-gradient(45deg,#F1F5F9,#F1F5F9 2px,#fff 2px,#fff 6px);border:2px dashed var(--color-border-strong);color:var(--color-text-secondary);cursor:pointer;}
+.slot-time{font-weight:600;font-size:14px;}
+.slot-status{font-size:11px;}
+.slot-booked .slot-status::before{content:"✗ ";}
+.slot-blocked .slot-status::before{content:"⊘ ";}
+.slot-preferred .slot-status::before{content:"◈ ";}
+/* SELECTION PANEL */
+.selection-panel{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-6);box-shadow:var(--shadow-1);width:280px;flex-shrink:0;height:fit-content;}
+.selection-title{font-size:15px;font-weight:600;margin-bottom:var(--space-5);}
+.selection-field{margin-bottom:var(--space-4);}
+.selection-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;}
+.selection-value{font-size:15px;font-weight:600;}
+.divider{border:none;border-top:1px solid var(--color-border);margin:var(--space-4) 0;}
+/* CONFLICT PANEL (UXR-602: 409 state) */
+.conflict-panel{background:#FEF2F2;border:1px solid #FEE2E2;border-radius:var(--radius-sm);padding:var(--space-4);margin-top:var(--space-4);display:none;}
+.conflict-title{font-size:13px;font-weight:600;color:var(--color-status-error);margin-bottom:var(--space-3);}
+.alt-slots{display:flex;flex-direction:column;gap:var(--space-2);}
+.alt-slot-btn{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-2) var(--space-3);font-size:13px;cursor:pointer;text-align:left;}
+.alt-slot-btn:hover{border-color:var(--color-primary);background:var(--color-primary-subtle);}
+.alt-slot-btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.link-sm{font-size:13px;color:var(--color-primary);text-decoration:none;cursor:pointer;}
+.link-sm:hover{text-decoration:underline;}
+@media(max-width:1279px){.sidebar{display:none;}.calendar-wrapper{grid-template-columns:1fr;}.selection-panel{width:100%;}}
+@media(max-width:768px){.slots-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<aside class="sidebar" role="navigation" aria-label="Patient navigation">
+  <div class="sidebar-logo">UPACIP</div>
+  <nav class="sidebar-nav">
+    <a href="wireframe-SCR-003-patient-home-dashboard.html" class="nav-item">Dashboard</a>
+    <a href="wireframe-SCR-004-ai-conversational-intake.html" class="nav-item">Intake</a>
+    <a href="wireframe-SCR-006-appointment-slot-calendar.html" class="nav-item active" aria-current="page">Appointments</a>
+    <a href="wireframe-SCR-009-document-upload.html" class="nav-item">Documents</a>
+    <a href="wireframe-SCR-008-patient-profile-settings.html" class="nav-item">Profile</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar">SM</div><div><div style="font-size:14px;font-weight:500;">Sarah Mitchell</div><div style="font-size:12px;color:var(--color-text-secondary);">Patient</div></div></div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="app-header">
+    <div class="header-title">Appointment slot calendar</div>
+    <a href="wireframe-SCR-003-patient-home-dashboard.html" id="back-to-dashboard" class="btn btn-secondary" style="font-size:13px;padding:8px 16px;height:auto;">← Back to dashboard</a>
+  </header>
+
+  <main class="content-area" id="main-content">
+    <!-- Insurance soft warning (UXR-604) -->
+    <div class="alert-banner warning" role="alert" aria-live="polite">
+      <span aria-hidden="true">⚠</span>
+      <div>
+        <strong>Insurance not matched.</strong> Your provider (BCBS) was not found in our current network. Booking will continue — confirm with the clinic about coverage.
+        <div style="margin-top:6px;"><button class="link-sm" style="background:none;border:none;cursor:pointer;color:var(--color-status-warning);font-weight:600;" onclick="this.closest('.alert-banner').style.display='none'" aria-label="Dismiss insurance warning">Dismiss</button></div>
+      </div>
+    </div>
+
+    <div class="calendar-wrapper">
+      <div class="calendar-main">
+        <!-- DATE NAVIGATION -->
+        <div class="date-nav">
+          <button class="btn btn-icon" aria-label="Previous week">‹</button>
+          <h1 style="font-size:20px;font-weight:700;">17 May 2026 — Saturday</h1>
+          <button class="btn btn-icon" aria-label="Next week">›</button>
+        </div>
+
+        <!-- SLOT LEGEND (UXR-105: shape+pattern+label) -->
+        <div class="slot-legend" role="list" aria-label="Slot status legend">
+          <div class="legend-item" role="listitem"><div class="legend-swatch swatch-available" aria-hidden="true"></div>Available</div>
+          <div class="legend-item" role="listitem"><div class="legend-swatch swatch-booked" style="position:relative;"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--color-text-disabled);">✗</span></div>Booked</div>
+          <div class="legend-item" role="listitem"><div class="legend-swatch swatch-selected" aria-hidden="true"></div>Selected</div>
+          <div class="legend-item" role="listitem"><div class="legend-swatch swatch-preferred" aria-hidden="true"></div>Preferred (unavailable)</div>
+        </div>
+
+        <!-- SLOT GRID -->
+        <div class="slots-grid" role="grid" aria-label="Available appointment slots, 17 May 2026">
+          <button class="slot-btn slot-booked" disabled aria-label="09:00 AM — Booked, unavailable" aria-disabled="true">
+            <span class="slot-time">09:00 AM</span>
+            <span class="slot-status">Booked</span>
+          </button>
+          <button class="slot-btn slot-available" aria-label="09:30 AM — Available" onclick="selectSlot(this,'09:30 AM')">
+            <span class="slot-time">09:30 AM</span>
+            <span class="slot-status">Available</span>
+          </button>
+          <button class="slot-btn slot-booked" disabled aria-label="10:00 AM — Booked, unavailable" aria-disabled="true">
+            <span class="slot-time">10:00 AM</span>
+            <span class="slot-status">Booked</span>
+          </button>
+          <button class="slot-btn slot-available slot-selected" id="selected-slot" aria-label="10:30 AM — Available, currently selected" aria-pressed="true" onclick="selectSlot(this,'10:30 AM')">
+            <span class="slot-time">10:30 AM</span>
+            <span class="slot-status">Selected ✓</span>
+          </button>
+          <button class="slot-btn slot-available" aria-label="11:00 AM — Available" onclick="selectSlot(this,'11:00 AM')">
+            <span class="slot-time">11:00 AM</span>
+            <span class="slot-status">Available</span>
+          </button>
+          <button class="slot-btn slot-blocked" disabled aria-label="11:30 AM — Blocked" aria-disabled="true">
+            <span class="slot-time">11:30 AM</span>
+            <span class="slot-status">Blocked</span>
+          </button>
+          <button class="slot-btn slot-available" aria-label="02:00 PM — Available" onclick="selectSlot(this,'02:00 PM')">
+            <span class="slot-time">02:00 PM</span>
+            <span class="slot-status">Available</span>
+          </button>
+          <button class="slot-btn slot-booked" disabled aria-label="02:30 PM — Booked, unavailable" aria-disabled="true">
+            <span class="slot-time">02:30 PM</span>
+            <span class="slot-status">Booked</span>
+          </button>
+        </div>
+
+        <!-- Preferred slot link -->
+        <div style="margin-bottom:var(--space-5);">
+          <a href="wireframe-MOD-003-preferred-slot-selection.html" id="preferred-slot-link" class="link-sm">+ Add a preferred slot (currently unavailable)</a>
+        </div>
+
+        <!-- 409 CONFLICT PANEL (UXR-602) — shown on conflict -->
+        <div class="conflict-panel" id="conflict-panel" role="alert" aria-live="assertive">
+          <div class="conflict-title">⚠ Slot already booked</div>
+          <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:var(--space-3);">Your selected slot was booked by another patient. Choose from the 3 nearest available:</div>
+          <div class="alt-slots">
+            <button class="alt-slot-btn" onclick="selectAlt('09:30 AM')" aria-label="Alternative slot: 09:30 AM, Available">09:30 AM · Available</button>
+            <button class="alt-slot-btn" onclick="selectAlt('11:00 AM')" aria-label="Alternative slot: 11:00 AM, Available">11:00 AM · Available</button>
+            <button class="alt-slot-btn" onclick="selectAlt('02:00 PM')" aria-label="Alternative slot: 02:00 PM, Available">02:00 PM · Available</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SELECTION PANEL -->
+      <div class="selection-panel" role="complementary" aria-label="Booking summary">
+        <div class="selection-title">Your booking</div>
+        <div class="selection-field">
+          <div class="selection-label">Date</div>
+          <div class="selection-value" id="sel-date">17 May 2026</div>
+        </div>
+        <div class="selection-field">
+          <div class="selection-label">Time</div>
+          <div class="selection-value" id="sel-time">10:30 AM</div>
+        </div>
+        <div class="selection-field">
+          <div class="selection-label">Duration</div>
+          <div class="selection-value">30 minutes</div>
+        </div>
+        <div class="selection-field">
+          <div class="selection-label">Patient</div>
+          <div class="selection-value">Sarah Mitchell</div>
+        </div>
+        <div class="divider" role="separator"></div>
+        <button class="btn btn-primary" id="confirm-slot-btn" style="width:100%;" onclick="handleConfirm()">Confirm booking</button>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:var(--space-3);text-align:center;">You'll be asked to review before finalising.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function selectSlot(btn, time) {
+  document.querySelectorAll('.slot-btn').forEach(function(b){
+    b.classList.remove('slot-selected');
+    b.setAttribute('aria-pressed','false');
+    if(b.classList.contains('slot-available')){b.querySelector('.slot-status').textContent='Available';}
+  });
+  btn.classList.add('slot-selected');
+  btn.setAttribute('aria-pressed','true');
+  btn.querySelector('.slot-status').textContent='Selected ✓';
+  document.getElementById('sel-time').textContent=time;
+  document.getElementById('conflict-panel').style.display='none';
+}
+function handleConfirm() {
+  window.location.href='wireframe-MOD-002-booking-confirmation-dialog.html';
+}
+function selectAlt(time) {
+  document.getElementById('sel-time').textContent=time;
+  document.getElementById('conflict-panel').style.display='none';
+}
+</script>
+</body>
+</html>

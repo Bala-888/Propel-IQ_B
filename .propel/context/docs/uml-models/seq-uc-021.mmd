@@ -1,0 +1,21 @@
+﻿sequenceDiagram
+    participant S as Staff
+    participant SPA as React SPA
+    participant API as .NET API
+    participant HUB as SignalR Hub
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over S,SEQ: UC-021 -- Staff Creates Walk-in Booking and Queue Updates
+
+    S->>SPA: Select "New Walk-in"
+    SPA-->>S: Walk-in form
+    S->>SPA: Enter patient name, contact details
+    S->>SPA: Submit
+    SPA->>API: POST /walkins { patientName, contact } (JWT Staff)
+    API->>DB: INSERT Booking (status=WalkIn, arrivalOrder=NEXT)
+    API->>HUB: BroadcastQueueUpdate({ type: walkin_added, booking })
+    HUB-->>SPA: SignalR push to all connected Staff clients
+    SPA-->>S: Queue view updates in real-time (< 5 seconds)
+    API->>SEQ: walkin_created { staffId, bookingId }
+    API-->>SPA: 201 { bookingId }

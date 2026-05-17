@@ -1,0 +1,22 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant SEQ as Seq Logger
+
+    Note over P,SEQ: UC-025 -- Document Upload Validation Failure
+
+    P->>SPA: Upload file (invalid type or oversized)
+    SPA->>API: POST /documents (multipart/form-data, JWT)
+    API->>API: ValidateMimeType(file)
+
+    alt Invalid MIME type
+        API-->>SPA: 415 { error: "Unsupported file type. Allowed: PDF, DOC, DOCX, JPG, PNG" }
+        SPA-->>P: Error: unsupported file type
+    else File exceeds size limit (> 20 MB)
+        API->>API: ValidateFileSize(file) -- fails
+        API-->>SPA: 413 { error: "File too large. Maximum size: 20 MB" }
+        SPA-->>P: Error: file too large
+    end
+
+    API->>SEQ: document_upload_rejected { patientId, reason, mimeType, size }

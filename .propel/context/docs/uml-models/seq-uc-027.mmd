@@ -1,0 +1,29 @@
+﻿sequenceDiagram
+    participant JOB as Conflict Detector
+    participant DB as PostgreSQL
+    participant OL as Ollama
+    participant STAFF as Staff
+    participant API as .NET API
+
+    Note over JOB,API: UC-027 -- Data Conflict Detected and Surfaced
+    Note over JOB,API: See also: ai-seq-uc-027.mmd for full AI architecture view
+
+    JOB->>DB: SELECT ExtractedRecords WHERE patientId=?
+    DB-->>JOB: records from multiple documents
+    JOB->>JOB: Rule-based: group by entityType + flag contradictory values
+    JOB->>OL: Analyse conflicting pairs
+    OL-->>JOB: { conflicts [{field, valueA, sourceA, valueB, sourceB, confidence}] }
+    JOB->>DB: INSERT ConflictFlags (linked to ExtractedRecord IDs)
+
+    STAFF->>API: GET /patients/{id}/view (JWT Staff)
+    API->>DB: SELECT ExtractedRecords + ConflictFlags
+    DB-->>API: view with conflicts
+    API-->>STAFF: 360 view with conflict banners
+
+    STAFF->>API: PATCH /conflicts/{id}/resolve { chosenValue }
+    API->>DB: UPDATE ConflictFlag status=Resolved
+    API-->>STAFF: 200 OK
+
+    alt No conflicts found
+        JOB->>DB: (no INSERT ConflictFlags)
+    end

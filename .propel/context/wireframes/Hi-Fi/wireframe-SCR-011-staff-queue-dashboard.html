@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                         |
+|----------------------|--------|-------------------------------------------------------|
+| patient-name-link    | click  | wireframe-SCR-014-360-patient-view.html               |
+| new-walkin-btn       | click  | wireframe-SCR-012-walkin-booking-form.html            |
+| nav links            | click  | respective screens                                    |
+UCR: UXR-106 (inline Mark Arrived), UXR-304 (card layout at 375px), UXR-403 (risk: color+icon+text), UXR-502 (row highlight)
+UC: UC-021, UC-022, UC-035
+Flows: FL-007 (steps 1-3)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCR-011 — Staff Queue Dashboard | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-disabled:#94A3B8;--color-text-inverse:#FFFFFF;--color-bg-page:#F8FAFC;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-border:#E2E8F0;--color-border-strong:#94A3B8;--color-border-focus:#1A56DB;--color-status-success:#16A34A;--color-status-warning:#D97706;--color-status-error:#DC2626;--color-status-info:#0284C7;--color-ai-accent:#6366F1;--color-ai-bg:#EEF2FF;--color-row-highlight:#EBF3FE;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-xs:2px;--radius-sm:4px;--radius-md:8px;--radius-full:9999px;--shadow-1:0 1px 3px rgba(15,23,42,0.08);--sidebar-width:240px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg-page);color:var(--color-text-primary);height:100vh;display:flex;overflow:hidden;}
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--color-bg-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:var(--space-6);font-size:18px;font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);}
+.sidebar-nav{flex:1;padding:var(--space-4) var(--space-3);}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;min-height:44px;margin-bottom:4px;}
+.nav-item:hover{background:var(--color-bg-subtle);}
+.nav-item.active{background:var(--color-primary-subtle);color:var(--color-primary);}
+.nav-item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-border);}
+.user-info{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+/* SIGNALR STATUS BAR */
+.signalr-bar{background:#DCFCE7;border-bottom:1px solid #BBF7D0;padding:var(--space-2) var(--space-8);display:flex;align-items:center;gap:var(--space-2);font-size:13px;color:var(--color-status-success);}
+.signalr-bar .dot{width:8px;height:8px;border-radius:50%;background:var(--color-status-success);animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+/* Header + toolbar */
+.page-header{padding:var(--space-6) var(--space-8);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--color-border);background:var(--color-bg-surface);}
+.page-title{font-size:22px;font-weight:700;}
+.toolbar-right{display:flex;align-items:center;gap:var(--space-3);}
+.content-area{flex:1;overflow-y:auto;padding:var(--space-8);}
+/* DATA TABLE */
+.table-wrapper{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-1);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--color-bg-subtle);}
+th{padding:var(--space-3) var(--space-4);font-size:12px;font-weight:600;color:var(--color-text-secondary);text-align:left;letter-spacing:0.3px;text-transform:uppercase;border-bottom:1px solid var(--color-border);}
+td{padding:var(--space-4);font-size:14px;border-bottom:1px solid var(--color-border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--color-bg-subtle);}
+/* UXR-502 row highlight animation (new row) */
+.row-new td{background:var(--color-row-highlight);animation:fadeHighlight 2s ease-out forwards;}
+@keyframes fadeHighlight{0%{background:var(--color-row-highlight);}100%{background:var(--color-bg-surface);}}
+/* Patient link */
+.patient-cell{display:flex;align-items:center;gap:var(--space-3);}
+.patient-initials{width:32px;height:32px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.patient-name-link{font-weight:600;color:var(--color-text-primary);text-decoration:none;}
+.patient-name-link:hover{color:var(--color-primary);text-decoration:underline;}
+.patient-name-link:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:2px 10px;border-radius:var(--radius-full);}
+.badge.confirmed{background:var(--color-primary-subtle);color:var(--color-primary);}
+.badge.walkin{background:#FEF9C3;color:#A16207;}
+.badge.arrived{background:#DCFCE7;color:var(--color-status-success);}
+.badge.inprogress{background:#EEF2FF;color:var(--color-ai-accent);}
+/* UXR-403 Risk score: colour + icon + text */
+.risk-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:var(--radius-full);}
+.risk-badge.low{background:#DCFCE7;color:var(--color-status-success);}
+.risk-badge.medium{background:#FEF9C3;color:#A16207;}
+.risk-badge.high{background:#FEF2F2;color:var(--color-status-error);}
+/* CONFLICT INDICATOR */
+.conflict-flag{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--color-status-error);font-weight:500;}
+/* BUTTONS */
+.btn{font-family:var(--font-sans);font-size:13px;font-weight:600;padding:var(--space-2) var(--space-4);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2);min-height:36px;min-width:44px;transition:background 0.15s;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.btn-sm{font-size:12px;padding:6px 12px;min-height:32px;}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:var(--space-3);margin-bottom:var(--space-5);flex-wrap:wrap;align-items:center;}
+.filter-btn{font-family:var(--font-sans);font-size:13px;font-weight:500;padding:6px 14px;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-bg-surface);cursor:pointer;min-height:36px;}
+.filter-btn.active{background:var(--color-primary);color:white;border-color:var(--color-primary);}
+.filter-btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+/* MOBILE CARDS (UXR-304) */
+.queue-cards{display:none;flex-direction:column;gap:var(--space-4);}
+.queue-card{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-5);}
+@media(max-width:1279px){.sidebar{display:none;}}
+@media(max-width:768px){.table-wrapper{display:none;}.queue-cards{display:flex;}.content-area{padding:var(--space-4);}}
+</style>
+</head>
+<body>
+<aside class="sidebar" role="navigation" aria-label="Staff navigation">
+  <div class="sidebar-logo">UPACIP</div>
+  <nav class="sidebar-nav">
+    <a href="wireframe-SCR-011-staff-queue-dashboard.html" class="nav-item active" aria-current="page">Queue</a>
+    <a href="wireframe-SCR-012-walkin-booking-form.html" class="nav-item">Walk-in</a>
+    <a href="wireframe-SCR-013-patient-search.html" class="nav-item">Patient search</a>
+    <a href="wireframe-SCR-015-medical-code-review.html" class="nav-item">Code review</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar">RN</div><div><div style="font-size:14px;font-weight:500;">Rebecca Nguyen</div><div style="font-size:12px;color:var(--color-text-secondary);">Staff · Suite 3B</div></div></div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <!-- SIGNALR LIVE STATUS BAR -->
+  <div class="signalr-bar" role="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    Live · Queue updates active via SignalR
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Today's queue</h1>
+      <p style="font-size:14px;color:var(--color-text-secondary);margin-top:4px;">17 May 2026 · 6 patients</p>
+    </div>
+    <div class="toolbar-right">
+      <a href="wireframe-SCR-012-walkin-booking-form.html" id="new-walkin-btn" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New walk-in
+      </a>
+    </div>
+  </div>
+
+  <main class="content-area" id="main-content">
+    <!-- FILTER BAR -->
+    <div class="filter-bar" role="group" aria-label="Filter queue by status">
+      <button class="filter-btn active" aria-pressed="true">All (6)</button>
+      <button class="filter-btn" aria-pressed="false">Scheduled (3)</button>
+      <button class="filter-btn" aria-pressed="false">Walk-in (1)</button>
+      <button class="filter-btn" aria-pressed="false">Arrived (1)</button>
+      <button class="filter-btn" aria-pressed="false">In progress (1)</button>
+    </div>
+
+    <!-- DATA TABLE (desktop) -->
+    <div class="table-wrapper" role="region" aria-label="Patient queue table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Patient</th>
+            <th scope="col">Time</th>
+            <th scope="col">Type</th>
+            <th scope="col">Status</th>
+            <th scope="col">Risk</th>
+            <th scope="col">Conflict</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row 1 — Scheduled, High risk, conflict (UXR-502: new row highlight) -->
+          <tr class="row-new" role="row">
+            <td>
+              <div class="patient-cell">
+                <div class="patient-initials" aria-hidden="true">SM</div>
+                <a href="wireframe-SCR-014-360-patient-view.html" class="patient-name-link">Sarah Mitchell</a>
+              </div>
+            </td>
+            <td>09:00 AM</td>
+            <td><span class="badge confirmed">Scheduled</span></td>
+            <td><span class="badge arrived">Arrived</span></td>
+            <td><span class="risk-badge high" aria-label="Risk: High">⚠ High</span></td>
+            <td><span class="conflict-flag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 1 conflict</span></td>
+            <td>
+              <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="markArrived(this,'Sarah Mitchell')" aria-label="Mark Sarah Mitchell as arrived">Mark arrived</button>
+                <a href="wireframe-SCR-014-360-patient-view.html" class="btn btn-secondary btn-sm">View →</a>
+              </div>
+            </td>
+          </tr>
+          <!-- Row 2 -->
+          <tr>
+            <td><div class="patient-cell"><div class="patient-initials" aria-hidden="true">JO</div><a href="wireframe-SCR-014-360-patient-view.html" class="patient-name-link">James Okafor</a></div></td>
+            <td>09:30 AM</td>
+            <td><span class="badge confirmed">Scheduled</span></td>
+            <td><span class="badge confirmed">Confirmed</span></td>
+            <td><span class="risk-badge medium" aria-label="Risk: Medium">● Medium</span></td>
+            <td><span style="font-size:12px;color:var(--color-text-disabled);">None</span></td>
+            <td><div style="display:flex;gap:var(--space-2);flex-wrap:wrap;"><button class="btn btn-secondary btn-sm" aria-label="Mark James Okafor as arrived">Mark arrived</button><a href="wireframe-SCR-014-360-patient-view.html" class="btn btn-secondary btn-sm">View →</a></div></td>
+          </tr>
+          <!-- Row 3 — Walk-in -->
+          <tr>
+            <td><div class="patient-cell"><div class="patient-initials" aria-hidden="true">DR</div><a href="wireframe-SCR-014-360-patient-view.html" class="patient-name-link">David Reyes</a></div></td>
+            <td>10:00 AM</td>
+            <td><span class="badge walkin">Walk-in</span></td>
+            <td><span class="badge inprogress">In progress</span></td>
+            <td><span class="risk-badge low" aria-label="Risk: Low">✓ Low</span></td>
+            <td><span style="font-size:12px;color:var(--color-text-disabled);">None</span></td>
+            <td><div style="display:flex;gap:var(--space-2);flex-wrap:wrap;"><a href="wireframe-SCR-014-360-patient-view.html" class="btn btn-secondary btn-sm">View →</a></div></td>
+          </tr>
+          <!-- Row 4 — long name truncation from sample data -->
+          <tr>
+            <td>
+              <div class="patient-cell">
+                <div class="patient-initials" aria-hidden="true">PK</div>
+                <!-- UXR: long name truncated (>40 chars) -->
+                <a href="wireframe-SCR-014-360-patient-view.html" class="patient-name-link" title="Priya Krishnamurthy-Nair" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Priya Krishnamurthy-N…</a>
+              </div>
+            </td>
+            <td>10:30 AM</td>
+            <td><span class="badge confirmed">Scheduled</span></td>
+            <td><span class="badge confirmed">Confirmed</span></td>
+            <td><span class="risk-badge medium" aria-label="Risk: Medium">● Medium</span></td>
+            <td><span class="conflict-flag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 1 conflict</span></td>
+            <td><div style="display:flex;gap:var(--space-2);flex-wrap:wrap;"><button class="btn btn-secondary btn-sm" aria-label="Mark Priya Krishnamurthy-Nair as arrived">Mark arrived</button><a href="wireframe-SCR-014-360-patient-view.html" class="btn btn-secondary btn-sm">View →</a></div></td>
+          </tr>
+          <!-- Row 5 -->
+          <tr>
+            <td><div class="patient-cell"><div class="patient-initials" aria-hidden="true">MC</div><a href="wireframe-SCR-014-360-patient-view.html" class="patient-name-link">Maria Chen</a></div></td>
+            <td>11:00 AM</td>
+            <td><span class="badge confirmed">Scheduled</span></td>
+            <td><span class="badge confirmed">Confirmed</span></td>
+            <td><span class="risk-badge low" aria-label="Risk: Low">✓ Low</span></td>
+            <td><span style="font-size:12px;color:var(--color-text-disabled);">None</span></td>
+            <td><div style="display:flex;gap:var(--space-2);flex-wrap:wrap;"><button class="btn btn-secondary btn-sm" aria-label="Mark Maria Chen as arrived">Mark arrived</button><a href="wireframe-SCR-014-360-patient-view.html" class="btn btn-secondary btn-sm">View →</a></div></td>
+          </tr>
+          <!-- Row 6 -->
+          <tr>
+            <td><div class="patient-cell"><div class="patient-initials" aria-hidden="true">TB</div><a href="wireframe-SCR-014-360-patient-view.html" class="patient-name-link">Thomas Bergmann</a></div></td>
+            <td>11:30 AM</td>
+            <td><span class="badge confirmed">Scheduled</span></td>
+            <td><span class="badge confirmed">Confirmed</span></td>
+            <td><span class="risk-badge high" aria-label="Risk: High">⚠ High</span></td>
+            <td><span style="font-size:12px;color:var(--color-text-disabled);">None</span></td>
+            <td><div style="display:flex;gap:var(--space-2);flex-wrap:wrap;"><button class="btn btn-secondary btn-sm" aria-label="Mark Thomas Bergmann as arrived">Mark arrived</button><a href="wireframe-SCR-014-360-patient-view.html" class="btn btn-secondary btn-sm">View →</a></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MOBILE QUEUE CARDS (UXR-304) -->
+    <div class="queue-cards" aria-label="Patient queue">
+      <div class="queue-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-3);">
+          <div><a href="wireframe-SCR-014-360-patient-view.html" class="patient-name-link" style="font-size:16px;">Sarah Mitchell</a><div style="font-size:13px;color:var(--color-text-secondary);margin-top:2px;">09:00 AM · Scheduled</div></div>
+          <span class="risk-badge high">⚠ High</span>
+        </div>
+        <div style="display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap;">
+          <span class="badge arrived">Arrived</span>
+          <span class="conflict-flag">⚠ 1 conflict</span>
+        </div>
+        <div style="margin-top:var(--space-3);display:flex;gap:var(--space-2);"><button class="btn btn-secondary btn-sm" aria-label="Mark Sarah Mitchell as arrived">Mark arrived</button><a href="wireframe-SCR-014-360-patient-view.html" class="btn btn-secondary btn-sm">View →</a></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function markArrived(btn, name) {
+  btn.textContent = '✓ Arrived';
+  btn.disabled = true;
+  btn.style.background = '#DCFCE7';
+  btn.style.color = '#16A34A';
+  btn.style.borderColor = '#BBF7D0';
+  btn.setAttribute('aria-label', name + ' marked as arrived');
+}
+</script>
+</body>
+</html>

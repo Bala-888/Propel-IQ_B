@@ -1,0 +1,17 @@
+﻿sequenceDiagram
+    participant API as .NET API
+    participant GCAL as Google/Outlook Calendar API
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over API,SEQ: UC-020 -- Calendar Sync Failure
+
+    API->>GCAL: POST /events (calendar sync attempt)
+    GCAL-->>API: 5xx / network timeout
+    API->>SEQ: calendar_sync_failed { bookingId, provider, reason }
+    API->>DB: UPDATE Booking calendarSyncStatus=Failed
+
+    Note over API: Booking is NOT rolled back\nCalendar sync failure is non-blocking
+
+    API-->>SPA: 200 { synced: false, reason: "sync_failed -- booking confirmed" }
+    SPA-->>P: "Booking confirmed -- Calendar sync failed -- retry from profile"

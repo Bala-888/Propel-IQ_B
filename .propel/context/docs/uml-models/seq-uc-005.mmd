@@ -1,0 +1,26 @@
+﻿sequenceDiagram
+    participant U as User (Any Role)
+    participant SPA as React SPA
+    participant API as .NET API
+    participant SEQ as Seq Logger
+
+    Note over U,SEQ: UC-005 -- Session Timeout
+
+    Note over SPA: JWT expiry = 15 minutes from issuance
+    SPA->>SPA: Inactivity timer reaches 14:00
+    SPA-->>U: Warning modal "Session expires in 60s"
+
+    alt User clicks "Extend Session"
+        U->>SPA: Click "Extend Session"
+        SPA->>API: POST /auth/refresh { refreshToken }
+        API-->>SPA: 200 { newToken, exp: +15min }
+        SPA->>SPA: Reset inactivity timer
+        SPA-->>U: Session extended
+    else User does not respond (60s elapsed)
+        SPA->>SPA: JWT expired
+        SPA->>API: Any request with expired token
+        API-->>SPA: 401 Unauthorized
+        API->>SEQ: session_expired { userId, ip }
+        SPA->>SPA: Clear token from storage
+        SPA-->>U: Redirect to /login -- Session expired
+    end

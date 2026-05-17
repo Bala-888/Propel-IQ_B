@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                         |
+|----------------------|--------|-------------------------------------------------------|
+| resolve-btn          | click  | wireframe-SCR-014-360-patient-view.html               |
+| close-btn            | click  | wireframe-SCR-014-360-patient-view.html               |
+UCR: UXR-202 (drawer focus), UXR-601 (conflict resolution form)
+UC: UC-027, UC-028
+Patient: Sarah Mitchell — Amoxicillin / Penicillin allergy conflict
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOD-005 — Resolve Conflict Drawer | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-inverse:#FFFFFF;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-bg-overlay:rgba(15,23,42,0.48);--color-border:#E2E8F0;--color-border-focus:#1A56DB;--color-status-error:#DC2626;--color-ai-accent:#6366F1;--color-ai-bg:#EEF2FF;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--radius-xs:2px;--radius-sm:4px;--radius-md:8px;--shadow-3:0 8px 24px rgba(15,23,42,0.14);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);min-height:100vh;overflow:hidden;background:#F8FAFC;}
+/* ILLUSTRATIVE BACKGROUND */
+.bg-page{position:fixed;inset:0;background:#F8FAFC;z-index:0;display:flex;align-items:center;justify-content:center;color:#CBD5E1;font-size:14px;}
+/* OVERLAY (darker on non-drawer side) */
+.overlay{position:fixed;inset:0;background:var(--color-bg-overlay);z-index:100;}
+/* DRAWER (right-side, 320px) */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:360px;background:var(--color-bg-surface);box-shadow:var(--shadow-3);z-index:101;display:flex;flex-direction:column;overflow:hidden;}
+/* DRAWER HEADER */
+.drawer-header{padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--color-border);display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);background:#FEF2F2;}
+.drawer-title{font-size:18px;font-weight:700;color:var(--color-status-error);}
+.close-btn{background:none;border:none;cursor:pointer;font-size:20px;color:#94A3B8;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-xs);}
+.close-btn:hover{background:rgba(0,0,0,0.04);}
+.close-btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+/* DRAWER BODY */
+.drawer-body{flex:1;overflow-y:auto;padding:var(--space-6);}
+/* CONFLICT DETAIL */
+.conflict-entities{display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-6);}
+.conflict-entity{background:var(--color-bg-subtle);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-4);}
+.conflict-entity.error{background:#FEF2F2;border-color:#FECACA;}
+.entity-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;color:var(--color-text-secondary);margin-bottom:4px;}
+.entity-name{font-size:15px;font-weight:600;}
+.entity-detail{font-size:13px;color:var(--color-text-secondary);margin-top:4px;}
+.conflict-link{display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--color-status-error);padding:var(--space-2);font-weight:500;}
+/* RESOLUTION FORM */
+.section-title{font-size:14px;font-weight:600;margin-bottom:var(--space-4);color:var(--color-text-primary);}
+.resolution-options{display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-6);}
+.radio-option{display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-4);border:2px solid var(--color-border);border-radius:var(--radius-sm);cursor:pointer;transition:border-color 0.15s,background 0.15s;}
+.radio-option:hover{border-color:var(--color-primary);background:var(--color-primary-subtle);}
+.radio-option.selected{border-color:var(--color-primary);background:var(--color-primary-subtle);}
+.radio-option input[type="radio"]{margin-top:2px;accent-color:var(--color-primary);flex-shrink:0;}
+.radio-option label{cursor:pointer;}
+.radio-label{font-size:14px;font-weight:600;}
+.radio-desc{font-size:13px;color:var(--color-text-secondary);margin-top:2px;}
+/* NOTES */
+.form-group{margin-bottom:var(--space-5);}
+.form-label{font-size:14px;font-weight:500;display:block;margin-bottom:var(--space-2);}
+.form-textarea{font-family:var(--font-sans);font-size:14px;padding:var(--space-3) var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-sm);width:100%;outline:none;resize:vertical;min-height:80px;line-height:1.5;}
+.form-textarea:focus{border-color:var(--color-border-focus);box-shadow:0 0 0 3px rgba(26,86,219,0.18);}
+/* DRAWER FOOTER */
+.drawer-footer{padding:var(--space-5) var(--space-6);border-top:1px solid var(--color-border);display:flex;gap:var(--space-3);}
+.btn{font-family:var(--font-sans);font-size:14px;font-weight:600;padding:var(--space-3) var(--space-5);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);min-height:44px;flex:1;transition:background 0.15s;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+/* AI LABEL */
+.ai-label{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--color-ai-accent);background:var(--color-ai-bg);padding:2px 8px;border-radius:9999px;margin-bottom:var(--space-4);}
+@media(max-width:400px){.drawer{width:100%;}}
+</style>
+</head>
+<body>
+<div class="bg-page" aria-hidden="true">[ 360° Patient View — Extracted Data tab ]</div>
+<div class="overlay" onclick="window.location.href='wireframe-SCR-014-360-patient-view.html'" aria-hidden="true"></div>
+
+<!-- DRAWER (right-side, 360px) -->
+<div class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" aria-describedby="drawer-desc">
+  <div class="drawer-header">
+    <div>
+      <h1 class="drawer-title" id="drawer-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-3px;margin-right:4px;" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Resolve conflict
+      </h1>
+      <p style="font-size:13px;color:#7F1D1D;margin-top:4px;" id="drawer-desc">Sarah Mitchell · Drug-allergy interaction</p>
+    </div>
+    <a href="wireframe-SCR-014-360-patient-view.html" class="close-btn" aria-label="Close conflict resolution drawer">×</a>
+  </div>
+
+  <div class="drawer-body">
+    <div class="ai-label">✦ AI flagged this conflict</div>
+
+    <!-- CONFLICT ENTITIES -->
+    <div class="conflict-entities" aria-label="Conflicting clinical entities">
+      <div class="conflict-entity error" role="group" aria-label="Conflicting medication: Amoxicillin">
+        <div class="entity-label">Medication (prescribed)</div>
+        <div class="entity-name">Amoxicillin 500 mg</div>
+        <div class="entity-detail">Oral · TID · Penicillin-class antibiotic</div>
+      </div>
+      <div class="conflict-link" aria-hidden="true">⬆ conflicts with ⬇</div>
+      <div class="conflict-entity error" role="group" aria-label="Conflicting allergy: Penicillin">
+        <div class="entity-label">Allergy (documented)</div>
+        <div class="entity-name">Penicillin</div>
+        <div class="entity-detail">Reaction: Hives and difficulty breathing</div>
+      </div>
+    </div>
+
+    <!-- RESOLUTION OPTIONS -->
+    <div class="section-title">Resolution action</div>
+    <div class="resolution-options" role="radiogroup" aria-label="Select resolution action">
+      <div class="radio-option selected" onclick="selectOption(this)" id="opt-1">
+        <input type="radio" name="resolution" id="radio-1" checked>
+        <label for="radio-1">
+          <div class="radio-label">Override and document</div>
+          <div class="radio-desc">Keep Amoxicillin — document clinical rationale for prescribing despite allergy.</div>
+        </label>
+      </div>
+      <div class="radio-option" onclick="selectOption(this)" id="opt-2">
+        <input type="radio" name="resolution" id="radio-2">
+        <label for="radio-2">
+          <div class="radio-label">Remove medication</div>
+          <div class="radio-desc">Remove Amoxicillin from the extracted record. Select an alternative medication.</div>
+        </label>
+      </div>
+      <div class="radio-option" onclick="selectOption(this)" id="opt-3">
+        <input type="radio" name="resolution" id="radio-3">
+        <label for="radio-3">
+          <div class="radio-label">Mark allergy as incorrect</div>
+          <div class="radio-desc">Allergy data was extracted in error — mark as not applicable.</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- CLINICAL NOTES -->
+    <div class="form-group">
+      <label class="form-label" for="resolution-notes">Clinical rationale <span style="font-size:12px;color:var(--color-text-secondary);font-weight:400;">(required for override)</span></label>
+      <textarea id="resolution-notes" class="form-textarea" placeholder="Enter clinical reason for overriding this conflict…" aria-label="Clinical rationale for conflict resolution"></textarea>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <a href="wireframe-SCR-014-360-patient-view.html" class="btn btn-secondary">Cancel</a>
+    <a href="wireframe-SCR-014-360-patient-view.html" id="resolve-btn" class="btn btn-primary">Resolve conflict</a>
+  </div>
+</div>
+
+<script>
+function selectOption(el){
+  document.querySelectorAll('.radio-option').forEach(function(o){o.classList.remove('selected');});
+  el.classList.add('selected');
+  el.querySelector('input[type="radio"]').checked=true;
+}
+document.querySelector('.drawer').addEventListener('keydown',function(e){
+  if(e.key==='Escape') window.location.href='wireframe-SCR-014-360-patient-view.html';
+  if(e.key==='Tab'){
+    var focusable=this.querySelectorAll('button,a,input,textarea,[tabindex]:not([tabindex="-1"])');
+    var first=focusable[0],last=focusable[focusable.length-1];
+    if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}
+    else{if(document.activeElement===last){e.preventDefault();first.focus();}}
+  }
+});
+</script>
+</body>
+</html>

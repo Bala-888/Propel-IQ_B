@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                         |
+|----------------------|--------|-------------------------------------------------------|
+| confirm-btn          | click  | wireframe-SCR-007-booking-confirmation.html           |
+| cancel-btn           | click  | wireframe-SCR-006-appointment-slot-calendar.html      |
+UCR: UXR-202 (focus trap), UXR-501 (loading state on confirm)
+UC: UC-012, UC-013
+Flows: FL-005 (step 7)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOD-002 — Booking Confirmation Dialog | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-inverse:#FFFFFF;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-bg-overlay:rgba(15,23,42,0.48);--color-border:#E2E8F0;--color-border-focus:#1A56DB;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--radius-sm:4px;--radius-md:8px;--shadow-3:0 8px 24px rgba(15,23,42,0.14);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.bg-page{position:fixed;inset:0;background:#F8FAFC;z-index:0;display:flex;align-items:center;justify-content:center;color:#CBD5E1;font-size:14px;}
+.overlay{position:fixed;inset:0;background:var(--color-bg-overlay);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal{background:var(--color-bg-surface);border-radius:var(--radius-md);padding:var(--space-8);box-shadow:var(--shadow-3);max-width:480px;width:90%;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-6);}
+.modal-title{font-size:20px;font-weight:700;}
+.close-btn{background:none;border:none;cursor:pointer;font-size:20px;color:#94A3B8;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);}
+.close-btn:hover{background:var(--color-bg-subtle);}
+.close-btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.modal-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:var(--space-6);}
+/* SLOT SUMMARY */
+.slot-summary{background:var(--color-bg-subtle);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-5);margin-bottom:var(--space-6);}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);}
+.detail-field{display:flex;flex-direction:column;gap:4px;}
+.detail-label{font-size:12px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;}
+.detail-value{font-size:14px;font-weight:600;}
+/* BUTTONS */
+.btn{font-family:var(--font-sans);font-size:15px;font-weight:600;padding:var(--space-3) var(--space-5);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);min-height:48px;transition:background 0.15s;width:100%;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-primary:disabled{background:#94A3B8;cursor:not-allowed;}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.modal-actions{display:flex;flex-direction:column;gap:var(--space-3);}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="bg-page" aria-hidden="true">[ Appointment slot calendar in background ]</div>
+
+<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-sub">
+  <div class="modal">
+    <div class="modal-header">
+      <h1 class="modal-title" id="modal-title">Confirm booking</h1>
+      <a href="wireframe-SCR-006-appointment-slot-calendar.html" class="close-btn" aria-label="Cancel and close">×</a>
+    </div>
+    <p class="modal-sub" id="modal-sub">Please review the appointment details before confirming.</p>
+
+    <div class="slot-summary" role="region" aria-label="Appointment summary">
+      <div class="detail-grid">
+        <div class="detail-field">
+          <span class="detail-label">Date</span>
+          <span class="detail-value">17 May 2026</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-label">Time</span>
+          <span class="detail-value">10:30 AM</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-label">Duration</span>
+          <span class="detail-value">30 minutes</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-label">Provider</span>
+          <span class="detail-value">Dr. M. Nguyen</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-label">Location</span>
+          <span class="detail-value">Suite 3B</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-label">Patient</span>
+          <span class="detail-value">Sarah Mitchell</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="confirm-btn" onclick="confirmBooking()">Confirm booking</button>
+      <a href="wireframe-SCR-006-appointment-slot-calendar.html" id="cancel-btn" class="btn btn-secondary">Cancel</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function confirmBooking(){
+  var btn=document.getElementById('confirm-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner" aria-hidden="true"></span> Confirming…';
+  setTimeout(function(){
+    window.location.href='wireframe-SCR-007-booking-confirmation.html';
+  },1200);
+}
+document.querySelector('.overlay').addEventListener('keydown',function(e){
+  if(e.key==='Tab'){
+    var focusable=this.querySelectorAll('button,a,[tabindex]:not([tabindex="-1"])');
+    var first=focusable[0],last=focusable[focusable.length-1];
+    if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}
+    else{if(document.activeElement===last){e.preventDefault();first.focus();}}
+  }
+  if(e.key==='Escape') window.location.href='wireframe-SCR-006-appointment-slot-calendar.html';
+});
+</script>
+</body>
+</html>

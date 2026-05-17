@@ -1,0 +1,36 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant AUTH as Auth Module
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over P,SEQ: UC-001 -- Patient Self-Registration
+
+    P->>SPA: Navigate to /register
+    SPA-->>P: Registration form
+    P->>SPA: Enter name, DOB, email, phone, insurance details
+    P->>SPA: Submit
+    SPA->>API: POST /auth/register { name, dob, email, phone, insurance }
+    API->>AUTH: ValidateRegistrationInput()
+    AUTH->>DB: SELECT User WHERE email = ?
+    DB-->>AUTH: (no row)
+    AUTH->>DB: INSERT User (role=Patient, passwordHash=bcrypt)\nINSERT Patient (PHI fields encrypted)
+    AUTH->>SEQ: patient_registered { userId }
+    AUTH-->>API: 201 Created { userId, token }
+    API-->>SPA: 201 { token }
+    SPA-->>P: Redirect to intake / dashboard
+
+    alt Duplicate email
+        AUTH->>DB: SELECT User WHERE email = ?
+        DB-->>AUTH: existing row
+        AUTH-->>API: 409 Conflict
+        API-->>SPA: 409 { error: "Email already registered" }
+        SPA-->>P: Show error -- prompt login
+    end
+
+    opt Missing mandatory field
+        API-->>SPA: 400 { errors: [{ field, message }] }
+        SPA-->>P: Highlight missing fields
+    end

@@ -1,0 +1,44 @@
+﻿sequenceDiagram
+    participant A as Admin
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+    participant GW as Email Gateway
+    participant SEQ as Seq Logger
+
+    Note over A,SEQ: UC-006 -- Admin Manages Users and Roles
+
+    A->>SPA: Navigate to User Management
+    SPA->>API: GET /admin/users (JWT Admin)
+    API->>DB: SELECT User WHERE isActive=true ORDER BY createdAt
+    DB-->>API: user list
+    API-->>SPA: 200 [users]
+    SPA-->>A: User list table
+
+    alt Create user
+        SPA->>API: POST /admin/users { name, email, role }
+        API->>DB: INSERT User (temp password, role)
+        API->>GW: Send account credentials email
+        API->>SEQ: user_created { adminId, newUserId, role }
+        API-->>SPA: 201 Created
+    else Edit user
+        SPA->>API: PATCH /admin/users/{id} { name, email }
+        API->>DB: UPDATE User
+        API->>SEQ: user_updated { adminId, userId }
+        API-->>SPA: 200 OK
+    else Deactivate user
+        SPA->>API: DELETE /admin/users/{id}
+        API->>DB: UPDATE User isActive=false
+        API->>SEQ: user_deactivated { adminId, userId }
+        API-->>SPA: 204 No Content
+    else Change role
+        SPA->>API: PATCH /admin/users/{id}/role { role }
+        API->>DB: UPDATE User role=?
+        API->>SEQ: role_changed { adminId, userId, newRole }
+        API-->>SPA: 200 OK
+    end
+
+    opt Admin attempts to deactivate own account
+        API-->>SPA: 403 Forbidden { error: "Cannot deactivate own account" }
+        SPA-->>A: Error message shown
+    end

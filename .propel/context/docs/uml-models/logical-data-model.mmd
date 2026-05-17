@@ -1,0 +1,131 @@
+﻿erDiagram
+    User {
+        uuid id PK
+        string email UK
+        string passwordHash
+        enum role "Patient or Staff or Admin"
+        bool isActive
+        timestamp createdAt
+        timestamp lastLoginAt
+    }
+    Patient {
+        uuid id PK
+        string dateOfBirth "encrypted"
+        string phone "encrypted"
+        string insuranceProvider "encrypted"
+        string insuranceId "encrypted"
+        timestamp profileCreatedAt
+    }
+    IntakeRecord {
+        uuid id PK
+        uuid patientId FK
+        enum mode "AI or Manual"
+        enum status "Draft or Complete"
+        jsonb intakeData "encrypted"
+        timestamp completedAt
+        timestamp createdAt
+    }
+    AppointmentSlot {
+        uuid id PK
+        date scheduledDate
+        time startTime
+        int durationMinutes
+        enum status "Available or Booked or Blocked"
+        uuid createdBy FK
+    }
+    Booking {
+        uuid id PK
+        uuid patientId FK
+        uuid slotId FK
+        uuid preferredSlotId FK "nullable"
+        enum status "Confirmed or Cancelled or Completed or WalkIn"
+        int noShowRiskScore
+        jsonb riskFactors
+        timestamp riskScoredAt
+        timestamp bookedAt
+        uuid bookedBy FK
+    }
+    ClinicalDocument {
+        uuid id PK
+        uuid patientId FK
+        string originalFilename
+        string mimeType
+        string fileHash "SHA-256"
+        string storagePath "encrypted"
+        timestamp uploadedAt
+        uuid uploadedBy FK
+        enum processingStatus "Pending or Extracting or Complete or Failed"
+    }
+    ExtractedRecord {
+        uuid id PK
+        uuid documentId FK
+        uuid patientId FK
+        enum entityType "Vital or Medication or Diagnosis or Note or Allergy"
+        jsonb entityValue "encrypted"
+        float confidence
+        string chunkRef
+        timestamp extractedAt
+    }
+    ChunkEmbedding {
+        uuid id PK
+        uuid documentId FK
+        uuid patientId FK
+        int chunkSequence
+        string chunkText "encrypted"
+        vector embedding "dim 1536"
+        timestamp createdAt
+    }
+    MedicalCodeSuggestion {
+        uuid id PK
+        uuid patientId FK
+        enum codeType "ICD10 or CPT"
+        string codeValue
+        string codeDescription
+        text sourceChunkRefs "array"
+        float aiConfidence
+        enum reviewStatus "Pending or Accepted or Rejected"
+        uuid reviewedBy FK "nullable"
+        timestamp reviewedAt
+        timestamp createdAt
+    }
+    AuditLog {
+        uuid id PK
+        uuid actorId FK
+        string actorRole
+        string actionType
+        string resourceType
+        string resourceId
+        string ipAddress
+        string userAgent
+        jsonb details
+        timestamp occurredAt
+    }
+    ReminderSchedule {
+        uuid id PK
+        uuid bookingId FK
+        enum channelType "Email or SMS"
+        timestamp scheduledAt
+        timestamp sentAt "nullable"
+        enum deliveryStatus "Pending or Sent or Failed or Retrying"
+        int attemptCount
+    }
+    InsuranceRecord {
+        uuid id PK
+        string providerName
+        string insuranceIdPattern
+    }
+    User ||--|| Patient : "patient profile"
+    User ||--o{ AuditLog : "acts as actor"
+    User ||--o{ AppointmentSlot : "admin creates"
+    Patient ||--o{ IntakeRecord : "completes"
+    Patient ||--o{ Booking : "makes"
+    Patient ||--o{ ClinicalDocument : "uploads"
+    Patient ||--o{ ExtractedRecord : "has extracted"
+    Patient ||--o{ ChunkEmbedding : "has embeddings"
+    Patient ||--o{ MedicalCodeSuggestion : "receives"
+    AppointmentSlot ||--o{ Booking : "reserved by"
+    AppointmentSlot ||--o{ Booking : "preferred by"
+    Booking ||--o{ ReminderSchedule : "triggers"
+    ClinicalDocument ||--o{ ExtractedRecord : "yields"
+    ClinicalDocument ||--o{ ChunkEmbedding : "chunks into"
+    User ||--o{ MedicalCodeSuggestion : "reviews"

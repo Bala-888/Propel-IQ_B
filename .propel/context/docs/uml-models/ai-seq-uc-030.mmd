@@ -1,0 +1,38 @@
+﻿sequenceDiagram
+    participant TRIGGER as Code Suggestion Job
+    participant ORCH as RAG Orchestrator
+    participant OL as Ollama (Llama 3.1 8B)
+    participant VEC as pgvector (PostgreSQL)
+    participant DB as PostgreSQL
+    participant VAL as Schema Validator
+    participant SEQ as Seq Logger
+
+    Note over TRIGGER,SEQ: UC-030 -- AI Suggests Medical Codes [HYBRID]
+
+    TRIGGER->>ORCH: GenerateCodeSuggestions(patientId)
+    ORCH->>DB: SELECT ExtractedRecords WHERE patientId=? AND status=Accepted
+    DB-->>ORCH: structured clinical entities
+
+    Note over ORCH: RAG retrieval for code context
+    ORCH->>OL: POST /api/embeddings { text: clinical_summary }
+    OL-->>ORCH: query_vector float[1536]
+    ORCH->>VEC: SELECT TOP-20 ChunkEmbeddings\nWHERE patient_id=?\nORDER BY cosine_dist(vector, query_vector)
+    VEC-->>ORCH: top_chunks [{chunkText, docId, chunkSeq}]
+
+    ORCH->>OL: POST /api/chat with icd10_cpt_coding_prompt + context + entities
+    OL-->>VAL: JSON [{codeType, codeValue, description, sourceChunkRefs[], confidence}]
+
+    VAL->>VAL: Schema validation:\n- codeType in {ICD10, CPT}\n- ICD-10 format check\n- CPT 5 digits\n- confidence > 0.0
+
+    alt Validation passes
+        loop For each valid suggestion
+            VAL->>DB: INSERT MedicalCodeSuggestion (Pending, sourceChunkRefs, aiConfidence)
+        end
+        VAL->>SEQ: code_suggestions_generated { patientId, icd10Count, cptCount }
+        ORCH-->>TRIGGER: { suggestions_created: N }
+    else Validation fails or low confidence
+        VAL->>SEQ: code_suggestion_validation_failed { patientId, reason }
+        ORCH-->>TRIGGER: { suggestions_created: 0, reason: validation_failed }
+    end
+
+    Note over DB: All suggestions remain Pending\nNo auto-finalization (AIR-007)\nStaff review required via UC-031 or UC-032

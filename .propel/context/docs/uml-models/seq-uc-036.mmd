@@ -1,0 +1,21 @@
+﻿sequenceDiagram
+    participant A as Admin
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+
+    Note over A,DB: UC-036 -- Admin Views Platform Metrics and Manages Users
+
+    A->>SPA: Navigate to Admin Dashboard
+    SPA->>API: GET /admin/metrics (JWT Admin)
+    API->>DB: Aggregate: COUNT(Patient), COUNT(Booking), AVG(noShowRate), AVG(aiAgreementRate), COUNT(ConflictFlags)
+    DB-->>API: KPI metrics
+    API-->>SPA: { metrics: { totalPatients, totalBookings, noShowRate, aiAgreement, criticalConflicts } }
+    SPA-->>A: KPI dashboard
+
+    A->>SPA: Navigate to User Management
+    SPA->>API: GET /admin/users (JWT Admin)
+    API->>DB: SELECT User ORDER BY createdAt
+    DB-->>API: user list
+    API-->>SPA: user list table
+    SPA-->>A: User management table (CRUD -- see UC-006)

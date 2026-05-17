@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UPACIP — Wireframe Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-primary: #1A56DB;
+      --color-primary-hover: #1547B4;
+      --color-primary-subtle: #EBF3FE;
+      --color-text-primary: #0F172A;
+      --color-text-secondary: #475569;
+      --color-text-disabled: #94A3B8;
+      --color-bg-page: #F8FAFC;
+      --color-bg-surface: #FFFFFF;
+      --color-bg-subtle: #F1F5F9;
+      --color-border: #E2E8F0;
+      --color-border-strong: #94A3B8;
+      --color-border-focus: #1A56DB;
+      --color-ai-accent: #6366F1;
+      --color-ai-bg: #EEF2FF;
+      --color-status-success: #16A34A;
+      --color-status-warning: #D97706;
+      --color-status-error: #DC2626;
+      --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+      --sidebar-width: 280px;
+      --toolbar-height: 52px;
+    }
+
+    html, body { height: 100%; overflow: hidden; font-family: var(--font-sans); background: var(--color-bg-page); color: var(--color-text-primary); }
+
+    /* ── Layout ─────────────────────────────────────── */
+    .layout { display: flex; height: 100vh; }
+
+    /* ── Sidebar ─────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      background: var(--color-bg-surface);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+    }
+
+    .sidebar-subtitle {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    .sidebar-search {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-search input {
+      width: 100%;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: var(--font-sans);
+      color: var(--color-text-primary);
+      background: var(--color-bg-subtle);
+      outline: none;
+    }
+
+    .sidebar-search input:focus {
+      border-color: var(--color-border-focus);
+      background: var(--color-bg-surface);
+      box-shadow: 0 0 0 2px rgba(26,86,219,0.12);
+    }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 0 16px; }
+    .sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+    .nav-group { margin-bottom: 4px; }
+
+    .nav-group-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-disabled);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .nav-group-label .chevron {
+      margin-left: auto;
+      font-size: 10px;
+      transition: transform 0.15s;
+    }
+
+    .nav-group.collapsed .chevron { transform: rotate(-90deg); }
+    .nav-group.collapsed .nav-items { display: none; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px 7px 20px;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      border-radius: 0;
+      text-decoration: none;
+      transition: background 0.1s, color 0.1s;
+      border-left: 2px solid transparent;
+    }
+
+    .nav-item:hover { background: var(--color-bg-subtle); color: var(--color-text-primary); }
+
+    .nav-item.active {
+      background: var(--color-primary-subtle);
+      color: var(--color-primary);
+      font-weight: 600;
+      border-left-color: var(--color-primary);
+    }
+
+    .nav-item .screen-id {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-text-disabled);
+      flex-shrink: 0;
+    }
+
+    .nav-item.active .screen-id { color: var(--color-primary); }
+
+    .nav-item .screen-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .nav-item .modal-tag {
+      font-size: 9px;
+      font-weight: 700;
+      background: var(--color-ai-bg);
+      color: var(--color-ai-accent);
+      padding: 1px 5px;
+      border-radius: 9999px;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Main area ─────────────────────────────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Toolbar ─────────────────────────────────────── */
+    .toolbar {
+      height: var(--toolbar-height);
+      background: var(--color-bg-surface);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 16px;
+      flex-shrink: 0;
+    }
+
+    .toolbar-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+
+    .toolbar-id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-disabled);
+      background: var(--color-bg-subtle);
+      padding: 3px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .toolbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .toolbar-center { display: flex; align-items: center; gap: 8px; }
+
+    /* Flow selector */
+    .flow-label { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; }
+
+    .flow-select {
+      height: 30px;
+      padding: 0 28px 0 8px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      color: var(--color-text-primary);
+      background: var(--color-bg-subtle);
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      min-width: 220px;
+    }
+
+    .flow-select:focus { border-color: var(--color-border-focus); box-shadow: 0 0 0 2px rgba(26,86,219,0.12); }
+
+    .toolbar-right { display: flex; align-items: center; gap: 6px; }
+
+    .btn-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      background: var(--color-bg-subtle);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      flex-shrink: 0;
+    }
+
+    .btn-nav:hover:not(:disabled) { background: var(--color-bg-surface); border-color: var(--color-border-strong); color: var(--color-text-primary); }
+    .btn-nav:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
+    .btn-nav:disabled { opacity: 0.35; cursor: default; }
+
+    .step-counter {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--color-text-disabled);
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .btn-open {
+      height: 30px;
+      padding: 0 12px;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-decoration: none;
+      transition: background 0.1s;
+    }
+
+    .btn-open:hover { background: var(--color-primary-hover); }
+    .btn-open:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+
+    /* ── Frame area ─────────────────────────────────────── */
+    .frame-wrapper {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      background: #CBD5E1;
+    }
+
+    .frame-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ── Empty state ─────────────────────────────────────── */
+    .empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--color-text-disabled);
+    }
+
+    .empty-icon { font-size: 40px; opacity: 0.4; }
+    .empty-text { font-size: 14px; }
+
+    /* ── Status bar ─────────────────────────────────────── */
+    .statusbar {
+      height: 24px;
+      background: var(--color-bg-surface);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .statusbar-item {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--color-text-disabled);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .statusbar-item span { color: var(--color-text-secondary); }
+
+    /* ── Search highlight ─────────────────────────────────── */
+    .nav-item.hidden { display: none; }
+
+    /* ── Tooltip ──────────────────────────────────────────── */
+    [title] { cursor: pointer; }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar" role="navigation" aria-label="Wireframe navigator">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">UPACIP</div>
+      <div class="sidebar-subtitle">Wireframe Viewer · 23 screens</div>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="search" id="searchInput" placeholder="Search screens…" aria-label="Search screens" autocomplete="off" />
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+
+      <!-- Auth -->
+      <div class="nav-group" id="group-auth">
+        <div class="nav-group-label" onclick="toggleGroup('group-auth')">
+          🔐 Authentication
+          <span class="chevron">▾</span>
+        </div>
+        <div class="nav-items">
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-001-login.html" data-id="SCR-001" data-title="Login" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-001</span>
+            <span class="screen-label">Login</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-002-patient-registration.html" data-id="SCR-002" data-title="Patient Registration" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-002</span>
+            <span class="screen-label">Patient Registration</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patient Portal -->
+      <div class="nav-group" id="group-patient">
+        <div class="nav-group-label" onclick="toggleGroup('group-patient')">
+          🏥 Patient Portal
+          <span class="chevron">▾</span>
+        </div>
+        <div class="nav-items">
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-003-patient-home-dashboard.html" data-id="SCR-003" data-title="Patient Home Dashboard" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-003</span>
+            <span class="screen-label">Home Dashboard</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-004-ai-conversational-intake.html" data-id="SCR-004" data-title="AI Conversational Intake" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-004</span>
+            <span class="screen-label">AI Conversational Intake</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-005-manual-intake-form.html" data-id="SCR-005" data-title="Manual Intake Form" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-005</span>
+            <span class="screen-label">Manual Intake Form</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-006-appointment-slot-calendar.html" data-id="SCR-006" data-title="Appointment Slot Calendar" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-006</span>
+            <span class="screen-label">Appointment Slot Calendar</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-007-booking-confirmation.html" data-id="SCR-007" data-title="Booking Confirmation" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-007</span>
+            <span class="screen-label">Booking Confirmation</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-008-patient-profile-settings.html" data-id="SCR-008" data-title="Patient Profile & Settings" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-008</span>
+            <span class="screen-label">Patient Profile & Settings</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-009-document-upload.html" data-id="SCR-009" data-title="Document Upload" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-009</span>
+            <span class="screen-label">Document Upload</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-010-document-processing-status.html" data-id="SCR-010" data-title="Document Processing Status" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-010</span>
+            <span class="screen-label">Document Processing Status</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff Portal -->
+      <div class="nav-group" id="group-staff">
+        <div class="nav-group-label" onclick="toggleGroup('group-staff')">
+          🩺 Staff Portal
+          <span class="chevron">▾</span>
+        </div>
+        <div class="nav-items">
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-011-staff-queue-dashboard.html" data-id="SCR-011" data-title="Staff Queue Dashboard" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-011</span>
+            <span class="screen-label">Queue Dashboard</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-012-walkin-booking-form.html" data-id="SCR-012" data-title="Walk-in Booking Form" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-012</span>
+            <span class="screen-label">Walk-in Booking Form</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-013-patient-search.html" data-id="SCR-013" data-title="Patient Search" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-013</span>
+            <span class="screen-label">Patient Search</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-014-360-patient-view.html" data-id="SCR-014" data-title="360° Patient View" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-014</span>
+            <span class="screen-label">360° Patient View</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-015-medical-code-review.html" data-id="SCR-015" data-title="Medical Code Review" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-015</span>
+            <span class="screen-label">Medical Code Review</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Console -->
+      <div class="nav-group" id="group-admin">
+        <div class="nav-group-label" onclick="toggleGroup('group-admin')">
+          ⚙️ Admin Console
+          <span class="chevron">▾</span>
+        </div>
+        <div class="nav-items">
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-016-admin-kpi-dashboard.html" data-id="SCR-016" data-title="Admin KPI Dashboard" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-016</span>
+            <span class="screen-label">KPI Dashboard</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-SCR-017-admin-user-management.html" data-id="SCR-017" data-title="Admin User Management" onclick="loadScreen(this)">
+            <span class="screen-id">SCR-017</span>
+            <span class="screen-label">User Management</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modals & Dialogs -->
+      <div class="nav-group" id="group-modal">
+        <div class="nav-group-label" onclick="toggleGroup('group-modal')">
+          🪟 Modals & Dialogs
+          <span class="chevron">▾</span>
+        </div>
+        <div class="nav-items">
+          <div class="nav-item" data-src="Hi-Fi/wireframe-MOD-001-session-timeout-warning.html" data-id="MOD-001" data-title="Session Timeout Warning" onclick="loadScreen(this)">
+            <span class="screen-id">MOD-001</span>
+            <span class="screen-label">Session Timeout Warning</span>
+            <span class="modal-tag">MOD</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-MOD-002-booking-confirmation-dialog.html" data-id="MOD-002" data-title="Booking Confirmation Dialog" onclick="loadScreen(this)">
+            <span class="screen-id">MOD-002</span>
+            <span class="screen-label">Booking Confirmation Dialog</span>
+            <span class="modal-tag">MOD</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-MOD-003-preferred-slot-selection.html" data-id="MOD-003" data-title="Preferred Slot Selection" onclick="loadScreen(this)">
+            <span class="screen-id">MOD-003</span>
+            <span class="screen-label">Preferred Slot Selection</span>
+            <span class="modal-tag">MOD</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-MOD-004-walkin-account-creation.html" data-id="MOD-004" data-title="Walk-in Account Creation" onclick="loadScreen(this)">
+            <span class="screen-id">MOD-004</span>
+            <span class="screen-label">Walk-in Account Creation</span>
+            <span class="modal-tag">MOD</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-MOD-005-resolve-conflict-drawer.html" data-id="MOD-005" data-title="Resolve Conflict Drawer" onclick="loadScreen(this)">
+            <span class="screen-id">MOD-005</span>
+            <span class="screen-label">Resolve Conflict Drawer</span>
+            <span class="modal-tag">MOD</span>
+          </div>
+          <div class="nav-item" data-src="Hi-Fi/wireframe-MOD-006-create-edit-user-modal.html" data-id="MOD-006" data-title="Create / Edit User Modal" onclick="loadScreen(this)">
+            <span class="screen-id">MOD-006</span>
+            <span class="screen-label">Create / Edit User Modal</span>
+            <span class="modal-tag">MOD</span>
+          </div>
+        </div>
+      </div>
+
+    </nav>
+  </aside>
+
+  <!-- ── Main ─────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Toolbar -->
+    <div class="toolbar" role="toolbar" aria-label="Wireframe controls">
+
+      <div class="toolbar-left">
+        <span class="toolbar-id" id="toolbarId">—</span>
+        <span class="toolbar-title" id="toolbarTitle">Select a screen to preview</span>
+      </div>
+
+      <div class="toolbar-center">
+        <span class="flow-label">Flow:</span>
+        <select class="flow-select" id="flowSelect" onchange="loadFlow(this.value)" aria-label="Select flow">
+          <option value="">— All screens —</option>
+          <option value="FL-001">FL-001 · User Registration</option>
+          <option value="FL-002">FL-002 · Patient Login → Dashboard</option>
+          <option value="FL-004">FL-004 · AI Intake</option>
+          <option value="FL-005">FL-005 · Book Appointment</option>
+          <option value="FL-006">FL-006 · Preferred Slot Selection</option>
+          <option value="FL-007">FL-007 · Walk-in Booking</option>
+          <option value="FL-008">FL-008 · Document Upload & Extraction</option>
+          <option value="FL-009">FL-009 · Patient Lookup</option>
+          <option value="FL-010">FL-010 · Medical Code Review</option>
+          <option value="FL-011">FL-011 · Conflict Resolution</option>
+        </select>
+      </div>
+
+      <div class="toolbar-right">
+        <button class="btn-nav" id="btnPrev" onclick="stepFlow(-1)" disabled aria-label="Previous screen" title="Previous screen">◀</button>
+        <span class="step-counter" id="stepCounter">—</span>
+        <button class="btn-nav" id="btnNext" onclick="stepFlow(1)" disabled aria-label="Next screen" title="Next screen">▶</button>
+        <a id="btnOpen" class="btn-open" href="#" target="_blank" rel="noopener" style="pointer-events:none;opacity:0.4" title="Open in new tab">
+          ↗ Open
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Frame -->
+    <div class="frame-wrapper">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">⬡</div>
+        <div class="empty-text">Select a screen from the sidebar, or choose a flow above.</div>
+      </div>
+      <iframe
+        id="previewFrame"
+        class="frame-iframe"
+        title="Wireframe preview"
+        style="display:none"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      ></iframe>
+    </div>
+
+    <!-- Status bar -->
+    <div class="statusbar">
+      <div class="statusbar-item">Screens: <span>23</span></div>
+      <div class="statusbar-item">Flows: <span>11</span></div>
+      <div class="statusbar-item">Fidelity: <span>Hi-Fi</span></div>
+      <div class="statusbar-item">Design System: <span>UPACIP · Utilitarian</span></div>
+      <div class="statusbar-item" style="margin-left:auto">WCAG: <span>2.2 AA</span></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── Data ──────────────────────────────────────────────────────────────
+  const FLOWS = {
+    'FL-001': ['SCR-001', 'SCR-002'],
+    'FL-002': ['SCR-001', 'SCR-003'],
+    'FL-004': ['SCR-003', 'SCR-004', 'SCR-005'],
+    'FL-005': ['SCR-003', 'SCR-006', 'MOD-002', 'SCR-007'],
+    'FL-006': ['SCR-006', 'MOD-003'],
+    'FL-007': ['SCR-011', 'SCR-012', 'MOD-004'],
+    'FL-008': ['SCR-009', 'SCR-010', 'SCR-014'],
+    'FL-009': ['SCR-013', 'SCR-014'],
+    'FL-010': ['SCR-014', 'SCR-015'],
+    'FL-011': ['SCR-014', 'MOD-005'],
+  };
+
+  const ALL_SCREENS = Array.from(document.querySelectorAll('.nav-item'));
+
+  let currentFlowScreens = [];
+  let currentFlowIndex = -1;
+  let activeItem = null;
+
+  // ── Helpers ───────────────────────────────────────────────────────────
+  function getItemById(id) {
+    return ALL_SCREENS.find(el => el.dataset.id === id);
+  }
+
+  function updateToolbar(item) {
+    document.getElementById('toolbarId').textContent = item ? item.dataset.id : '—';
+    document.getElementById('toolbarTitle').textContent = item ? item.dataset.title : 'Select a screen to preview';
+    const btn = document.getElementById('btnOpen');
+    if (item) {
+      btn.href = item.dataset.src;
+      btn.style.pointerEvents = 'auto';
+      btn.style.opacity = '1';
+    } else {
+      btn.href = '#';
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.4';
+    }
+  }
+
+  function updateNavHighlight(item) {
+    ALL_SCREENS.forEach(el => el.classList.remove('active'));
+    if (item) item.classList.add('active');
+    activeItem = item;
+    if (item) scrollItemIntoView(item);
+  }
+
+  function scrollItemIntoView(item) {
+    const nav = document.getElementById('sidebarNav');
+    const itemTop = item.offsetTop;
+    const itemBot = itemTop + item.offsetHeight;
+    const viewTop = nav.scrollTop;
+    const viewBot = viewTop + nav.clientHeight;
+    if (itemTop < viewTop) nav.scrollTop = itemTop - 8;
+    else if (itemBot > viewBot) nav.scrollTop = itemBot - nav.clientHeight + 8;
+  }
+
+  function updateStepCounter() {
+    const el = document.getElementById('stepCounter');
+    const prev = document.getElementById('btnPrev');
+    const next = document.getElementById('btnNext');
+    if (currentFlowScreens.length > 0 && currentFlowIndex >= 0) {
+      el.textContent = `${currentFlowIndex + 1} / ${currentFlowScreens.length}`;
+      prev.disabled = currentFlowIndex <= 0;
+      next.disabled = currentFlowIndex >= currentFlowScreens.length - 1;
+    } else {
+      el.textContent = '—';
+      prev.disabled = true;
+      next.disabled = true;
+    }
+  }
+
+  function showFrame(src) {
+    const frame = document.getElementById('previewFrame');
+    const empty = document.getElementById('emptyState');
+    frame.src = src;
+    frame.style.display = 'block';
+    empty.style.display = 'none';
+  }
+
+  // ── Load screen ───────────────────────────────────────────────────────
+  function loadScreen(item) {
+    if (!item || !item.dataset.src) return;
+    updateNavHighlight(item);
+    updateToolbar(item);
+    showFrame(item.dataset.src);
+
+    // If this screen is in the current flow, sync index
+    if (currentFlowScreens.length > 0) {
+      const idx = currentFlowScreens.indexOf(item.dataset.id);
+      if (idx >= 0) {
+        currentFlowIndex = idx;
+        updateStepCounter();
+        return;
+      }
+    }
+
+    // No flow active — clear flow state
+    currentFlowScreens = [];
+    currentFlowIndex = -1;
+    document.getElementById('flowSelect').value = '';
+    updateStepCounter();
+  }
+
+  // ── Load flow ─────────────────────────────────────────────────────────
+  function loadFlow(flowId) {
+    if (!flowId) {
+      currentFlowScreens = [];
+      currentFlowIndex = -1;
+      updateStepCounter();
+      return;
+    }
+    const screens = FLOWS[flowId];
+    if (!screens) return;
+    currentFlowScreens = screens;
+    currentFlowIndex = 0;
+    const first = getItemById(screens[0]);
+    if (first) {
+      // Ensure the group containing this item is expanded
+      const group = first.closest('.nav-group');
+      if (group) group.classList.remove('collapsed');
+      loadScreen(first);
+    }
+    updateStepCounter();
+  }
+
+  function stepFlow(dir) {
+    const newIdx = currentFlowIndex + dir;
+    if (newIdx < 0 || newIdx >= currentFlowScreens.length) return;
+    currentFlowIndex = newIdx;
+    const item = getItemById(currentFlowScreens[currentFlowIndex]);
+    if (!item) { updateStepCounter(); return; }
+    // Ensure group is expanded
+    const group = item.closest('.nav-group');
+    if (group) group.classList.remove('collapsed');
+    updateNavHighlight(item);
+    updateToolbar(item);
+    showFrame(item.dataset.src);
+    updateStepCounter();
+  }
+
+  // ── Group toggle ──────────────────────────────────────────────────────
+  function toggleGroup(id) {
+    document.getElementById(id).classList.toggle('collapsed');
+  }
+
+  // ── Search ────────────────────────────────────────────────────────────
+  document.getElementById('searchInput').addEventListener('input', function () {
+    const q = this.value.trim().toLowerCase();
+    ALL_SCREENS.forEach(item => {
+      const text = (item.dataset.id + ' ' + item.dataset.title).toLowerCase();
+      item.classList.toggle('hidden', q.length > 0 && !text.includes(q));
+    });
+    // Show groups with visible items
+    document.querySelectorAll('.nav-group').forEach(group => {
+      const visible = group.querySelectorAll('.nav-item:not(.hidden)').length > 0;
+      group.style.display = q.length > 0 && !visible ? 'none' : '';
+      if (q.length > 0 && visible) group.classList.remove('collapsed');
+    });
+  });
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────────
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') stepFlow(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   stepFlow(-1);
+  });
+
+  // ── Init: load SCR-001 ────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', function () {
+    const first = getItemById('SCR-001');
+    if (first) loadScreen(first);
+  });
+</script>
+</body>
+</html>

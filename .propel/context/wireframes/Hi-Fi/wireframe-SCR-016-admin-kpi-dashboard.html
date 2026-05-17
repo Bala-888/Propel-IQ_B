@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                         |
+|----------------------|--------|-------------------------------------------------------|
+| users-nav-link       | click  | wireframe-SCR-017-admin-user-management.html          |
+| nav links            | click  | respective screens                                    |
+UCR: UXR-501 (KPI cards), UXR-206 (live region for metrics)
+UC: UC-036
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCR-016 — Admin KPI Dashboard | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-disabled:#94A3B8;--color-text-inverse:#FFFFFF;--color-bg-page:#F8FAFC;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-border:#E2E8F0;--color-border-focus:#1A56DB;--color-status-success:#16A34A;--color-status-warning:#D97706;--color-status-error:#DC2626;--color-status-info:#0284C7;--color-ai-accent:#6366F1;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--radius-xs:2px;--radius-sm:4px;--radius-md:8px;--shadow-1:0 1px 3px rgba(15,23,42,0.08);--sidebar-width:240px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg-page);color:var(--color-text-primary);height:100vh;display:flex;overflow:hidden;}
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--color-bg-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:var(--space-6);font-size:18px;font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);}
+.sidebar-nav{flex:1;padding:var(--space-4) var(--space-3);}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;min-height:44px;margin-bottom:4px;}
+.nav-item:hover{background:var(--color-bg-subtle);}
+.nav-item.active{background:var(--color-primary-subtle);color:var(--color-primary);}
+.nav-item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-border);}
+.user-info{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.app-header{height:56px;background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;padding:0 var(--space-8);}
+.content-area{flex:1;overflow-y:auto;padding:var(--space-10);}
+.page-title{font-size:28px;font-weight:700;margin-bottom:var(--space-2);}
+.page-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:var(--space-8);}
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-5);margin-bottom:var(--space-10);}
+.kpi-card{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-6);box-shadow:var(--shadow-1);}
+.kpi-label{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:var(--space-3);text-transform:uppercase;letter-spacing:0.3px;}
+.kpi-value{font-size:36px;font-weight:700;line-height:1;font-family:var(--font-mono);}
+.kpi-trend{font-size:13px;margin-top:var(--space-3);display:flex;align-items:center;gap:4px;}
+.trend-up{color:var(--color-status-success);}
+.trend-down{color:var(--color-status-error);}
+.trend-neutral{color:var(--color-text-secondary);}
+.kpi-card.alert .kpi-value{color:var(--color-status-error);}
+.kpi-card.warn .kpi-value{color:var(--color-status-warning);}
+.kpi-card.good .kpi-value{color:var(--color-status-success);}
+.kpi-card.info .kpi-value{color:var(--color-primary);}
+/* CHART PLACEHOLDER */
+.chart-section{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-6);box-shadow:var(--shadow-1);margin-bottom:var(--space-6);}
+.chart-title{font-size:16px;font-weight:600;margin-bottom:var(--space-5);}
+.chart-placeholder{background:var(--color-bg-subtle);border-radius:var(--radius-sm);height:180px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-text-disabled);}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:var(--space-3);margin-bottom:var(--space-6);align-items:center;}
+.period-btn{font-family:var(--font-sans);font-size:13px;font-weight:500;padding:6px 14px;border-radius:9999px;border:1px solid var(--color-border);background:var(--color-bg-surface);cursor:pointer;min-height:36px;}
+.period-btn.active{background:var(--color-primary);color:white;border-color:var(--color-primary);}
+.period-btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+/* SECTION TITLE */
+.section-title{font-size:18px;font-weight:700;margin-bottom:var(--space-5);}
+@media(max-width:1279px){.sidebar{display:none;}}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.kpi-grid{grid-template-columns:1fr;}.content-area{padding:var(--space-6);}}
+</style>
+</head>
+<body>
+<aside class="sidebar" role="navigation" aria-label="Admin navigation">
+  <div class="sidebar-logo">UPACIP</div>
+  <nav class="sidebar-nav">
+    <a href="wireframe-SCR-016-admin-kpi-dashboard.html" class="nav-item active" aria-current="page">Metrics</a>
+    <a href="wireframe-SCR-017-admin-user-management.html" class="nav-item" id="users-nav-link">Users</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar" style="background:#E0E7FF;color:var(--color-ai-accent);">JA</div><div><div style="font-size:14px;font-weight:500;">James Adeyemi</div><div style="font-size:12px;color:var(--color-text-secondary);">Admin</div></div></div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="app-header"><span style="font-size:16px;font-weight:600;">Platform metrics</span></header>
+  <main class="content-area" id="main-content">
+    <h1 class="page-title">Platform metrics</h1>
+    <p class="page-sub">Real-time operational overview. Data refreshed every 5 minutes.</p>
+
+    <!-- DATE FILTER -->
+    <div class="filter-bar" role="group" aria-label="Date range">
+      <button class="period-btn" aria-pressed="false">Today</button>
+      <button class="period-btn" aria-pressed="false">7 days</button>
+      <button class="period-btn active" aria-pressed="true">30 days</button>
+      <button class="period-btn" aria-pressed="false">90 days</button>
+    </div>
+
+    <!-- KPI GRID (2×3) -->
+    <div class="kpi-grid" role="list" aria-label="Key performance indicators" aria-live="polite">
+      <div class="kpi-card info" role="listitem" aria-label="Total patients: 1,247">
+        <div class="kpi-label">Total patients</div>
+        <div class="kpi-value">1,247</div>
+        <div class="kpi-trend trend-up"><span aria-hidden="true">↑</span> +14 this week</div>
+      </div>
+      <div class="kpi-card info" role="listitem" aria-label="Bookings this month: 389">
+        <div class="kpi-label">Bookings this month</div>
+        <div class="kpi-value">389</div>
+        <div class="kpi-trend trend-up"><span aria-hidden="true">↑</span> +23 vs last month</div>
+      </div>
+      <div class="kpi-card warn" role="listitem" aria-label="No-show rate: 8.3 percent — above 8 percent threshold">
+        <div class="kpi-label">No-show rate</div>
+        <div class="kpi-value">8.3%</div>
+        <div class="kpi-trend trend-down"><span aria-hidden="true">↑</span> Above 8% threshold</div>
+      </div>
+      <div class="kpi-card good" role="listitem" aria-label="AI-human agreement: 87.4 percent">
+        <div class="kpi-label">AI–human agreement</div>
+        <div class="kpi-value">87.4%</div>
+        <div class="kpi-trend trend-up"><span aria-hidden="true">↑</span> +1.2% vs last month</div>
+      </div>
+      <div class="kpi-card alert" role="listitem" aria-label="Critical conflicts: 3 — requires review">
+        <div class="kpi-label">Critical conflicts</div>
+        <div class="kpi-value">3</div>
+        <div class="kpi-trend trend-down"><span aria-hidden="true">⚠</span> Requires review</div>
+      </div>
+      <div class="kpi-card info" role="listitem" aria-label="Average queue wait: 12 minutes">
+        <div class="kpi-label">Avg queue wait</div>
+        <div class="kpi-value">12 min</div>
+        <div class="kpi-trend trend-neutral">Steady vs last month</div>
+      </div>
+    </div>
+
+    <!-- TRENDS CHARTS (placeholder) -->
+    <div class="section-title">Trends</div>
+    <div class="chart-section">
+      <div class="chart-title">Bookings per day — May 2026</div>
+      <div class="chart-placeholder" aria-label="Bar chart: bookings per day over May 2026 — chart rendered in production, placeholder in wireframe">[Bookings bar chart — rendered in production]</div>
+    </div>
+    <div class="chart-section">
+      <div class="chart-title">AI–human agreement rate — rolling 30 days</div>
+      <div class="chart-placeholder" aria-label="Line chart: AI-human agreement rate over 30 days — chart rendered in production, placeholder in wireframe">[Agreement rate line chart — rendered in production]</div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

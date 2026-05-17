@@ -1,0 +1,32 @@
+﻿sequenceDiagram
+    participant JOB as Extraction Job
+    participant API as .NET API
+    participant PDFPIG as PdfPig
+    participant OL as Ollama
+    participant VEC as pgvector
+    participant DB as PostgreSQL
+
+    Note over JOB,DB: UC-026 -- AI Extracts and De-duplicates Clinical Data
+    Note over JOB,DB: See also: ai-seq-uc-026.mmd for full AI architecture view
+
+    JOB->>API: ProcessPendingDocuments(patientId)
+    API->>DB: SELECT documents WHERE status=Pending
+    DB-->>API: document list
+
+    loop Per document
+        API->>DB: UPDATE status=Extracting
+        API->>PDFPIG: ExtractText(path)
+        PDFPIG-->>API: raw text
+        API->>OL: embed + extract entities
+        OL-->>API: vectors + extracted JSON
+        API->>VEC: INSERT ChunkEmbeddings
+        API->>DB: INSERT ExtractedRecords [Pending, encrypted]
+        API->>DB: UPDATE status=Complete
+    end
+
+    API->>DB: De-duplicate ExtractedRecords by (entityType + normalised value)
+    API->>DB: Mark duplicates isDuplicate=true
+
+    alt Extraction fails
+        API->>DB: UPDATE status=Failed
+    end

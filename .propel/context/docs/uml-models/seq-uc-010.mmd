@@ -1,0 +1,28 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+
+    Note over P,DB: UC-010 -- Intake Validation Failure
+
+    P->>SPA: Submit intake (AI confirm or manual submit)
+    SPA->>API: POST /intake/confirm or /intake/manual
+    API->>API: ValidateIntakeFields()
+    API-->>SPA: 400 { errors: [{ field, message }] }
+    SPA-->>P: Highlight failing fields, data NOT cleared
+
+    P->>SPA: Correct errors and resubmit
+    SPA->>API: POST /intake/confirm (corrected)
+    API->>API: ValidateIntakeFields() -- passes
+    API->>DB: INSERT IntakeRecord [status=Complete]
+    API-->>SPA: 201 Created
+    SPA-->>P: Intake saved
+
+    opt Patient abandons intake
+        P->>SPA: Navigate away
+        SPA->>API: POST /intake/draft { sessionId, partialData }
+        API->>DB: UPSERT IntakeRecord [status=Draft, data=partial encrypted]
+        API-->>SPA: 200 Draft saved
+        SPA-->>P: (silently saved)
+    end

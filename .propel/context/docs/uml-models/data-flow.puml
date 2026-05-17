@@ -1,0 +1,101 @@
+﻿@startuml data-flow
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName Arial
+skinparam ArrowColor #555555
+skinparam RectangleBorderColor #336699
+skinparam DatabaseBorderColor #336699
+skinparam BoundaryBorderColor #999999
+
+title Unified Patient Access & Clinical Intelligence Platform\nData Flow Diagram
+
+actor "Patient" as PAT
+actor "Staff" as STA
+actor "Email/SMS\nGateway" as GW
+actor "Calendar APIs\n(Google/Outlook)" as CAL
+
+boundary "Nginx TLS\n(Port 443)" as NGINX
+
+rectangle ".NET 8.0 API" as APIBOX {
+    rectangle "Auth &\nSession" as AUTHSVC
+    rectangle "Booking &\nSlot Engine" as BOOKSVC
+    rectangle "Intake\nService" as INTSVC
+    rectangle "Notification\nDispatcher" as NOTIFSVC
+    rectangle "Document\nIngestor" as DOCSVC
+    rectangle "AI Extraction\nOrchestrator" as AIORCH
+    rectangle "Code Suggestion\nEngine" as CODESVC
+    rectangle "360 View\nAggregator" as VIEWSVC
+    rectangle "Audit Logger" as AUDITLOG
+}
+
+rectangle "AI Pipeline" as AIPIPE {
+    rectangle "PdfPig\nText Extractor" as PDFEXT
+    rectangle "Text\nChunker" as CHUNKER
+    rectangle "Ollama\nEmbedder" as EMBEDDER
+    rectangle "pgvector\nRetriever" as RETRIEVER
+    rectangle "Ollama\nLlama 3.1 8B" as LLM
+    rectangle "Schema\nValidator" as SCHVAL
+}
+
+database "PostgreSQL 15.3+" as DB {
+    rectangle "[PHI encrypted pgcrypto]\nUser, Patient, IntakeRecord,\nBooking, Slot" as DB1
+    rectangle "[Append-only]\nAuditLog" as DB2
+    rectangle "[pgvector 0.5+]\nChunkEmbedding\nExtractedRecord\nCodeSuggestion" as DB3
+    rectangle "ClinicalDocument\nReminderSchedule\nInsuranceRecord" as DB4
+}
+
+component "Seq\nStructured Logs" as SEQ
+component "Prometheus\n/metrics" as PROM
+
+PAT -right-> NGINX : HTTPS Register/Login
+NGINX -right-> AUTHSVC : Verify credentials
+AUTHSVC --> DB1 : Read/Write User + password hash
+AUTHSVC -down-> AUDITLOG : Login event
+AUTHSVC --> PAT : JWT token
+
+PAT -right-> NGINX : Book slot
+NGINX --> BOOKSVC : POST /bookings
+BOOKSVC --> DB1 : ACID txn slot + Booking INSERT
+BOOKSVC --> NOTIFSVC : Confirm PDF + reminder
+NOTIFSVC --> GW : SMTP email + SMS
+NOTIFSVC --> CAL : OAuth event CREATE
+BOOKSVC --> AUDITLOG : Booking created
+
+PAT -right-> NGINX : Intake data
+NGINX --> INTSVC : POST /intake
+INTSVC --> LLM : AI mode chat prompt
+LLM --> INTSVC : Structured response
+INTSVC --> DB1 : IntakeRecord encrypted JSONB
+
+PAT --> NGINX : Upload PDF
+NGINX --> DOCSVC : POST /documents
+DOCSVC --> DB4 : ClinicalDocument Pending
+
+DOCSVC -down-> PDFEXT : Trigger extraction
+PDFEXT --> CHUNKER : Raw text
+CHUNKER --> EMBEDDER : Text chunks
+EMBEDDER --> LLM : embed() call
+LLM --> EMBEDDER : Vectors
+EMBEDDER --> DB3 : ChunkEmbedding store pgvector
+CHUNKER --> LLM : Extract entities prompt
+LLM --> SCHVAL : Structured JSON
+SCHVAL --> DB3 : ExtractedRecord encrypted Pending
+
+AIORCH --> RETRIEVER : Query embeddings
+RETRIEVER --> DB3 : cosine similarity search
+DB3 --> RETRIEVER : Top-K chunks
+RETRIEVER --> CODESVC : Retrieved context
+CODESVC --> LLM : Code suggestion prompt
+LLM --> SCHVAL : ICD-10/CPT JSON
+SCHVAL --> DB3 : CodeSuggestion Pending source ref
+
+STA --> NGINX : View patient
+NGINX --> VIEWSVC : GET /patients/{id}/view
+VIEWSVC --> DB3 : ExtractedRecords + CodeSuggestions
+VIEWSVC --> DB4 : ClinicalDocuments
+VIEWSVC --> STA : 360 aggregated view + conflict flags
+
+AUDITLOG --> DB2 : INSERT-only AuditLog entry
+AUDITLOG --> SEQ : Serilog structured event
+APIBOX --> PROM : Expose /metrics
+@enduml

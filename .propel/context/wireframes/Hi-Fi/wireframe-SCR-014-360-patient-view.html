@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                            |
+|----------------------|--------|----------------------------------------------------------|
+| review-codes-link    | click  | wireframe-SCR-015-medical-code-review.html               |
+| resolve-conflict-btn | click  | wireframe-MOD-005-resolve-conflict-drawer.html           |
+| back-link            | click  | wireframe-SCR-013-patient-search.html                    |
+| nav links            | click  | respective screens                                       |
+UCR: UXR-402 (AILabel on extracted), UXR-601 (conflict banner), UXR-403 (no border-left >2px)
+UC: UC-027, UC-028, UC-029
+Patient: Sarah Mitchell (SM) — Aetna PPO, DOB 12 Apr 1984
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCR-014 — 360° Patient View | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-disabled:#94A3B8;--color-text-inverse:#FFFFFF;--color-bg-page:#F8FAFC;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-border:#E2E8F0;--color-border-strong:#94A3B8;--color-border-focus:#1A56DB;--color-status-success:#16A34A;--color-status-warning:#D97706;--color-status-error:#DC2626;--color-status-info:#0284C7;--color-ai-accent:#6366F1;--color-ai-bg:#EEF2FF;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-xs:2px;--radius-sm:4px;--radius-md:8px;--radius-full:9999px;--shadow-1:0 1px 3px rgba(15,23,42,0.08);--sidebar-width:240px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg-page);color:var(--color-text-primary);height:100vh;display:flex;overflow:hidden;}
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--color-bg-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:var(--space-6);font-size:18px;font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);}
+.sidebar-nav{flex:1;padding:var(--space-4) var(--space-3);}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;min-height:44px;margin-bottom:4px;}
+.nav-item:hover{background:var(--color-bg-subtle);}
+.nav-item.active{background:var(--color-primary-subtle);color:var(--color-primary);}
+.nav-item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-border);}
+.user-info{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+/* PATIENT HEADER */
+.patient-header{background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);padding:var(--space-5) var(--space-8);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);}
+.patient-id-row{display:flex;align-items:center;gap:var(--space-4);}
+.avatar-lg{width:52px;height:52px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.patient-name{font-size:20px;font-weight:700;}
+.patient-meta-row{display:flex;gap:var(--space-4);margin-top:4px;flex-wrap:wrap;}
+.patient-meta-item{font-size:13px;color:var(--color-text-secondary);}
+/* TABS */
+.tabs-bar{background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);padding:0 var(--space-8);display:flex;gap:0;overflow-x:auto;}
+.tab{padding:var(--space-4) var(--space-5);font-size:14px;font-weight:500;color:var(--color-text-secondary);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;min-height:44px;}
+.tab:hover{color:var(--color-text-primary);}
+.tab.active{color:var(--color-primary);border-bottom-color:var(--color-primary);font-weight:600;}
+.tab:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+/* CONTENT PANELS */
+.content-area{flex:1;overflow-y:auto;padding:var(--space-8);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+/* AI LABEL (UXR-402) */
+.ai-label{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--color-ai-accent);background:var(--color-ai-bg);padding:2px 8px;border-radius:var(--radius-full);}
+/* CONFLICT BANNER (QG fix: icon+bg+border, no border-left >2px) */
+.conflict-banner{background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-6);display:flex;align-items:flex-start;gap:var(--space-3);}
+.conflict-icon{width:36px;height:36px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.conflict-title{font-size:14px;font-weight:700;color:var(--color-status-error);margin-bottom:4px;}
+.conflict-desc{font-size:13px;color:#7F1D1D;}
+/* EXTRACTED ENTITIES */
+.entity-card{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);box-shadow:var(--shadow-1);}
+.entity-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3);}
+.entity-type{font-size:12px;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}
+.entity-value{font-size:15px;font-weight:600;margin-bottom:4px;}
+.entity-meta{font-size:13px;color:var(--color-text-secondary);}
+.code-mono{font-family:var(--font-mono);font-size:13px;}
+/* DATA TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:14px;}
+.data-table th{padding:var(--space-3) var(--space-4);background:var(--color-bg-subtle);text-align:left;font-size:12px;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.3px;border-bottom:1px solid var(--color-border);}
+.data-table td{padding:var(--space-4);border-bottom:1px solid var(--color-border);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+/* SECTION TITLE */
+.section-title{font-size:16px;font-weight:600;margin-bottom:var(--space-4);}
+/* BUTTONS */
+.btn{font-family:var(--font-sans);font-size:14px;font-weight:600;padding:var(--space-3) var(--space-5);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2);min-height:44px;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.btn-danger{background:#FEF2F2;color:var(--color-status-error);border:1px solid #FECACA;}
+.btn-danger:hover{background:#FEE2E2;}
+@media(max-width:1279px){.sidebar{display:none;}}
+@media(max-width:768px){.patient-header{flex-direction:column;align-items:flex-start;}.content-area{padding:var(--space-4);}}
+</style>
+</head>
+<body>
+<aside class="sidebar" role="navigation" aria-label="Staff navigation">
+  <div class="sidebar-logo">UPACIP</div>
+  <nav class="sidebar-nav">
+    <a href="wireframe-SCR-011-staff-queue-dashboard.html" class="nav-item">Queue</a>
+    <a href="wireframe-SCR-012-walkin-booking-form.html" class="nav-item">Walk-in</a>
+    <a href="wireframe-SCR-013-patient-search.html" class="nav-item active" aria-current="page">Patient search</a>
+    <a href="wireframe-SCR-015-medical-code-review.html" class="nav-item">Code review</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar">RN</div><div><div style="font-size:14px;font-weight:500;">Rebecca Nguyen</div><div style="font-size:12px;color:var(--color-text-secondary);">Staff · Suite 3B</div></div></div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <!-- PATIENT HEADER -->
+  <div class="patient-header">
+    <div class="patient-id-row">
+      <a href="wireframe-SCR-013-patient-search.html" style="color:var(--color-text-secondary);text-decoration:none;font-size:14px;min-height:44px;display:flex;align-items:center;" aria-label="Back to patient search">← Back</a>
+      <div class="avatar-lg" aria-hidden="true">SM</div>
+      <div>
+        <div class="patient-name">Sarah Mitchell</div>
+        <div class="patient-meta-row">
+          <span class="patient-meta-item">DOB: 12 Apr 1984 (42)</span>
+          <span class="patient-meta-item">·</span>
+          <span class="patient-meta-item">Aetna PPO</span>
+          <span class="patient-meta-item">·</span>
+          <span class="patient-meta-item" style="font-family:var(--font-mono);font-size:12px;">PAT-00001</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:var(--space-3);">
+      <a href="wireframe-SCR-015-medical-code-review.html" id="review-codes-link" class="btn btn-secondary" style="font-size:14px;">Review codes →</a>
+    </div>
+  </div>
+
+  <!-- TABS (5 sticky tabs) -->
+  <div class="tabs-bar" role="tablist" aria-label="Patient record sections">
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-demographics" onclick="switchTab(event,'demographics')">Demographics</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-intake" onclick="switchTab(event,'intake')">Intake</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-documents" onclick="switchTab(event,'documents')">Documents</button>
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="panel-extracted" onclick="switchTab(event,'extracted')">Extracted data</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-codes" onclick="switchTab(event,'codes')">Medical codes</button>
+  </div>
+
+  <main class="content-area" id="main-content">
+
+    <!-- DEMOGRAPHICS PANEL -->
+    <div id="panel-demographics" class="tab-panel" role="tabpanel" aria-label="Demographics">
+      <div class="section-title">Personal information</div>
+      <table class="data-table">
+        <tbody>
+          <tr><td style="color:var(--color-text-secondary);width:160px;font-size:13px;">Full name</td><td style="font-weight:500;">Sarah Mitchell</td></tr>
+          <tr><td style="color:var(--color-text-secondary);font-size:13px;">Date of birth</td><td>12 April 1984 (42 years)</td></tr>
+          <tr><td style="color:var(--color-text-secondary);font-size:13px;">Email</td><td>sarah.mitchell@email.com</td></tr>
+          <tr><td style="color:var(--color-text-secondary);font-size:13px;">Phone</td><td>+1 (555) 234-5678</td></tr>
+          <tr><td style="color:var(--color-text-secondary);font-size:13px;">Insurance</td><td>Aetna PPO · <span style="font-family:var(--font-mono);font-size:13px;">INS-001234567</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- INTAKE PANEL -->
+    <div id="panel-intake" class="tab-panel" role="tabpanel" aria-label="Intake form responses">
+      <div class="section-title">Intake summary</div>
+      <table class="data-table">
+        <tbody>
+          <tr><td style="color:var(--color-text-secondary);width:180px;font-size:13px;">Smoking</td><td>Never</td></tr>
+          <tr><td style="color:var(--color-text-secondary);font-size:13px;">Alcohol</td><td>Occasionally</td></tr>
+          <tr><td style="color:var(--color-text-secondary);font-size:13px;">Exercise</td><td>3–4 times per week</td></tr>
+          <tr><td style="color:var(--color-text-secondary);font-size:13px;">Chief complaint</td><td>Persistent cough and shortness of breath for 2 weeks</td></tr>
+          <tr><td style="color:var(--color-text-secondary);font-size:13px;">Submitted</td><td>17 May 2026, 08:45 AM</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- DOCUMENTS PANEL -->
+    <div id="panel-documents" class="tab-panel" role="tabpanel" aria-label="Uploaded documents">
+      <div class="section-title">Uploaded documents</div>
+      <table class="data-table">
+        <thead><tr><th>Document</th><th>Uploaded</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>chest-xray-report-2026-03.pdf</td><td>15 Mar 2026</td><td><span style="color:var(--color-status-success);font-weight:500;">Complete</span></td></tr>
+          <tr><td>lab-results-cbc-2026-04.pdf</td><td>8 Apr 2026</td><td><span style="color:var(--color-status-success);font-weight:500;">Complete</span></td></tr>
+          <tr><td>previous-rx-notes.docx</td><td>17 May 2026</td><td><span style="color:var(--color-primary);font-weight:500;">Extracting</span></td></tr>
+          <tr><td>ecg-reading-2026-01.pdf</td><td>20 Jan 2026</td><td><span style="color:var(--color-status-error);font-weight:500;">Failed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- EXTRACTED DATA PANEL (active by default) — CRITICAL: ConflictBanner -->
+    <div id="panel-extracted" class="tab-panel active" role="tabpanel" aria-label="AI-extracted clinical data">
+
+      <!-- CONFLICT BANNER (QG fix: icon+bg+border, NO border-left >2px) -->
+      <div class="conflict-banner" role="alert" aria-label="Clinical conflict detected: Amoxicillin allergy to Penicillin-class" aria-live="assertive">
+        <div class="conflict-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div class="conflict-title">Drug-allergy conflict detected</div>
+          <div class="conflict-desc">Prescribed medication <strong>Amoxicillin</strong> (500 mg) is a penicillin-class antibiotic. Patient allergy record shows <strong>Penicillin</strong> allergy with documented reaction. Review before dispensing.</div>
+          <div style="margin-top:var(--space-3);">
+            <a href="wireframe-MOD-005-resolve-conflict-drawer.html" id="resolve-conflict-btn" class="btn btn-danger" style="font-size:13px;padding:8px 16px;height:auto;">Resolve conflict →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Extracted entities (6)</div>
+      <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-6);font-size:13px;color:var(--color-text-secondary);">
+        <span class="ai-label">✦ AI extracted</span>
+        All entities extracted by AI from uploaded documents. Verify before clinical use.
+      </div>
+
+      <!-- DIAGNOSIS: J18.9 -->
+      <div class="entity-card">
+        <div class="entity-header">
+          <span class="entity-type">Diagnosis</span>
+          <span class="ai-label">✦ AI</span>
+        </div>
+        <div class="entity-value"><span class="code-mono">J18.9</span> — Pneumonia, unspecified</div>
+        <div class="entity-meta">Source: chest-xray-report-2026-03.pdf · Confidence: 0.91 · Extracted 15 Mar 2026</div>
+      </div>
+
+      <!-- VITAL: SpO2 -->
+      <div class="entity-card">
+        <div class="entity-header">
+          <span class="entity-type">Vital sign</span>
+          <span class="ai-label">✦ AI</span>
+        </div>
+        <div class="entity-value">SpO2: 94%</div>
+        <div class="entity-meta">Source: chest-xray-report-2026-03.pdf · Extracted 15 Mar 2026</div>
+      </div>
+
+      <!-- DIAGNOSIS: D50.9 -->
+      <div class="entity-card">
+        <div class="entity-header">
+          <span class="entity-type">Diagnosis</span>
+          <span class="ai-label">✦ AI</span>
+        </div>
+        <div class="entity-value"><span class="code-mono">D50.9</span> — Iron deficiency anaemia</div>
+        <div class="entity-meta">Source: lab-results-cbc-2026-04.pdf · Confidence: 0.83 · Extracted 8 Apr 2026</div>
+      </div>
+
+      <!-- VITAL: Haemoglobin -->
+      <div class="entity-card">
+        <div class="entity-header">
+          <span class="entity-type">Vital sign</span>
+          <span class="ai-label">✦ AI</span>
+        </div>
+        <div class="entity-value">Haemoglobin: 9.2 g/dL</div>
+        <div class="entity-meta">Source: lab-results-cbc-2026-04.pdf · Extracted 8 Apr 2026</div>
+      </div>
+
+      <!-- MEDICATION: Amoxicillin (CONFLICT) -->
+      <div class="entity-card" style="border-color:#FECACA;background:#FFF5F5;">
+        <div class="entity-header">
+          <span class="entity-type" style="color:var(--color-status-error);">Medication ⚠ Conflict</span>
+          <span class="ai-label">✦ AI</span>
+        </div>
+        <div class="entity-value">Amoxicillin 500 mg — oral, TID</div>
+        <div class="entity-meta" style="color:var(--color-status-error);">Conflicts with Penicillin allergy · Source: previous-rx-notes.docx</div>
+      </div>
+
+      <!-- ALLERGY: Penicillin -->
+      <div class="entity-card" style="border-color:#FECACA;background:#FFF5F5;">
+        <div class="entity-header">
+          <span class="entity-type" style="color:var(--color-status-error);">Allergy ⚠ Conflict</span>
+          <span class="ai-label">✦ AI</span>
+        </div>
+        <div class="entity-value">Penicillin — Hives and difficulty breathing</div>
+        <div class="entity-meta" style="color:var(--color-status-error);">Conflicts with Amoxicillin prescription · Source: previous-rx-notes.docx</div>
+      </div>
+
+    </div>
+
+    <!-- MEDICAL CODES PANEL -->
+    <div id="panel-codes" class="tab-panel" role="tabpanel" aria-label="AI medical code suggestions">
+      <div style="margin-bottom:var(--space-5);display:flex;align-items:center;justify-content:space-between;">
+        <div class="section-title" style="margin-bottom:0;">Medical code suggestions</div>
+        <a href="wireframe-SCR-015-medical-code-review.html" class="btn btn-primary" style="font-size:13px;padding:8px 16px;height:auto;">Go to code review →</a>
+      </div>
+      <div style="font-size:14px;color:var(--color-text-secondary);">5 AI-suggested codes pending review. Open the Code Review screen to accept, reject, or correct.</div>
+    </div>
+
+  </main>
+</div>
+<script>
+function switchTab(e, id){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');t.setAttribute('aria-selected','false');});
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  e.currentTarget.classList.add('active');
+  e.currentTarget.setAttribute('aria-selected','true');
+  var panel = document.getElementById('panel-'+id);
+  if(panel) panel.classList.add('active');
+}
+</script>
+</body>
+</html>

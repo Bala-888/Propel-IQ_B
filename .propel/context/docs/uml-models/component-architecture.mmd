@@ -1,0 +1,60 @@
+﻿graph TB
+    subgraph Browsers["External Clients"]
+        PAT["🧑 Patient Browser"]
+        STA["👩‍⚕️ Staff Browser"]
+        ADM["🛡️ Admin Browser"]
+    end
+    subgraph NGINX["Nginx Reverse Proxy (TLS 1.2+)"]
+        NX["Static SPA Files\n+ HTTPS Termination\n+ HTTP→HTTPS Redirect"]
+    end
+    subgraph SPA["React SPA (TypeScript 18.x)"]
+        PP["Patient Portal\n(Registration, Intake,\nBooking, Docs)"]
+        SD["Staff Dashboard\n(Queue, 360° View,\nCode Review)"]
+        AC["Admin Console\n(User Mgmt, KPIs)"]
+    end
+    subgraph API[".NET 8.0 ASP.NET Core Web API"]
+        AUTH["Auth Module\n(Identity + JWT\n+ Rate Limiting)"]
+        BOOK["Booking Module\n(Slots, Swap Monitor,\nRisk Scoring)"]
+        INT["Intake Module\n(AI + Manual\n+ Mode Switch)"]
+        CLIN["Clinical Module\n(Document Upload,\n360° View, Codes)"]
+        QUE["Queue Module\n(SignalR Hub\nReal-time Push)"]
+        NOTIF["Notification Module\n(Email PDF, SMS,\nReminders)"]
+        CAL["Calendar Sync\n(Google + Outlook\nOAuth 2.0)"]
+        ADMIN["Admin Module\n(User CRUD, KPIs)"]
+        AUDIT["Audit Logger\n(Append-only)"]
+    end
+    subgraph AISERVICE["AI Service (.NET)"]
+        PDFPIG["PdfPig\nText Extractor"]
+        CHUNK["Chunker &\nEmbedder"]
+        RETR["pgvector\nRetriever"]
+        VALID["Output Schema\nValidator"]
+    end
+    subgraph INFRA["Infrastructure Services (Docker Compose)"]
+        PG[("PostgreSQL 15.3+\npgcrypto + pgvector\n[PHI encrypted]")]
+        OL["Ollama 0.1.29+\nLlama 3.1 8B Q4_K_M\n[Local Inference]"]
+        SEQ["Seq 2023.4+\nStructured Logs"]
+        PROM["Prometheus 2.45+\nMetrics"]
+        GRAF["Grafana 10+\nDashboards"]
+    end
+    subgraph EXT["External APIs (Free Tier)"]
+        GW["Email / SMS\nGateway"]
+        GCAL["Google\nCalendar API"]
+        MSCAL["Microsoft\nGraph API"]
+    end
+    PAT & STA & ADM -->|HTTPS| NX
+    NX -->|Serve Static| SPA
+    NX -->|Proxy /api/*| API
+    SPA -->|REST + SignalR WS| API
+    API --> AUTH & BOOK & INT & CLIN & QUE & NOTIF & CAL & ADMIN & AUDIT
+    CLIN --> AISERVICE
+    AISERVICE --> PDFPIG & CHUNK & RETR & VALID
+    CHUNK -->|embed| OL
+    RETR -->|cosine search| PG
+    VALID -->|structured prompt| OL
+    API -->|Npgsql EF Core| PG
+    AUDIT -->|Serilog sink| SEQ
+    API -->|/metrics| PROM
+    PROM --> GRAF
+    NOTIF -->|SMTP + SMS API| GW
+    CAL -->|OAuth 2.0| GCAL & MSCAL
+    INT -->|HTTP /api/chat| OL

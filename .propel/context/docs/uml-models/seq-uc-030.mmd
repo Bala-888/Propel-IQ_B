@@ -1,0 +1,27 @@
+﻿sequenceDiagram
+    participant JOB as Code Suggestion Job
+    participant ORCH as RAG Orchestrator
+    participant OL as Ollama
+    participant VEC as pgvector
+    participant DB as PostgreSQL
+
+    Note over JOB,DB: UC-030 -- AI Suggests Medical Codes
+    Note over JOB,DB: See also: ai-seq-uc-030.mmd for full AI architecture view
+
+    JOB->>ORCH: GenerateCodeSuggestions(patientId)
+    ORCH->>OL: embed(clinical_summary)
+    OL-->>ORCH: query_vector
+    ORCH->>VEC: SELECT TOP-20 chunks (cosine sim)
+    VEC-->>ORCH: top chunks
+
+    ORCH->>OL: Code suggestion prompt + context
+    OL-->>ORCH: [{codeType, code, description, sourceChunkRefs, confidence}]
+    ORCH->>ORCH: Schema validate (ICD-10/CPT format check)
+
+    alt Validation passes
+        ORCH->>DB: INSERT MedicalCodeSuggestion[] [Pending]
+    else Fails
+        ORCH->>DB: log failure
+    end
+
+    Note over DB: All suggestions Pending -- awaiting staff review (UC-031/032)

@@ -1,0 +1,23 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over P,SEQ: UC-024 -- Patient Uploads Clinical Documents
+
+    P->>SPA: Navigate to "Upload Documents"
+    SPA-->>P: File upload widget
+    P->>SPA: Select PDF file(s)
+    SPA->>API: POST /documents (multipart/form-data, JWT)
+    API->>API: ValidateMimeType(file) -- must be application/pdf or allowed type
+    API->>API: ValidateFileSize(file) -- must be <= 20 MB
+    API->>API: ComputeSHA256Hash(file)
+    API->>API: EncryptStoragePath(file)
+    API->>DB: INSERT ClinicalDocument { patientId, filename, hash, mimeType, storagePath(enc), status=Pending }
+    API->>DB: INSERT AuditLog (action=document_uploaded, actorId, resourceId)
+    API->>SEQ: document_uploaded { patientId, docId, mimeType }
+    API-->>SPA: 201 { documentId, status: Pending }
+    SPA-->>P: "Document uploaded -- processing queued"
+    Note over API: Triggers AI extraction job (UC-026) asynchronously

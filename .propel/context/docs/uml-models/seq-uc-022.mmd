@@ -1,0 +1,19 @@
+﻿sequenceDiagram
+    participant S as Staff
+    participant SPA as React SPA
+    participant API as .NET API
+    participant HUB as SignalR Hub
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over S,SEQ: UC-022 -- Staff Marks Patient as Arrived
+
+    S->>SPA: Click "Mark Arrived" on patient row in queue
+    SPA->>API: PATCH /bookings/{id}/status { status: Arrived } (JWT Staff)
+    API->>DB: UPDATE Booking status=Arrived, arrivedAt=NOW()
+    API->>DB: INSERT AuditLog (action=patient_arrived, actorId, resourceId)
+    API->>HUB: BroadcastQueueUpdate({ type: status_changed, bookingId, status: Arrived })
+    HUB-->>SPA: Real-time push to all Staff clients
+    SPA-->>S: Patient row shows "Arrived" badge instantly
+    API->>SEQ: patient_arrived { bookingId, staffId, arrivedAt }
+    API-->>SPA: 200 OK

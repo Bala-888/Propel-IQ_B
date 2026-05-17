@@ -1,0 +1,27 @@
+﻿sequenceDiagram
+    participant NOTIF as Notification Module
+    participant PDF as QuestPDF Service
+    participant GW as Email Gateway
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over NOTIF,SEQ: UC-013 -- PDF Confirmation Email Delivery
+
+    NOTIF->>PDF: GeneratePDF(bookingId, patientEmail, slotDetails)
+    PDF-->>NOTIF: byte[] pdfDocument
+    NOTIF->>GW: SMTP SendEmail(to: patientEmail, attachment: pdf)
+    GW-->>NOTIF: 200 Accepted
+    NOTIF->>DB: INSERT ReminderSchedule (type=Confirmation, status=Sent)
+    NOTIF->>SEQ: confirmation_email_sent { bookingId, patientId }
+
+    alt Email delivery fails
+        GW-->>NOTIF: 5xx / timeout
+        NOTIF->>NOTIF: Wait 2^1 seconds (exponential back-off)
+        NOTIF->>GW: Retry attempt 2
+        GW-->>NOTIF: 5xx
+        NOTIF->>NOTIF: Wait 2^2 seconds
+        NOTIF->>GW: Retry attempt 3
+        GW-->>NOTIF: 5xx
+        NOTIF->>DB: UPDATE ReminderSchedule status=Failed, attemptCount=3
+        NOTIF->>SEQ: confirmation_email_failed { bookingId, reason }
+    end

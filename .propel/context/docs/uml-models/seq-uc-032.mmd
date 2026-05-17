@@ -1,0 +1,26 @@
+﻿sequenceDiagram
+    participant S as Staff
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over S,SEQ: UC-032 -- Staff Rejects or Corrects AI Code Suggestion
+
+    S->>SPA: Review pending code suggestion X
+    S->>SPA: Click "Reject" or "Enter correct code"
+
+    alt Staff rejects suggestion
+        SPA->>API: PATCH /suggestions/{id} { action: reject } (JWT Staff)
+        API->>DB: UPDATE MedicalCodeSuggestion reviewStatus=Rejected, reviewedBy, reviewedAt
+        API->>SEQ: code_suggestion_rejected { suggestionId, staffId }
+        API-->>SPA: 200 OK
+        SPA-->>S: Suggestion removed from pending list
+    else Staff provides correction
+        SPA->>API: PATCH /suggestions/{id} { action: correct, correctedCode, correctedDescription }
+        API->>DB: INSERT MedicalCodeSuggestion (corrected, reviewStatus=Accepted, source=Staff)
+        API->>DB: UPDATE original MedicalCodeSuggestion reviewStatus=Rejected
+        API->>SEQ: code_suggestion_corrected { original, corrected, staffId }
+        API-->>SPA: 200 OK
+        SPA-->>S: Correction saved
+    end

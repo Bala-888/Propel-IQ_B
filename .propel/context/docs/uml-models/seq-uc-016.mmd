@@ -1,0 +1,15 @@
+﻿sequenceDiagram
+    participant MONITOR as Slot Monitor
+    participant DB as PostgreSQL
+    participant SEQ as Seq Logger
+
+    Note over MONITOR,SEQ: UC-016 -- Preferred Slot Never Opens
+
+    Note over MONITOR: Appointment date arrives -- preferred slot still unavailable
+    MONITOR->>DB: SELECT monitors WHERE active=true AND booking.scheduledDate <= today
+    DB-->>MONITOR: expired monitors list
+    MONITOR->>DB: UPDATE SlotMonitor active=false (batch)
+    MONITOR->>DB: UPDATE Booking preferredSlotId=null
+    MONITOR->>SEQ: preferred_slot_monitor_expired { bookingIds: [...] }
+
+    Note over DB: Original booking remains Confirmed\nPatient attends at original slot

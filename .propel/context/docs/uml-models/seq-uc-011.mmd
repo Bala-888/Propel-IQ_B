@@ -1,0 +1,36 @@
+﻿sequenceDiagram
+    participant P as Patient
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+    participant GW as Email/PDF
+
+    Note over P,GW: UC-011 -- Patient Books Available Slot
+
+    P->>SPA: Navigate to booking
+    SPA->>API: GET /slots?available=true
+    API->>DB: SELECT AppointmentSlot WHERE status=Available
+    DB-->>API: available slots
+    API-->>SPA: slot list with date/time
+    SPA-->>P: Calendar view of slots
+
+    P->>SPA: Select slot + (optional) preferred slot
+    P->>SPA: Complete insurance pre-check (UC-033)
+    P->>SPA: Confirm booking
+    SPA->>API: POST /bookings { slotId, preferredSlotId? } (JWT)
+    API->>DB: BEGIN TRANSACTION
+    API->>DB: SELECT slot FOR UPDATE -- verify status=Available
+    API->>DB: INSERT Booking, UPDATE Slot status=Booked
+    API->>DB: ComputeNoShowRiskScore(patientId, slotId)
+    API->>DB: UPDATE Booking noShowRiskScore=?
+    API->>DB: COMMIT
+    API->>GW: Trigger PDF confirmation email (async, UC-013)
+    API-->>SPA: 201 { bookingId }
+    SPA-->>P: Booking confirmed
+
+    alt Slot taken concurrently
+        DB-->>API: Slot status=Booked on re-read
+        API->>DB: ROLLBACK
+        API-->>SPA: 409 { error: "Slot no longer available" }
+        SPA-->>P: Show alternatives (UC-012)
+    end

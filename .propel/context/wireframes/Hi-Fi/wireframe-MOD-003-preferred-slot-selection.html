@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                        |
+|----------------------|--------|------------------------------------------------------|
+| set-preferred-btn    | click  | Action placeholder (sets preferred and closes)       |
+| close-btn            | click  | wireframe-SCR-006-appointment-slot-calendar.html     |
+UCR: UXR-304 (slot list), UXR-202 (focus trap)
+UC: UC-014, UC-033
+Flows: FL-006 (preferred slot designation)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOD-003 — Preferred Slot Selection | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-inverse:#FFFFFF;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-bg-overlay:rgba(15,23,42,0.48);--color-border:#E2E8F0;--color-border-focus:#1A56DB;--color-status-success:#16A34A;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-sm:4px;--radius-md:8px;--shadow-3:0 8px 24px rgba(15,23,42,0.14);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.bg-page{position:fixed;inset:0;background:#F8FAFC;z-index:0;display:flex;align-items:center;justify-content:center;color:#CBD5E1;font-size:14px;}
+.overlay{position:fixed;inset:0;background:var(--color-bg-overlay);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal{background:var(--color-bg-surface);border-radius:var(--radius-md);padding:var(--space-8);box-shadow:var(--shadow-3);max-width:520px;width:90%;max-height:80vh;overflow-y:auto;}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--space-3);}
+.modal-title{font-size:20px;font-weight:700;}
+.modal-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:var(--space-6);}
+.close-btn{background:none;border:none;cursor:pointer;font-size:20px;color:#94A3B8;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);flex-shrink:0;}
+.close-btn:hover{background:var(--color-bg-subtle);}
+.close-btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+/* SLOT GRID */
+.slot-section-title{font-size:14px;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:var(--space-3);margin-top:var(--space-5);}
+.slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3);margin-bottom:var(--space-6);}
+.slot-tile{border:2px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-4);cursor:pointer;transition:border-color 0.15s,background 0.15s;background:var(--color-bg-surface);text-align:center;}
+.slot-tile:hover{border-color:var(--color-primary);background:var(--color-primary-subtle);}
+.slot-tile.selected{border-color:var(--color-primary);background:var(--color-primary-subtle);}
+.slot-tile.booked{background:var(--color-bg-subtle);cursor:not-allowed;opacity:0.5;}
+.slot-tile:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.slot-time{font-size:15px;font-weight:600;margin-bottom:4px;}
+.slot-meta{font-size:12px;color:var(--color-text-secondary);}
+/* PREFERRED INDICATOR */
+.preferred-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--color-primary);background:var(--color-primary-subtle);padding:2px 8px;border-radius:9999px;margin-top:var(--space-2);}
+/* BUTTONS */
+.btn{font-family:var(--font-sans);font-size:14px;font-weight:600;padding:var(--space-3) var(--space-5);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);min-height:44px;transition:background 0.15s;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-primary:disabled{background:#94A3B8;cursor:not-allowed;}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.modal-actions{display:flex;gap:var(--space-3);justify-content:flex-end;margin-top:var(--space-6);}
+</style>
+</head>
+<body>
+<div class="bg-page" aria-hidden="true">[ Appointment calendar in background ]</div>
+
+<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-sub">
+  <div class="modal">
+    <div class="modal-header">
+      <h1 class="modal-title" id="modal-title">Select preferred slot</h1>
+      <a href="wireframe-SCR-006-appointment-slot-calendar.html" class="close-btn" aria-label="Close and return to calendar">×</a>
+    </div>
+    <p class="modal-sub" id="modal-sub">Mark a time slot as your preferred appointment time. The system will prioritise this slot if your first choice is unavailable. You can only designate one preferred slot per provider.</p>
+
+    <!-- MAY 17 SLOTS -->
+    <div class="slot-section-title">Saturday 17 May 2026</div>
+    <div class="slot-grid" role="group" aria-label="Available slots for 17 May 2026">
+      <div class="slot-tile" tabindex="0" role="radio" aria-checked="false" onclick="selectSlot(this,'slot-1')" aria-label="9:00 AM, 30 minutes">
+        <div class="slot-time">9:00 AM</div>
+        <div class="slot-meta">30 min</div>
+      </div>
+      <div class="slot-tile selected" tabindex="0" role="radio" aria-checked="true" id="slot-1" onclick="selectSlot(this,'slot-1')" aria-label="10:30 AM, 30 minutes, currently selected">
+        <div class="slot-time">10:30 AM</div>
+        <div class="slot-meta">30 min</div>
+        <div class="preferred-tag">◈ Preferred</div>
+      </div>
+      <div class="slot-tile booked" tabindex="-1" role="radio" aria-checked="false" aria-disabled="true" aria-label="11:00 AM, booked, not available">
+        <div class="slot-time" style="color:#94A3B8;">11:00 AM</div>
+        <div class="slot-meta">Booked</div>
+      </div>
+      <div class="slot-tile" tabindex="0" role="radio" aria-checked="false" onclick="selectSlot(this,'slot-4')" aria-label="2:00 PM, 30 minutes">
+        <div class="slot-time">2:00 PM</div>
+        <div class="slot-meta">30 min</div>
+      </div>
+      <div class="slot-tile" tabindex="0" role="radio" aria-checked="false" onclick="selectSlot(this,'slot-5')" aria-label="3:30 PM, 30 minutes">
+        <div class="slot-time">3:30 PM</div>
+        <div class="slot-meta">30 min</div>
+      </div>
+    </div>
+
+    <!-- MAY 20 SLOTS -->
+    <div class="slot-section-title">Tuesday 20 May 2026</div>
+    <div class="slot-grid" role="group" aria-label="Available slots for 20 May 2026">
+      <div class="slot-tile" tabindex="0" role="radio" aria-checked="false" onclick="selectSlot(this,'slot-6')" aria-label="8:30 AM, 30 minutes">
+        <div class="slot-time">8:30 AM</div>
+        <div class="slot-meta">30 min</div>
+      </div>
+      <div class="slot-tile" tabindex="0" role="radio" aria-checked="false" onclick="selectSlot(this,'slot-7')" aria-label="10:00 AM, 30 minutes">
+        <div class="slot-time">10:00 AM</div>
+        <div class="slot-meta">30 min</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <a href="wireframe-SCR-006-appointment-slot-calendar.html" class="btn btn-secondary">Cancel</a>
+      <button class="btn btn-primary" id="set-preferred-btn" onclick="setPreferred()">Set as preferred</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var selected = 'slot-1';
+function selectSlot(el, id){
+  document.querySelectorAll('.slot-tile').forEach(function(s){
+    s.classList.remove('selected');
+    s.setAttribute('aria-checked','false');
+    var tag=s.querySelector('.preferred-tag');
+    if(tag) tag.remove();
+  });
+  el.classList.add('selected');
+  el.setAttribute('aria-checked','true');
+  var tag=document.createElement('div');
+  tag.className='preferred-tag';
+  tag.textContent='◈ Preferred';
+  el.appendChild(tag);
+  selected=id;
+}
+function setPreferred(){
+  // In production: PATCH /api/slots/{selected}/preferred
+  window.location.href='wireframe-SCR-006-appointment-slot-calendar.html';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+﻿sequenceDiagram
+    participant ACTOR as Any Authenticated Actor
+    participant API as .NET API
+    participant AUDIT as Audit Logger
+    participant DB as PostgreSQL (audit_log)
+    participant SEQ as Seq Logger
+
+    Note over ACTOR,SEQ: UC-037 -- Audit Log Entry Created on Sensitive Action
+
+    ACTOR->>API: Any sensitive request (login, booking, PHI access, user mgmt, code review)
+    API->>API: ProcessRequest()
+    API->>AUDIT: LogAction(actorId, role, actionType, resourceType, resourceId, ip, details)
+    AUDIT->>DB: INSERT AuditLog (append-only; INSERT-only DB user grant)
+    Note over DB: No UPDATE or DELETE permitted\nINSERT-only database privilege on audit_log table
+    AUDIT->>SEQ: structured_audit_event { actorId, actionType, resourceId, ip, ts }
+    AUDIT-->>API: logged
+    API-->>ACTOR: Normal response (audit is side-effect, non-blocking)

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                     |
+|----------------------|--------|---------------------------------------------------|
+| switch-manual-link   | click  | wireframe-SCR-005-manual-intake-form.html         |
+| confirm-intake-btn   | click  | wireframe-SCR-003-patient-home-dashboard.html     |
+| nav: Dashboard       | click  | wireframe-SCR-003-patient-home-dashboard.html     |
+| nav: Appointments    | click  | wireframe-SCR-006-appointment-slot-calendar.html  |
+UCR: UXR-103 (data preservation), UXR-402 (AI label), UXR-504 (typing indicator), UXR-601 (inline errors)
+UC: UC-007, UC-009
+Flows: FL-003 (steps 2-6)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCR-004 — AI Conversational Intake | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;
+  --color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-disabled:#94A3B8;--color-text-inverse:#FFFFFF;
+  --color-bg-page:#F8FAFC;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;
+  --color-border:#E2E8F0;--color-border-strong:#94A3B8;--color-border-focus:#1A56DB;
+  --color-status-error:#DC2626;--color-status-warning:#D97706;
+  --color-ai-accent:#6366F1;--color-ai-bg:#EEF2FF;
+  --font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --font-mono:'IBM Plex Mono','Courier New',monospace;
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
+  --radius-xs:2px;--radius-sm:4px;--radius-md:8px;--radius-full:9999px;
+  --shadow-1:0 1px 3px rgba(15,23,42,0.08);--shadow-2:0 4px 12px rgba(15,23,42,0.10);
+  --sidebar-width:240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg-page);color:var(--color-text-primary);height:100vh;display:flex;overflow:hidden;}
+/* Shared sidebar */
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--color-bg-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:var(--space-6);font-size:18px;font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);}
+.sidebar-nav{flex:1;padding:var(--space-4) var(--space-3);}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;transition:background 0.1s;min-height:44px;margin-bottom:var(--space-1);}
+.nav-item:hover{background:var(--color-bg-subtle);color:var(--color-text-primary);}
+.nav-item.active{background:var(--color-primary-subtle);color:var(--color-primary);}
+.nav-item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-border);}
+.user-info{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+/* Main */
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.app-header{height:56px;background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 var(--space-8);}
+.header-title{font-size:16px;font-weight:600;}
+.header-actions{display:flex;align-items:center;gap:var(--space-4);}
+.content-area{flex:1;overflow:hidden;display:flex;}
+/* SPLIT LAYOUT */
+.chat-column{flex:2;display:flex;flex-direction:column;border-right:1px solid var(--color-border);min-width:0;}
+.summary-column{flex:1;background:var(--color-bg-subtle);display:flex;flex-direction:column;min-width:280px;}
+/* CHAT */
+.chat-header{padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;}
+.chat-title{font-size:16px;font-weight:600;}
+.messages-area{flex:1;overflow-y:auto;padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-5);}
+.message{display:flex;gap:var(--space-3);max-width:80%;}
+.message.ai{align-self:flex-start;}
+.message.patient{align-self:flex-end;flex-direction:row-reverse;}
+.message-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.message.ai .message-avatar{background:var(--color-ai-bg);color:var(--color-ai-accent);}
+.message.patient .message-avatar{background:var(--color-primary-subtle);color:var(--color-primary);}
+.message-bubble{padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);font-size:15px;line-height:1.5;}
+.message.ai .message-bubble{background:var(--color-bg-surface);border:1px solid var(--color-border);}
+.message.patient .message-bubble{background:var(--color-primary);color:var(--color-text-inverse);}
+/* AI LABEL */
+.ai-label{display:inline-flex;align-items:center;gap:4px;background:var(--color-ai-bg);color:var(--color-ai-accent);font-size:11px;font-weight:600;padding:2px 8px;border-radius:var(--radius-full);border:1px solid #C7D2FE;margin-bottom:var(--space-2);}
+/* TYPING INDICATOR (UXR-504) */
+.typing-indicator{display:flex;gap:4px;align-items:center;padding:var(--space-3) var(--space-4);}
+.typing-dot{width:8px;height:8px;border-radius:50%;background:var(--color-text-disabled);animation:pulse 1.4s ease-in-out infinite;}
+.typing-dot:nth-child(2){animation-delay:0.2s;}
+.typing-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes pulse{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+/* CHAT INPUT */
+.chat-input-area{padding:var(--space-4) var(--space-6);border-top:1px solid var(--color-border);display:flex;gap:var(--space-3);}
+.chat-input{flex:1;font-family:var(--font-sans);font-size:15px;padding:var(--space-3) var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-bg-surface);color:var(--color-text-primary);outline:none;resize:none;}
+.chat-input:focus{border-color:var(--color-border-focus);box-shadow:0 0 0 3px rgba(26,86,219,0.18);}
+.btn{font-family:var(--font-sans);font-size:14px;font-weight:600;padding:var(--space-3) var(--space-5);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2);transition:background 0.15s;min-height:44px;min-width:44px;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.icon-btn{background:none;border:1px solid var(--color-border);color:var(--color-text-secondary);padding:var(--space-3);border-radius:var(--radius-sm);}
+.icon-btn:hover{background:var(--color-bg-subtle);}
+/* SUMMARY COLUMN */
+.summary-header{padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;}
+.summary-title{font-size:15px;font-weight:600;}
+.summary-body{flex:1;overflow-y:auto;padding:var(--space-5) var(--space-6);}
+.summary-field{margin-bottom:var(--space-5);}
+.summary-label{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--space-1);}
+.summary-value{font-size:14px;color:var(--color-text-primary);padding:var(--space-2) 0;border-bottom:1px solid var(--color-border);}
+.summary-value.empty{color:var(--color-text-disabled);font-style:italic;}
+.summary-footer{padding:var(--space-5) var(--space-6);border-top:1px solid var(--color-border);}
+/* ALERT BANNER */
+.alert-banner{display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);border:1px solid;margin-bottom:var(--space-4);font-size:14px;}
+.alert-banner.error{background:#FEF2F2;border-color:#FEE2E2;color:var(--color-status-error);}
+/* RESPONSIVE */
+@media(max-width:1279px){.sidebar{display:none;}}
+@media(max-width:768px){.summary-column{display:none;}.chat-column{border-right:none;}}
+</style>
+</head>
+<body>
+<aside class="sidebar" role="navigation" aria-label="Patient navigation">
+  <div class="sidebar-logo">UPACIP</div>
+  <nav class="sidebar-nav">
+    <a href="wireframe-SCR-003-patient-home-dashboard.html" class="nav-item">Dashboard</a>
+    <a href="wireframe-SCR-004-ai-conversational-intake.html" class="nav-item active" aria-current="page">Intake</a>
+    <a href="wireframe-SCR-006-appointment-slot-calendar.html" class="nav-item">Appointments</a>
+    <a href="wireframe-SCR-009-document-upload.html" class="nav-item">Documents</a>
+    <a href="wireframe-SCR-008-patient-profile-settings.html" class="nav-item">Profile</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="avatar">SM</div>
+      <div><div style="font-size:14px;font-weight:500;">Sarah Mitchell</div><div style="font-size:12px;color:var(--color-text-secondary);">Patient</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="app-header">
+    <div class="header-title">AI conversational intake</div>
+    <div class="header-actions">
+      <!-- UXR-103: mode switch always visible -->
+      <a href="wireframe-SCR-005-manual-intake-form.html" id="switch-manual-link" class="btn btn-secondary" style="font-size:13px;padding:8px 16px;height:auto;">Switch to manual form</a>
+    </div>
+  </header>
+
+  <div class="content-area">
+    <!-- CHAT COLUMN -->
+    <div class="chat-column" role="main">
+      <div class="chat-header">
+        <div>
+          <div class="ai-label" aria-label="AI-generated content"><span aria-hidden="true">✦</span> AI</div>
+          <div class="chat-title">Health intake conversation</div>
+        </div>
+        <span style="font-size:13px;color:var(--color-text-secondary);">Session: 17 May 2026, 10:12 AM</span>
+      </div>
+
+      <div class="messages-area" role="log" aria-live="polite" aria-label="Conversation history">
+        <!-- AI greeting -->
+        <div class="message ai">
+          <div class="message-avatar" aria-hidden="true">AI</div>
+          <div>
+            <div class="ai-label" aria-label="AI-generated"><span aria-hidden="true">✦</span> AI suggestion</div>
+            <div class="message-bubble">Hello, Sarah. I'll help you complete your health intake today. This should take about 5–8 minutes. Let's start — could you briefly describe what brings you in today?</div>
+          </div>
+        </div>
+
+        <!-- Patient response -->
+        <div class="message patient">
+          <div class="message-avatar" aria-label="You">SM</div>
+          <div class="message-bubble">I've been having chest discomfort and shortness of breath for about two weeks. My energy has also been lower than usual.</div>
+        </div>
+
+        <!-- AI follow-up -->
+        <div class="message ai">
+          <div class="message-avatar" aria-hidden="true">AI</div>
+          <div>
+            <div class="ai-label" aria-label="AI-generated"><span aria-hidden="true">✦</span> AI suggestion</div>
+            <div class="message-bubble">Thank you, Sarah. I've noted chest discomfort, shortness of breath, and fatigue (2 weeks). Could you rate the discomfort on a scale of 1–10, where 1 is minimal and 10 is severe?</div>
+          </div>
+        </div>
+
+        <!-- Patient response -->
+        <div class="message patient">
+          <div class="message-avatar" aria-label="You">SM</div>
+          <div class="message-bubble">I'd say about a 4. It's not sharp pain, more like pressure.</div>
+        </div>
+
+        <!-- AI typing indicator (UXR-504) -->
+        <div class="message ai" id="typing-row" aria-label="AI is generating a response">
+          <div class="message-avatar" aria-hidden="true">AI</div>
+          <div class="message-bubble" style="padding:var(--space-3);">
+            <div class="typing-indicator">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT INPUT -->
+      <div class="chat-input-area">
+        <label for="chat-input" class="sr-only" style="position:absolute;left:-9999px;">Type your response</label>
+        <textarea id="chat-input" class="chat-input" rows="1" placeholder="Type your response…" aria-label="Type your response" style="resize:none;overflow:hidden;line-height:1.5;"></textarea>
+        <button class="btn btn-primary icon-btn" style="border:none;background:var(--color-primary);color:white;" onclick="sendMessage()" aria-label="Send message">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- SUMMARY COLUMN -->
+    <div class="summary-column" role="complementary" aria-label="Intake summary">
+      <div class="summary-header">
+        <div class="summary-title">Collected so far</div>
+        <div class="ai-label" aria-label="AI-generated content"><span aria-hidden="true">✦</span> AI</div>
+      </div>
+      <div class="summary-body">
+        <div class="summary-field">
+          <div class="summary-label">Chief complaint</div>
+          <div class="summary-value">Chest discomfort, shortness of breath, fatigue · 2 weeks</div>
+        </div>
+        <div class="summary-field">
+          <div class="summary-label">Severity (1–10)</div>
+          <div class="summary-value">4 — pressure, non-sharp</div>
+        </div>
+        <div class="summary-field">
+          <div class="summary-label">Medical history</div>
+          <div class="summary-value empty">Pending…</div>
+        </div>
+        <div class="summary-field">
+          <div class="summary-label">Current medications</div>
+          <div class="summary-value empty">Pending…</div>
+        </div>
+        <div class="summary-field">
+          <div class="summary-label">Allergies</div>
+          <div class="summary-value empty">Pending…</div>
+        </div>
+        <div class="summary-field">
+          <div class="summary-label">Demographics</div>
+          <div class="summary-value">Sarah Mitchell · 12 Apr 1984 · Aetna PPO</div>
+        </div>
+      </div>
+      <div class="summary-footer">
+        <button class="btn btn-primary" id="confirm-intake-btn" onclick="window.location.href='wireframe-SCR-003-patient-home-dashboard.html'" style="width:100%;font-size:14px;" disabled aria-disabled="true" title="Complete the conversation to confirm intake">Confirm intake</button>
+        <div style="font-size:12px;color:var(--color-text-secondary);text-align:center;margin-top:var(--space-3);">Complete all sections to confirm</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function sendMessage(){
+  var input=document.getElementById('chat-input');
+  if(!input.value.trim())return;
+  input.value='';
+  document.getElementById('typing-row').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

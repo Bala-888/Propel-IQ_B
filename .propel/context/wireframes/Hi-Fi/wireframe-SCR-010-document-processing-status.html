@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Navigation Map
+| Element              | Action | Target Screen                                      |
+|----------------------|--------|----------------------------------------------------|
+| view-patient-link    | click  | wireframe-SCR-014-360-patient-view.html            |
+| retry-btn            | click  | Action placeholder (retry extraction)              |
+| nav links            | click  | respective screens                                 |
+UCR: UXR-503 (polled processing status), UXR-206 (aria-live for status changes)
+UC: UC-026, UC-029
+Flows: FL-008 (steps 4-6)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCR-010 — Document Processing Status | UPACIP Hi-Fi Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--color-primary:#1A56DB;--color-primary-hover:#1547B4;--color-primary-subtle:#EBF3FE;--color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-disabled:#94A3B8;--color-text-inverse:#FFFFFF;--color-bg-page:#F8FAFC;--color-bg-surface:#FFFFFF;--color-bg-subtle:#F1F5F9;--color-border:#E2E8F0;--color-border-focus:#1A56DB;--color-status-success:#16A34A;--color-status-warning:#D97706;--color-status-error:#DC2626;--color-status-info:#0284C7;--font-sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-xs:2px;--radius-sm:4px;--radius-md:8px;--shadow-1:0 1px 3px rgba(15,23,42,0.08);--sidebar-width:240px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg-page);color:var(--color-text-primary);height:100vh;display:flex;overflow:hidden;}
+.sidebar{width:var(--sidebar-width);min-height:100vh;background:var(--color-bg-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:var(--space-6);font-size:18px;font-weight:700;color:var(--color-primary);border-bottom:1px solid var(--color-border);}
+.sidebar-nav{flex:1;padding:var(--space-4) var(--space-3);}
+.nav-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--color-text-secondary);text-decoration:none;min-height:44px;margin-bottom:4px;}
+.nav-item:hover{background:var(--color-bg-subtle);}
+.nav-item.active{background:var(--color-primary-subtle);color:var(--color-primary);}
+.nav-item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.sidebar-footer{padding:var(--space-4) var(--space-3);border-top:1px solid var(--color-border);}
+.user-info{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--color-primary-subtle);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.app-header{height:56px;background:var(--color-bg-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 var(--space-8);}
+.content-area{flex:1;overflow-y:auto;padding:var(--space-10);}
+.page-title{font-size:28px;font-weight:700;margin-bottom:var(--space-2);}
+.page-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:var(--space-8);}
+/* STATUS LIST */
+.status-list{max-width:720px;display:flex;flex-direction:column;gap:var(--space-4);}
+.status-card{background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);box-shadow:var(--shadow-1);}
+.status-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);}
+.file-name{font-size:15px;font-weight:600;}
+.file-meta{font-size:13px;color:var(--color-text-secondary);margin-top:2px;}
+/* STATUS BADGE */
+.doc-status{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:9999px;}
+.doc-status.complete{background:#DCFCE7;color:var(--color-status-success);}
+.doc-status.extracting{background:var(--color-primary-subtle);color:var(--color-primary);}
+.doc-status.failed{background:#FEF2F2;color:var(--color-status-error);}
+.doc-status.pending{background:var(--color-bg-subtle);color:var(--color-text-secondary);}
+/* PIPELINE STEPS */
+.pipeline{display:flex;align-items:center;gap:0;margin-top:var(--space-3);}
+.pipeline-step{display:flex;flex-direction:column;align-items:center;flex:1;}
+.step-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.step-dot.done{background:var(--color-status-success);color:white;}
+.step-dot.active{background:var(--color-primary);color:white;}
+.step-dot.pending{background:var(--color-border-strong);color:white;}
+.step-dot.error{background:var(--color-status-error);color:white;}
+.step-label{font-size:11px;color:var(--color-text-secondary);margin-top:4px;text-align:center;}
+.step-connector{height:2px;flex:1;background:var(--color-border);margin-top:-12px;}
+.step-connector.done{background:var(--color-status-success);}
+/* ENTITIES EXTRACTED */
+.entities-row{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4);}
+.entity-chip{background:var(--color-bg-subtle);border:1px solid var(--color-border);border-radius:var(--radius-full);padding:4px var(--space-3);font-size:12px;color:var(--color-text-secondary);}
+.entity-chip strong{color:var(--color-text-primary);font-weight:600;}
+/* BUTTONS */
+.btn{font-family:var(--font-sans);font-size:14px;font-weight:600;padding:var(--space-3) var(--space-5);border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2);min-height:44px;}
+.btn:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.btn-secondary{background:var(--color-bg-surface);color:var(--color-text-primary);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-bg-subtle);}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);}
+.btn-primary:hover{background:var(--color-primary-hover);}
+/* SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(26,86,219,0.3);border-top-color:var(--color-primary);border-radius:50%;animation:spin 0.6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:1279px){.sidebar{display:none;}}
+</style>
+</head>
+<body>
+<aside class="sidebar" role="navigation" aria-label="Patient navigation">
+  <div class="sidebar-logo">UPACIP</div>
+  <nav class="sidebar-nav">
+    <a href="wireframe-SCR-003-patient-home-dashboard.html" class="nav-item">Dashboard</a>
+    <a href="wireframe-SCR-004-ai-conversational-intake.html" class="nav-item">Intake</a>
+    <a href="wireframe-SCR-006-appointment-slot-calendar.html" class="nav-item">Appointments</a>
+    <a href="wireframe-SCR-009-document-upload.html" class="nav-item active" aria-current="page">Documents</a>
+    <a href="wireframe-SCR-008-patient-profile-settings.html" class="nav-item">Profile</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar">SM</div><div><div style="font-size:14px;font-weight:500;">Sarah Mitchell</div><div style="font-size:12px;color:var(--color-text-secondary);">Patient</div></div></div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="app-header">
+    <span style="font-size:16px;font-weight:600;">Document processing status</span>
+    <span style="font-size:13px;color:var(--color-text-secondary);" aria-live="polite">Polling every 5s…</span>
+  </header>
+  <main class="content-area" id="main-content">
+    <h1 class="page-title">Document processing status</h1>
+    <p class="page-sub">AI extraction runs in the background. Status updates automatically every 5 seconds.</p>
+
+    <div class="status-list" role="list" aria-label="Document processing status list" aria-live="polite">
+
+      <!-- COMPLETE -->
+      <div class="status-card" role="listitem" aria-label="chest-xray-report-2026-03.pdf, extraction complete">
+        <div class="status-card-header">
+          <div>
+            <div class="file-name">chest-xray-report-2026-03.pdf</div>
+            <div class="file-meta">Uploaded 15 Mar 2026 · 842 KB</div>
+          </div>
+          <span class="doc-status complete">Complete</span>
+        </div>
+        <div class="pipeline" aria-label="Processing pipeline: Pending complete, Extracting complete, Complete">
+          <div class="pipeline-step"><div class="step-dot done" aria-label="Pending — done">✓</div><div class="step-label">Pending</div></div>
+          <div class="step-connector done"></div>
+          <div class="pipeline-step"><div class="step-dot done" aria-label="Extracting — done">✓</div><div class="step-label">Extracting</div></div>
+          <div class="step-connector done"></div>
+          <div class="pipeline-step"><div class="step-dot done" aria-label="Complete">✓</div><div class="step-label">Complete</div></div>
+        </div>
+        <div class="entities-row" aria-label="Extracted entities">
+          <span class="entity-chip"><strong>Diagnosis:</strong> J18.9 Pneumonia</span>
+          <span class="entity-chip"><strong>Vital:</strong> SpO2 94%</span>
+        </div>
+        <div style="margin-top:var(--space-4);">
+          <a href="wireframe-SCR-014-360-patient-view.html" id="view-patient-link" class="btn btn-secondary" style="font-size:13px;padding:8px 16px;height:auto;">View extracted data →</a>
+        </div>
+      </div>
+
+      <!-- EXTRACTING (in progress) -->
+      <div class="status-card" role="listitem" aria-label="previous-rx-notes.docx, extraction in progress">
+        <div class="status-card-header">
+          <div>
+            <div class="file-name">previous-rx-notes.docx</div>
+            <div class="file-meta">Uploaded 17 May 2026 · 94 KB</div>
+          </div>
+          <span class="doc-status extracting"><span class="spinner" aria-hidden="true"></span> Extracting</span>
+        </div>
+        <div class="pipeline">
+          <div class="pipeline-step"><div class="step-dot done" aria-label="Pending — done">✓</div><div class="step-label">Pending</div></div>
+          <div class="step-connector done"></div>
+          <div class="pipeline-step"><div class="step-dot active" aria-label="Extracting — in progress">⟳</div><div class="step-label">Extracting</div></div>
+          <div class="step-connector"></div>
+          <div class="pipeline-step"><div class="step-dot pending" aria-label="Complete — pending">…</div><div class="step-label">Complete</div></div>
+        </div>
+        <div style="margin-top:var(--space-4);font-size:13px;color:var(--color-text-secondary);">AI extraction in progress — typically 30–120 seconds.</div>
+      </div>
+
+      <!-- FAILED -->
+      <div class="status-card" style="border-color:#FEE2E2;" role="listitem" aria-label="ecg-reading-2026-01.pdf, extraction failed">
+        <div class="status-card-header">
+          <div>
+            <div class="file-name">ecg-reading-2026-01.pdf</div>
+            <div class="file-meta">Uploaded 20 Jan 2026 · 1.2 MB</div>
+          </div>
+          <span class="doc-status failed">Failed</span>
+        </div>
+        <div class="pipeline">
+          <div class="pipeline-step"><div class="step-dot done" aria-label="Pending — done">✓</div><div class="step-label">Pending</div></div>
+          <div class="step-connector done"></div>
+          <div class="pipeline-step"><div class="step-dot error" aria-label="Extracting — failed">✗</div><div class="step-label">Extracting</div></div>
+          <div class="step-connector"></div>
+          <div class="pipeline-step"><div class="step-dot pending" aria-label="Complete — not reached">–</div><div class="step-label">Complete</div></div>
+        </div>
+        <div style="margin-top:var(--space-4);font-size:13px;color:var(--color-status-error);">Extraction failed — document may be image-only. Upload a text-searchable PDF or retry.</div>
+        <div style="margin-top:var(--space-3);"><button class="btn btn-secondary" style="font-size:13px;padding:8px 16px;height:auto;">Retry extraction</button></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

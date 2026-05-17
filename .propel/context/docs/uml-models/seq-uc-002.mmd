@@ -1,0 +1,33 @@
+﻿sequenceDiagram
+    participant S as Staff
+    participant SPA as React SPA
+    participant API as .NET API
+    participant DB as PostgreSQL
+    participant GW as Email Gateway
+    participant SEQ as Seq Logger
+
+    Note over S,SEQ: UC-002 -- Staff-Assisted Walk-in Account Creation
+
+    S->>SPA: Select "Create Walk-in Booking"
+    SPA-->>S: Walk-in form (name, contact)
+    S->>SPA: Enter patient details
+    S->>SPA: Optionally check "Create account"
+    S->>SPA: Submit
+    SPA->>API: POST /walkins { patientName, contact, createAccount: true/false } (JWT Staff)
+    API->>DB: INSERT Booking (status=WalkIn, patientId=null or new)
+
+    alt createAccount = true
+        API->>DB: INSERT User (role=Patient, temp password)\nINSERT Patient (PHI encrypted)
+        API->>GW: Send credentials email to patient
+        API->>SEQ: walkin_account_created { staffId, patientId }
+    else createAccount = false
+        API->>SEQ: walkin_created_no_account { staffId }
+    end
+
+    API-->>SPA: 201 { bookingId }
+    SPA-->>S: Walk-in created
+
+    opt Duplicate email on account creation
+        API-->>SPA: 409 { error: "Email already exists" }
+        SPA-->>S: Show conflict -- link existing account?
+    end
