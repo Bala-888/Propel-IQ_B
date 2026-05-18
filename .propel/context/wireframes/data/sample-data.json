@@ -15,30 +15,30 @@
       "adminUser": "A User whose role is Admin. Creates and manages all user accounts and monitors platform KPI metrics."
     }
   },
-
+ 
   "user": [
-    { "id": "u-001", "email": "bala@email.com", "role": "Patient", "isActive": true, "createdAt": "2025-11-04T10:22:00Z", "lastLoginAt": "2026-05-17T08:45:00Z" },
-    { "id": "u-002", "email": "vishvak@gmail.com", "role": "Patient", "isActive": true, "createdAt": "2026-01-18T14:11:00Z", "lastLoginAt": "2026-05-17T09:00:00Z" },
-    { "id": "u-003", "email": "akash@outlook.com", "role": "Patient", "isActive": true, "createdAt": "2026-05-16T18:30:00Z", "lastLoginAt": "2026-05-17T07:58:00Z" },
-    { "id": "u-004", "email": "ishant@email.com", "role": "Patient", "isActive": true, "createdAt": "2024-08-22T09:05:00Z", "lastLoginAt": "2026-05-15T14:30:00Z" },
-    { "id": "u-005", "email": "ajay@gmail.com", "role": "Patient", "isActive": true, "createdAt": "2026-03-10T11:20:00Z", "lastLoginAt": "2026-05-16T16:00:00Z" },
-    { "id": "u-006", "email": "thilaga@email.com", "role": "Patient", "isActive": true, "createdAt": "2026-04-05T13:45:00Z", "lastLoginAt": "2026-05-12T10:15:00Z" },
-    { "id": "u-007", "email": "abhirami@email.com", "role": "Patient", "isActive": true, "createdAt": "2023-06-14T08:00:00Z", "lastLoginAt": "2026-05-17T09:30:00Z" },
-    { "id": "u-s01", "email": "pawan@clinic.org", "role": "Staff", "isActive": true, "createdAt": "2024-01-10T09:00:00Z", "lastLoginAt": "2026-05-17T07:30:00Z" },
-    { "id": "u-s02", "email": "babu@clinic.org", "role": "Staff", "isActive": true, "createdAt": "2024-01-10T09:00:00Z", "lastLoginAt": "2026-05-17T07:31:00Z" },
-    { "id": "u-a01", "email": "harsha@clinic.org", "role": "Admin", "isActive": true, "createdAt": "2024-01-01T00:00:00Z", "lastLoginAt": "2026-05-16T09:00:00Z" }
+    { "id": "u-001", "email": "sarah.mitchell@email.com", "role": "Patient", "isActive": true, "createdAt": "2025-11-04T10:22:00Z", "lastLoginAt": "2026-05-17T08:45:00Z" },
+    { "id": "u-002", "email": "james.okafor@gmail.com", "role": "Patient", "isActive": true, "createdAt": "2026-01-18T14:11:00Z", "lastLoginAt": "2026-05-17T09:00:00Z" },
+    { "id": "u-003", "email": "maria.chen@outlook.com", "role": "Patient", "isActive": true, "createdAt": "2026-05-16T18:30:00Z", "lastLoginAt": "2026-05-17T07:58:00Z" },
+    { "id": "u-004", "email": "thomas.bergmann@email.com", "role": "Patient", "isActive": true, "createdAt": "2024-08-22T09:05:00Z", "lastLoginAt": "2026-05-15T14:30:00Z" },
+    { "id": "u-005", "email": "priya.krishnamurthy-nair@gmail.com", "role": "Patient", "isActive": true, "createdAt": "2026-03-10T11:20:00Z", "lastLoginAt": "2026-05-16T16:00:00Z" },
+    { "id": "u-006", "email": "david.reyes@email.com", "role": "Patient", "isActive": true, "createdAt": "2026-04-05T13:45:00Z", "lastLoginAt": "2026-05-12T10:15:00Z" },
+    { "id": "u-007", "email": "linda.forsyth@email.com", "role": "Patient", "isActive": true, "createdAt": "2023-06-14T08:00:00Z", "lastLoginAt": "2026-05-17T09:30:00Z" },
+    { "id": "u-s01", "email": "a.patel@clinic.org", "role": "Staff", "isActive": true, "createdAt": "2024-01-10T09:00:00Z", "lastLoginAt": "2026-05-17T07:30:00Z" },
+    { "id": "u-s02", "email": "m.nguyen@clinic.org", "role": "Staff", "isActive": true, "createdAt": "2024-01-10T09:00:00Z", "lastLoginAt": "2026-05-17T07:31:00Z" },
+    { "id": "u-a01", "email": "admin@clinic.org", "role": "Admin", "isActive": true, "createdAt": "2024-01-01T00:00:00Z", "lastLoginAt": "2026-05-16T09:00:00Z" }
   ],
-
+ 
   "patient": [
-    { "userId": "u-001", "displayName": "Bala", "dateOfBirth": "12 Apr 1984", "phone": "+1 (555) 204-7831", "insuranceProvider": "Aetna PPO", "insuranceId": "AET-2026-0048821", "initials": "SM" },
-    { "userId": "u-002", "displayName": "Vishvak", "dateOfBirth": "7 Nov 1971", "phone": "+1 (555) 388-1024", "insuranceProvider": "United Healthcare", "insuranceId": "UHC-2026-1193742", "initials": "JO" },
-    { "userId": "u-003", "displayName": "Akash", "dateOfBirth": "22 Jun 1995", "phone": "+1 (555) 740-2295", "insuranceProvider": "BCBS", "insuranceId": "", "initials": "MC", "_note": "New patient — no insurance ID yet, triggers soft warning" },
-    { "userId": "u-004", "displayName": "Ishant", "dateOfBirth": "3 Jan 1958", "phone": "+1 (555) 612-9900", "insuranceProvider": "Medicare Part B", "insuranceId": "MCR-2026-TBG00014", "initials": "TB" },
-    { "userId": "u-005", "displayName": "Ajay", "dateOfBirth": "14 Sep 1990", "phone": "+1 (555) 891-3347", "insuranceProvider": "Cigna", "insuranceId": "CIG-2026-9980023", "initials": "PK", "_note": "Name >40 chars — tests truncation (35 chars + ellipsis)" },
-    { "userId": "u-006", "displayName": "Thilaga", "dateOfBirth": "30 Dec 2001", "phone": "+1 (555) 475-6612", "insuranceProvider": "Medicaid", "insuranceId": "MCD-2026-DVR00088", "initials": "DR" },
-    { "userId": "u-007", "displayName": "Abirami", "dateOfBirth": "11 Mar 1966", "phone": "+1 (555) 229-5573", "insuranceProvider": "Aetna HMO", "insuranceId": "AET-2026-0031504", "initials": "LF" }
+    { "userId": "u-001", "displayName": "Sarah Mitchell", "dateOfBirth": "12 Apr 1984", "phone": "+1 (555) 204-7831", "insuranceProvider": "Aetna PPO", "insuranceId": "AET-2026-0048821", "initials": "SM" },
+    { "userId": "u-002", "displayName": "James Okafor", "dateOfBirth": "7 Nov 1971", "phone": "+1 (555) 388-1024", "insuranceProvider": "United Healthcare", "insuranceId": "UHC-2026-1193742", "initials": "JO" },
+    { "userId": "u-003", "displayName": "Maria Chen", "dateOfBirth": "22 Jun 1995", "phone": "+1 (555) 740-2295", "insuranceProvider": "BCBS", "insuranceId": "", "initials": "MC", "_note": "New patient — no insurance ID yet, triggers soft warning" },
+    { "userId": "u-004", "displayName": "Thomas Bergmann", "dateOfBirth": "3 Jan 1958", "phone": "+1 (555) 612-9900", "insuranceProvider": "Medicare Part B", "insuranceId": "MCR-2026-TBG00014", "initials": "TB" },
+    { "userId": "u-005", "displayName": "Priya Krishnamurthy-Nair", "dateOfBirth": "14 Sep 1990", "phone": "+1 (555) 891-3347", "insuranceProvider": "Cigna", "insuranceId": "CIG-2026-9980023", "initials": "PK", "_note": "Name >40 chars — tests truncation (35 chars + ellipsis)" },
+    { "userId": "u-006", "displayName": "David Reyes", "dateOfBirth": "30 Dec 2001", "phone": "+1 (555) 475-6612", "insuranceProvider": "Medicaid", "insuranceId": "MCD-2026-DVR00088", "initials": "DR" },
+    { "userId": "u-007", "displayName": "Linda Forsyth", "dateOfBirth": "11 Mar 1966", "phone": "+1 (555) 229-5573", "insuranceProvider": "Aetna HMO", "insuranceId": "AET-2026-0031504", "initials": "LF" }
   ],
-
+ 
   "appointmentSlot": [
     { "id": "sl-101", "scheduledDate": "17 May 2026", "startTime": "09:00 AM", "duration": 30, "status": "Booked" },
     { "id": "sl-102", "scheduledDate": "17 May 2026", "startTime": "09:30 AM", "duration": 30, "status": "Available" },
@@ -51,33 +51,33 @@
     { "id": "sl-109", "scheduledDate": "20 May 2026", "startTime": "09:00 AM", "duration": 30, "status": "Available" },
     { "id": "sl-110", "scheduledDate": "20 May 2026", "startTime": "11:30 AM", "duration": 30, "status": "Available" }
   ],
-
+ 
   "booking": [
-    { "id": "BK-2026-00141", "patientId": "u-004", "patientName": "Ishant", "slotId": "sl-101", "date": "16 May 2026", "time": "02:30 PM", "type": "Scheduled", "status": "Completed", "noShowRiskScore": 12 },
-    { "id": "BK-2026-00142", "patientId": "u-001", "patientName": "Bala", "slotId": "sl-103", "date": "17 May 2026", "time": "10:00 AM", "type": "Scheduled", "status": "Confirmed", "noShowRiskScore": 8 },
-    { "id": "BK-2026-00143", "patientId": "u-002", "patientName": "Vishvak", "slotId": null, "date": "17 May 2026", "time": "09:15 AM", "type": "WalkIn", "status": "Arrived", "noShowRiskScore": 5 },
-    { "id": "BK-2026-00144", "patientId": "u-003", "patientName": "Akash", "slotId": "sl-110", "date": "20 May 2026", "time": "11:30 AM", "type": "Scheduled", "status": "Confirmed", "noShowRiskScore": 32 },
-    { "id": "BK-2026-00145", "patientId": "u-007", "patientName": "Abirami", "slotId": "sl-108", "date": "17 May 2026", "time": "02:30 PM", "type": "Scheduled", "status": "Confirmed", "noShowRiskScore": 71 },
-    { "id": "BK-2026-00146", "patientId": "u-005", "patientName": "Ajay", "slotId": null, "date": "17 May 2026", "time": "08:45 AM", "type": "WalkIn", "status": "InProgress", "noShowRiskScore": 15 },
-    { "id": "BK-2026-00147", "patientId": "u-006", "patientName": "Thilaga", "slotId": "sl-104", "date": "17 May 2026", "time": "10:30 AM", "type": "Scheduled", "status": "Confirmed", "noShowRiskScore": 24 }
+    { "id": "BK-2026-00141", "patientId": "u-004", "patientName": "Thomas Bergmann", "slotId": "sl-101", "date": "16 May 2026", "time": "02:30 PM", "type": "Scheduled", "status": "Completed", "noShowRiskScore": 12 },
+    { "id": "BK-2026-00142", "patientId": "u-001", "patientName": "Sarah Mitchell", "slotId": "sl-103", "date": "17 May 2026", "time": "10:00 AM", "type": "Scheduled", "status": "Confirmed", "noShowRiskScore": 8 },
+    { "id": "BK-2026-00143", "patientId": "u-002", "patientName": "James Okafor", "slotId": null, "date": "17 May 2026", "time": "09:15 AM", "type": "WalkIn", "status": "Arrived", "noShowRiskScore": 5 },
+    { "id": "BK-2026-00144", "patientId": "u-003", "patientName": "Maria Chen", "slotId": "sl-110", "date": "20 May 2026", "time": "11:30 AM", "type": "Scheduled", "status": "Confirmed", "noShowRiskScore": 32 },
+    { "id": "BK-2026-00145", "patientId": "u-007", "patientName": "Linda Forsyth", "slotId": "sl-108", "date": "17 May 2026", "time": "02:30 PM", "type": "Scheduled", "status": "Confirmed", "noShowRiskScore": 71 },
+    { "id": "BK-2026-00146", "patientId": "u-005", "patientName": "Priya Krishnamurthy-Nair", "slotId": null, "date": "17 May 2026", "time": "08:45 AM", "type": "WalkIn", "status": "InProgress", "noShowRiskScore": 15 },
+    { "id": "BK-2026-00147", "patientId": "u-006", "patientName": "David Reyes", "slotId": "sl-104", "date": "17 May 2026", "time": "10:30 AM", "type": "Scheduled", "status": "Confirmed", "noShowRiskScore": 24 }
   ],
-
+ 
   "queueEntry": [
-    { "bookingId": "BK-2026-00146", "patientName": "Ajay", "patientNameDisplay": "Ajay", "time": "08:45 AM", "type": "Walk-in", "status": "In Progress", "riskScore": 15, "riskLevel": "Low", "hasConflict": false },
-    { "bookingId": "BK-2026-00143", "patientName": "Vishvak", "patientNameDisplay": "Vishvak", "time": "09:15 AM", "type": "Walk-in", "status": "Arrived", "riskScore": 5, "riskLevel": "Low", "hasConflict": false },
-    { "bookingId": "BK-2026-00142", "patientName": "Bala", "patientNameDisplay": "Bala", "time": "10:00 AM", "type": "Scheduled", "status": "Confirmed", "riskScore": 8, "riskLevel": "Low", "hasConflict": false },
-    { "bookingId": "BK-2026-00147", "patientName": "Thilaga", "patientNameDisplay": "Thilaga", "time": "10:30 AM", "type": "Scheduled", "status": "Confirmed", "riskScore": 24, "riskLevel": "Medium", "hasConflict": false },
-    { "bookingId": "BK-2026-00144", "patientName": "Akash", "patientNameDisplay": "Akash  ", "time": "11:30 AM", "type": "Scheduled", "status": "Confirmed", "riskScore": 32, "riskLevel": "Medium", "hasConflict": true, "_note": "Insurance not matched — conflict flag" },
-    { "bookingId": "BK-2026-00145", "patientName": "Abirami", "patientNameDisplay": "Abirami", "time": "02:30 PM", "type": "Scheduled", "status": "Confirmed", "riskScore": 71, "riskLevel": "High", "hasConflict": true, "_note": "Data conflict: allergy record mismatch" }
+    { "bookingId": "BK-2026-00146", "patientName": "Priya Krishnamurthy-Nair", "patientNameDisplay": "Priya Krishnamurthy-N...", "time": "08:45 AM", "type": "Walk-in", "status": "In Progress", "riskScore": 15, "riskLevel": "Low", "hasConflict": false },
+    { "bookingId": "BK-2026-00143", "patientName": "James Okafor", "patientNameDisplay": "James Okafor", "time": "09:15 AM", "type": "Walk-in", "status": "Arrived", "riskScore": 5, "riskLevel": "Low", "hasConflict": false },
+    { "bookingId": "BK-2026-00142", "patientName": "Sarah Mitchell", "patientNameDisplay": "Sarah Mitchell", "time": "10:00 AM", "type": "Scheduled", "status": "Confirmed", "riskScore": 8, "riskLevel": "Low", "hasConflict": false },
+    { "bookingId": "BK-2026-00147", "patientName": "David Reyes", "patientNameDisplay": "David Reyes", "time": "10:30 AM", "type": "Scheduled", "status": "Confirmed", "riskScore": 24, "riskLevel": "Medium", "hasConflict": false },
+    { "bookingId": "BK-2026-00144", "patientName": "Maria Chen", "patientNameDisplay": "Maria Chen", "time": "11:30 AM", "type": "Scheduled", "status": "Confirmed", "riskScore": 32, "riskLevel": "Medium", "hasConflict": true, "_note": "Insurance not matched — conflict flag" },
+    { "bookingId": "BK-2026-00145", "patientName": "Linda Forsyth", "patientNameDisplay": "Linda Forsyth", "time": "02:30 PM", "type": "Scheduled", "status": "Confirmed", "riskScore": 71, "riskLevel": "High", "hasConflict": true, "_note": "Data conflict: allergy record mismatch" }
   ],
-
+ 
   "clinicalDocument": [
     { "id": "doc-001", "patientId": "u-001", "filename": "chest-xray-report-2026-03.pdf", "mimeType": "application/pdf", "uploadedAt": "2026-03-15T14:22:00Z", "processingStatus": "Complete", "sizeKb": 842 },
     { "id": "doc-002", "patientId": "u-001", "filename": "lab-results-cbc-2026-04.pdf", "mimeType": "application/pdf", "uploadedAt": "2026-04-08T10:10:00Z", "processingStatus": "Complete", "sizeKb": 218 },
     { "id": "doc-003", "patientId": "u-001", "filename": "previous-rx-notes.docx", "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "uploadedAt": "2026-05-17T08:50:00Z", "processingStatus": "Extracting", "sizeKb": 94 },
     { "id": "doc-004", "patientId": "u-001", "filename": "ecg-reading-2026-01.pdf", "mimeType": "application/pdf", "uploadedAt": "2026-01-20T11:05:00Z", "processingStatus": "Failed", "sizeKb": 1204 }
   ],
-
+ 
   "extractedRecord": [
     { "id": "er-001", "documentId": "doc-001", "patientId": "u-001", "entityType": "Diagnosis", "entityValue": "Community-acquired pneumonia, unspecified", "codeHint": "J18.9", "confidence": 0.91, "sourceFile": "chest-xray-report-2026-03.pdf", "extractedAt": "2026-03-15T14:30:00Z" },
     { "id": "er-002", "documentId": "doc-001", "patientId": "u-001", "entityType": "Vital", "entityValue": "SpO2: 94% as of 15 Mar 2026", "confidence": 0.96, "sourceFile": "chest-xray-report-2026-03.pdf", "extractedAt": "2026-03-15T14:30:00Z" },
@@ -86,7 +86,7 @@
     { "id": "er-005", "documentId": "doc-003", "patientId": "u-001", "entityType": "Medication", "entityValue": "Amoxicillin 500 mg capsules, 3× daily for 7 days", "confidence": 0.94, "sourceFile": "previous-rx-notes.docx", "extractedAt": "2026-05-17T09:02:00Z" },
     { "id": "er-006", "documentId": "doc-003", "patientId": "u-001", "entityType": "Allergy", "entityValue": "Penicillin — severe systemic reaction", "confidence": 0.88, "sourceFile": "previous-rx-notes.docx", "extractedAt": "2026-05-17T09:02:00Z", "_conflict": "Amoxicillin (er-005) is a penicillin-class antibiotic — potential allergy conflict" }
   ],
-
+ 
   "medicalCodeSuggestion": [
     { "id": "cs-001", "patientId": "u-001", "codeType": "ICD10", "codeValue": "J18.9", "codeDescription": "Pneumonia, unspecified organism", "aiConfidence": 0.91, "reviewStatus": "Pending", "sourceRefs": ["er-001"], "createdAt": "2026-05-17T09:05:00Z" },
     { "id": "cs-002", "patientId": "u-001", "codeType": "ICD10", "codeValue": "D50.9", "codeDescription": "Iron deficiency anaemia, unspecified", "aiConfidence": 0.83, "reviewStatus": "Pending", "sourceRefs": ["er-004"], "createdAt": "2026-05-17T09:05:00Z" },
@@ -94,7 +94,7 @@
     { "id": "cs-004", "patientId": "u-001", "codeType": "CPT", "codeValue": "99213", "codeDescription": "Office/outpatient visit, established patient, moderate complexity, 20–29 min", "aiConfidence": 0.88, "reviewStatus": "Accepted", "sourceRefs": ["er-001", "er-002"], "reviewedBy": "u-s01", "reviewedAt": "2026-05-17T09:15:00Z" },
     { "id": "cs-005", "patientId": "u-001", "codeType": "ICD10", "codeValue": "J06.9", "codeDescription": "Acute upper respiratory infection, unspecified", "aiConfidence": 0.72, "reviewStatus": "Pending", "sourceRefs": ["er-001"], "createdAt": "2026-05-17T09:05:00Z", "_note": "Overlaps with J18.9 — likely needs correction or rejection" }
   ],
-
+ 
   "kpiMetric": {
     "totalPatients": 1247,
     "totalBookingsThisMonth": 389,
