@@ -48,9 +48,9 @@ data conflicts (e.g., conflicting medications).
 -  Technology Stack & Infrastructure To ensure a scalable, cost-effective, and
 maintainable platform, the system architecture will be built utilizing the following
 technologies:
-- UI (Frontend) Layer: React.
-- API (Backend) Layer: .NET.
-- Data Layer: SQL Server.
+- UI (Frontend) Layer: React or Angular framework.
+- API (Backend) Layer: .NET or Java.
+- Data Layer: PostgresSQL or SQL Server.
 - Hosting & Infrastructure: The application must be hosted on free, open-source-
 friendly platforms such as Netlify, Vercel, GitHub Codespaces, or equivalent
 environments. Paid cloud hosting services (e.g., AWS, Azure) are strictly out of
