@@ -128,9 +128,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] Generated `AddColumn` for `risk_factors` specifies `type: "jsonb"` in the migration file — confirm before applying (AC-003; `json` vs `jsonb` is a distinct PostgreSQL column type)
-- [ ] Generated `AddColumn` for `review_status` carries `defaultValue: "Pending"` — confirms `HasDefaultValue("Pending")` from task_001 was applied correctly (AC-004)
-- [ ] `Up()` appends `ALTER TABLE bookings ADD CONSTRAINT chk_no_show_risk_score CHECK (no_show_risk_score BETWEEN 0 AND 100)` as `migrationBuilder.Sql(...)` after all `AddColumn` calls (AC-002)
-- [ ] `Up()` appends `ALTER TABLE medical_code_suggestions ADD CONSTRAINT chk_review_status CHECK (review_status IN ('Pending', 'Accepted', 'Rejected'))` as `migrationBuilder.Sql(...)` (AC-004; Edge: invalid review_status rejection)
-- [ ] `Down()` prepends `ALTER TABLE bookings DROP CONSTRAINT IF EXISTS chk_no_show_risk_score` and `ALTER TABLE medical_code_suggestions DROP CONSTRAINT IF EXISTS chk_review_status` before any `DropColumn` call — use `IF EXISTS` for rollback idempotency (AC-002, AC-004 — rollback safety)
+- [x] Generated `AddColumn` for `risk_factors` specifies `type: "jsonb"` in the migration file — confirm before applying (AC-003; `json` vs `jsonb` is a distinct PostgreSQL column type)
+- [x] Generated `AddColumn` for `review_status` carries `defaultValue: "Pending"` — confirms `HasDefaultValue("Pending")` from task_001 was applied correctly (AC-004)
+- [x] `Up()` appends `ALTER TABLE bookings ADD CONSTRAINT chk_no_show_risk_score CHECK (no_show_risk_score BETWEEN 0 AND 100)` as `migrationBuilder.Sql(...)` after all `AddColumn` calls (AC-002)
+- [x] `Up()` appends `ALTER TABLE medical_code_suggestions ADD CONSTRAINT chk_review_status CHECK (review_status IN ('Pending', 'Accepted', 'Rejected'))` as `migrationBuilder.Sql(...)` (AC-004; Edge: invalid review_status rejection)
+- [x] `Down()` prepends `ALTER TABLE bookings DROP CONSTRAINT IF EXISTS chk_no_show_risk_score` and `ALTER TABLE medical_code_suggestions DROP CONSTRAINT IF EXISTS chk_review_status` before any `DropColumn` call — use `IF EXISTS` for rollback idempotency (AC-002, AC-004 — rollback safety)
 - [ ] `dotnet ef database update` exits with code 0 and `SELECT migration_id FROM "__EFMigrationsHistory"` returns a second row ending in `_AddSchemaFieldsV2` (AC-002, AC-003, AC-004, AC-005 — migration applied)

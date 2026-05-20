@@ -1,8 +1,13 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
+using Pgvector.EntityFrameworkCore;
 using Prometheus;
 using Serilog;
+using Api.Data;
+using Api.Exceptions;
 using Api.Middleware;
+using Api.Repositories;
 using Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +27,17 @@ builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 // Centralised audit logging — OWASP A09: all audit events flow through IAuditLogger (AC-004)
 builder.Services.AddSingleton<IAuditLogger, AuditLoggerService>();
+// PHI field encryption service — key sourced from PHI_ENCRYPTION_KEY env var (us_006/AC-004; OWASP A02)
+builder.Services.AddSingleton<IPhiEncryptionService, PhiEncryptionService>();
+// Patient repository — PHI decryption is transparent via EF Core value converters (us_006/AC-002)
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+// EF Core + Npgsql + pgvector — connection string from env var; no credentials in source (OWASP A02, us_005/AC-002)
+// UseSnakeCaseNamingConventions produces snake_case table/column names matching AC-002 required names
+builder.Services.AddDbContext<AppDbContext>(opt =>
+{
+    opt.UseNpgsql(Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")!, o => o.UseVector());
+    opt.UseSnakeCaseNamingConvention();
+});
 
 var app = builder.Build();
 
@@ -35,6 +51,26 @@ var forwardedHeadersOptions = new ForwardedHeadersOptions
 forwardedHeadersOptions.KnownNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
+
+// PHI decryption exception middleware — must be placed before controller routing so it wraps
+// all downstream middleware (Edge: key rotation; OWASP A09 — no stack trace in response body).
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch (PhiDecryptionException ex)
+    {
+        if (!context.Response.HasStarted)
+        {
+            context.Response.StatusCode  = StatusCodes.Status503ServiceUnavailable;
+            context.Response.ContentType = "application/json";
+            // Return only the safe user-facing message — no inner exception detail (OWASP A09)
+            await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+        }
+    }
+});
 
 // Inject X-Service: api on every response (AC-002)
 app.UseMiddleware<ServiceHeaderMiddleware>();

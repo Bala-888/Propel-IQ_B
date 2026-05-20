@@ -126,8 +126,8 @@ docker-compose.yml               (MODIFY — add profile-gated seed service)
 ---
 
 ## Implementation Checklist
-- [ ] Seed data array in `InsuranceRecordSeeder.cs` contains ≥ 10 entries and includes a row with `ProviderName = "BlueCross BlueShield"` (AC-001)
-- [ ] INSERT statement uses `ON CONFLICT (policy_number) DO NOTHING` so re-running the seed on a pre-seeded database exits cleanly without duplicate-key errors (Edge: duplicate seed re-run)
-- [ ] `Program.cs` reads `POSTGRES_CONNECTION_STRING` exclusively from `Environment.GetEnvironmentVariable(...)` and throws at startup if the value is absent — no connection string in source code (OWASP A02)
-- [ ] `Program.cs` logs `SELECT COUNT(*) FROM insurance_records` before and after seeding so the operator can confirm ≥10 rows from console output (AC-001 — observable verification)
-- [ ] `docker-compose.yml` seed service is gated behind `profiles: [seed]` so it does not execute during normal `docker compose up` (AC-001 — seed is opt-in, not automatic)
+- [x] Seed data array in `InsuranceRecordSeeder.cs` contains ≥ 10 entries and includes a row with `ProviderName = "BlueCross BlueShield"` (AC-001)
+- [x] INSERT statement uses `ON CONFLICT (policy_number) DO NOTHING` so re-running the seed on a pre-seeded database exits cleanly without duplicate-key errors (Edge: duplicate seed re-run)
+- [x] `Program.cs` reads `POSTGRES_CONNECTION_STRING` exclusively from `Environment.GetEnvironmentVariable(...)` and throws at startup if the value is absent — no connection string in source code (OWASP A02)
+- [x] `Program.cs` logs `SELECT COUNT(*) FROM insurance_records` before and after seeding so the operator can confirm ≥10 rows from console output (AC-001 — observable verification)
+- [x] `docker-compose.yml` seed service is gated behind `profiles: [seed]` so it does not execute during normal `docker compose up` (AC-001 — seed is opt-in, not automatic)

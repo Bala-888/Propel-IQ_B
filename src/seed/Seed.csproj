@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Seed</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Direct Npgsql — no EF Core overhead needed for raw-SQL seed operations -->
+    <PackageReference Include="Npgsql" Version="8.*" />
+  </ItemGroup>
+
+</Project>

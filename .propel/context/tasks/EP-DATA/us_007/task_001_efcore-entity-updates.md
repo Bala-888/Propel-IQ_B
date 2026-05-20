@@ -134,11 +134,11 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `Booking` entity has `public int? NoShowRiskScore { get; set; }` and `public JsonDocument? RiskFactors { get; set; }` — both nullable matching AC-002/AC-003 column definitions (AC-002, AC-003)
-- [ ] `MedicalCodeSuggestion` entity has `public string ReviewStatus { get; set; } = "Pending";` with a C# default initialiser so the property is never null when inserting without an explicit value (AC-004)
-- [ ] `ClinicalDocument` entity has `public string? FileHash { get; set; }` — nullable string, length enforcement via Fluent API (AC-005)
-- [ ] `AppDbContext.OnModelCreating` calls `HasColumnType("jsonb")` on `Booking.RiskFactors` — without this, Npgsql generates `json` (text-backed) not `jsonb` (binary-backed) (AC-003)
-- [ ] `AppDbContext.OnModelCreating` calls `HasDefaultValue("Pending")` on `MedicalCodeSuggestion.ReviewStatus` so the EF Core migration DDL emits `DEFAULT 'Pending'` — a plain INSERT without `review_status` therefore returns `Pending` from the database (AC-004)
-- [ ] `AppDbContext.OnModelCreating` calls `HasMaxLength(64)` on `ClinicalDocument.FileHash` — generates `character varying(64)` in the migration DDL (AC-005)
-- [ ] `using System.Text.Json;` is added to `Booking.cs` for the `JsonDocument` type reference — no third-party JSON libraries introduced (AC-003; NFR consistent with .NET 8 built-ins)
-- [ ] `dotnet build src/api` exits with code 0 — confirms all type references resolve before task_002 scaffolds the migration (AC-002, AC-003, AC-004, AC-005)
+- [x] `Booking` entity has `public int? NoShowRiskScore { get; set; }` and `public JsonDocument? RiskFactors { get; set; }` — both nullable matching AC-002/AC-003 column definitions (AC-002, AC-003)
+- [x] `MedicalCodeSuggestion` entity has `public string ReviewStatus { get; set; } = "Pending";` with a C# default initialiser so the property is never null when inserting without an explicit value (AC-004)
+- [x] `ClinicalDocument` entity has `public string? FileHash { get; set; }` — nullable string, length enforcement via Fluent API (AC-005)
+- [x] `AppDbContext.OnModelCreating` calls `HasColumnType("jsonb")` on `Booking.RiskFactors` — without this, Npgsql generates `json` (text-backed) not `jsonb` (binary-backed) (AC-003)
+- [x] `AppDbContext.OnModelCreating` calls `HasDefaultValue("Pending")` on `MedicalCodeSuggestion.ReviewStatus` so the EF Core migration DDL emits `DEFAULT 'Pending'` — a plain INSERT without `review_status` therefore returns `Pending` from the database (AC-004)
+- [x] `AppDbContext.OnModelCreating` calls `HasMaxLength(64)` on `ClinicalDocument.FileHash` — generates `character varying(64)` in the migration DDL (AC-005)
+- [x] `using System.Text.Json;` is added to `Booking.cs` for the `JsonDocument` type reference — no third-party JSON libraries introduced (AC-003; NFR consistent with .NET 8 built-ins)
+- [x] `dotnet build src/api` exits with code 0 — confirms all type references resolve before task_002 scaffolds the migration (AC-002, AC-003, AC-004, AC-005)

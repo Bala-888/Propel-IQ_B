@@ -168,10 +168,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `Api.csproj` references `Npgsql.EntityFrameworkCore.PostgreSQL` 8.x and `EFCore.NamingConventions` 8.x (AC-002 — EF Core provider and snake_case naming required for all 12 tables)
-- [ ] All 12 entity classes exist in `src/api/Data/Entities/` with a `public int Id { get; set; }` primary key and navigation properties for FK relationships (AC-002)
-- [ ] `ChunkEmbedding` entity includes `public NpgsqlVector Embedding { get; set; }` as the vector property — prerequisite for the ivfflat index SQL in task_002 (AC-003)
-- [ ] `AppDbContext.OnModelCreating` calls `modelBuilder.UseSnakeCaseNamingConventions()` so generated table names match the 12 names required by AC-002 exactly (AC-002)
-- [ ] All FK relationships are configured in `OnModelCreating` with explicit `.HasForeignKey()` calls — at minimum `Booking → Patient`; all others mapped per entity domain relationships (AC-004)
-- [ ] `ChunkEmbedding.Embedding` is configured with `HasColumnType("vector(1536)")` in Fluent API to set the vector dimension used by the ivfflat index in task_002 (AC-003)
-- [ ] `Program.cs` registers `AddDbContext<AppDbContext>` reading the connection string from `POSTGRES_CONNECTION_STRING` environment variable — not hardcoded in source (AC-002, AC-005; OWASP A02 — no credentials in code)
+- [x] `Api.csproj` references `Npgsql.EntityFrameworkCore.PostgreSQL` 8.x and `EFCore.NamingConventions` 8.x (AC-002 — EF Core provider and snake_case naming required for all 12 tables)
+- [x] All 12 entity classes exist in `src/api/Data/Entities/` with a `public int Id { get; set; }` primary key and navigation properties for FK relationships (AC-002)
+- [x] `ChunkEmbedding` entity includes `public Vector Embedding { get; set; }` (Pgvector.Vector) as the vector property — prerequisite for the ivfflat index SQL in task_002 (AC-003)
+- [x] `AppDbContext` uses `UseSnakeCaseNamingConvention()` (via EFCore.NamingConventions `DbContextOptionsBuilder` extension) so generated table names match the 12 names required by AC-002 exactly (AC-002)
+- [x] All FK relationships are configured in `OnModelCreating` with explicit `.HasForeignKey()` calls — at minimum `Booking → Patient`; all others mapped per entity domain relationships (AC-004)
+- [x] `ChunkEmbedding.Embedding` is configured with `HasColumnType("vector(1536)")` in Fluent API to set the vector dimension used by the ivfflat index in task_002 (AC-003)
+- [x] `Program.cs` registers `AddDbContext<AppDbContext>` reading the connection string from `POSTGRES_CONNECTION_STRING` environment variable — not hardcoded in source (AC-002, AC-005; OWASP A02 — no credentials in code)

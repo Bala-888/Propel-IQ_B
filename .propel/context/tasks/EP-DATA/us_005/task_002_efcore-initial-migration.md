@@ -135,10 +135,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `Up()` prepends `migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS pgcrypto;")` and `migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS vector;")` before the first `CreateTable` call (AC-001)
-- [ ] `Up()` appends `migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS idx_chunk_embeddings_embedding_ivfflat ON chunk_embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);")` after all `CreateTable` and `CreateIndex` calls (AC-003)
-- [ ] `Down()` contains `DROP INDEX IF EXISTS idx_chunk_embeddings_embedding_ivfflat` before any `DropTable` call and `DROP EXTENSION IF EXISTS vector/pgcrypto` after all `DropTable` calls — matching the reverse order of `Up()` (AC-001, AC-003 — rollback safety)
-- [ ] Both extension statements and the index statement use `IF NOT EXISTS` / `IF EXISTS` so a second `dotnet ef database update` run exits cleanly with "No migrations were applied" and EF Core's `__EFMigrationsHistory` guard prevents re-execution (Edge: re-run idempotency)
-- [ ] The generated migration contains a `FK_bookings_patients_patient_id` constraint definition in the `bookings` `CreateTable` call — confirming EF Core emitted the FK DDL from task_001's Fluent API config (AC-004)
-- [ ] The `docker-compose.yml` `db` service uses image `pgvector/pgvector:pg15` (not `postgres:15`) — if the wrong image is used, the `CREATE EXTENSION vector` step will raise `ERROR: could not open extension control file` which explicitly surfaces the misconfiguration before any silent data loss (Edge: pgvector not available)
+- [x] `Up()` prepends `migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS pgcrypto;")` and `migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS vector;")` before the first `CreateTable` call (AC-001)
+- [x] `Up()` appends `migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS idx_chunk_embeddings_embedding_ivfflat ON chunk_embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);")` after all `CreateTable` and `CreateIndex` calls (AC-003)
+- [x] `Down()` contains `DROP INDEX IF EXISTS idx_chunk_embeddings_embedding_ivfflat` before any `DropTable` call and `DROP EXTENSION IF EXISTS vector/pgcrypto` after all `DropTable` calls — matching the reverse order of `Up()` (AC-001, AC-003 — rollback safety)
+- [x] Both extension statements and the index statement use `IF NOT EXISTS` / `IF EXISTS` so a second `dotnet ef database update` run exits cleanly with "No migrations were applied" and EF Core's `__EFMigrationsHistory` guard prevents re-execution (Edge: re-run idempotency)
+- [x] The generated migration contains a `fk_bookings_patients_patient_id` constraint definition in the `bookings` `CreateTable` call — confirming EF Core emitted the FK DDL from task_001's Fluent API config (AC-004)
+- [x] The `docker-compose.yml` `db` service uses image `pgvector/pgvector:pg15` (not `postgres:15`) — if the wrong image is used, the `CREATE EXTENSION vector` step will raise `ERROR: could not open extension control file` which explicitly surfaces the misconfiguration before any silent data loss (Edge: pgvector not available)
 - [ ] After applying the migration, `SELECT migration_id FROM "__EFMigrationsHistory"` returns exactly one row whose `migration_id` ends with `_InitialSchema` — confirming EF Core registered the migration as applied (AC-005)

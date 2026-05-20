@@ -10,13 +10,15 @@ services:
 
   # ── PostgreSQL database ────────────────────────────────────────────────────
   db:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY}
+      # APP_USER_PASSWORD: injected at runtime; placeholder 'changeme' used in init.sql (OWASP A02)
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -74,6 +76,10 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
+      # API connects as app_user (restricted role) — AC-003, AC-005; OWASP A02
+      POSTGRES_CONNECTION_STRING: >-
+        Host=db;Port=5432;Database=${POSTGRES_DB};
+        Username=app_user;Password=${APP_USER_PASSWORD}
       ConnectionStrings__Default: >-
         Host=db;Port=5432;Database=${POSTGRES_DB};
         Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
@@ -200,6 +206,29 @@ services:
       timeout: 10s
       retries: 6
       start_period: 15s
+    networks:
+      - upacip_net
+
+  # ── Insurance record seeder (opt-in) ──────────────────────────────────────
+  # Profile-gated: does NOT run on plain `docker compose up`.
+  # Invoke with: docker compose --profile seed run --rm seed
+  # Requires all migrations to be applied before running.
+  seed:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    profiles: [seed]
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./src/seed:/app
+    working_dir: /app
+    command: dotnet run
+    environment:
+      # Seeder connects as superuser so it can insert with explicit patient IDs
+      # and create the policy_number unique index (OWASP A02 — value from .env)
+      POSTGRES_CONNECTION_STRING: >-
+        Host=db;Port=5432;Database=${POSTGRES_DB};
+        Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     networks:
       - upacip_net
 

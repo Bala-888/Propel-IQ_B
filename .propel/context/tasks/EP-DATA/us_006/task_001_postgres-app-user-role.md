@@ -119,8 +119,8 @@ docker-compose.yml   (MODIFY — add APP_USER_PASSWORD env var to db service)
 ---
 
 ## Implementation Checklist
-- [ ] `app_user` role creation SQL in `docker/db/init.sql` is wrapped in an idempotent `DO $$ BEGIN IF NOT EXISTS ... END $$;` block to prevent error on repeated container startup (AC-003, AC-005 — stack stability)
-- [ ] `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;` is added before the REVOKE so the broad grant is applied first and then selectively narrowed (AC-005 — INSERT on all other tables must remain permitted)
-- [ ] `REVOKE UPDATE, DELETE ON TABLE audit_logs FROM app_user;` is added after the broad GRANT, making `audit_logs` INSERT+SELECT only for the application role (AC-003)
-- [ ] The `app_user` password in `docker/db/init.sql` is a placeholder value and the `docker-compose.yml` `db` service environment block references `APP_USER_PASSWORD` — no hardcoded credentials in any committed file (OWASP A02)
-- [ ] The .NET API connection string (in `POSTGRES_CONNECTION_STRING` env var from us_005 task_001) is updated to use `app_user` credentials so all API database operations run under the restricted role (AC-003, AC-005 — role enforcement requires API connects as `app_user` not `postgres`)
+- [x] `app_user` role creation SQL in `docker/db/init.sql` is wrapped in an idempotent `DO $$ BEGIN IF NOT EXISTS ... END $$;` block to prevent error on repeated container startup (AC-003, AC-005 — stack stability)
+- [x] `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;` is added before the REVOKE so the broad grant is applied first and then selectively narrowed (AC-005 — INSERT on all other tables must remain permitted)
+- [x] `REVOKE UPDATE, DELETE ON TABLE audit_logs FROM app_user;` is added after the broad GRANT, making `audit_logs` INSERT+SELECT only for the application role (AC-003)
+- [x] The `app_user` password in `docker/db/init.sql` is a placeholder value and the `docker-compose.yml` `db` service environment block references `APP_USER_PASSWORD` — no hardcoded credentials in any committed file (OWASP A02)
+- [x] The .NET API connection string (in `POSTGRES_CONNECTION_STRING` env var from us_005 task_001) is updated to use `app_user` credentials so all API database operations run under the restricted role (AC-003, AC-005 — role enforcement requires API connects as `app_user` not `postgres`)

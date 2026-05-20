@@ -14,6 +14,17 @@
     <PackageReference Include="Serilog.Sinks.Seq" Version="6.*" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="2.*" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.*" />
+    <!-- PHI field encryption — us_006/AC-001, AC-004; DR-001 (AES-256 PGP symmetric, pgcrypto-compatible) -->
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.*" />
+    <!-- EF Core + PostgreSQL provider + pgvector — us_005/AC-002, AC-003, AC-004 -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.*" />
+    <PackageReference Include="EFCore.NamingConventions" Version="8.*" />
+    <PackageReference Include="pgvector" Version="0.*" />
+    <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
