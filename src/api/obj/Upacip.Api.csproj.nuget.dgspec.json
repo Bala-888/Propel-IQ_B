@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\Upacip.Api.csproj": {}
+    "C:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\Upacip.Api.csproj": {}
   },
   "projects": {
-    "c:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\Upacip.Api.csproj": {
+    "C:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\Upacip.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\Upacip.Api.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\Upacip.Api.csproj",
         "projectName": "Upacip.Api",
-        "projectPath": "c:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\Upacip.Api.csproj",
+        "projectPath": "C:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\Upacip.Api.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\obj\\",
+        "outputPath": "C:\\Users\\Admin\\Desktop\\propelIQ kanini\\Propel-IQ_B\\src\\api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -83,10 +83,6 @@
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[9.0.4, )"
-            },
-            "PdfPig": {
-              "target": "Package",
-              "version": "[0.1.9, )"
             },
             "Pgvector": {
               "target": "Package",

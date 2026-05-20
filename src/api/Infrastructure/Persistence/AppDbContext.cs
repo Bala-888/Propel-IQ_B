@@ -88,6 +88,8 @@ public sealed class AppDbContext(
             e.Property(p => p.OutlookCalendarStatus).HasConversion<string>();
             e.Property(p => p.InsuranceProvider).HasColumnName("insurance_provider_encrypted").HasConversion(phiConverter);
             e.Property(p => p.InsuranceId).HasColumnName("insurance_id_encrypted").HasConversion(phiConverter);
+            e.Property(p => p.GoogleCalendarTokenEncrypted).HasColumnName("google_calendar_token_encrypted").HasConversion(phiConverter);
+            e.Property(p => p.OutlookCalendarTokenEncrypted).HasColumnName("outlook_calendar_token_encrypted").HasConversion(phiConverter);
         });
 
         // ─── IntakeRecord ─────────────────────────────────────────────────────
@@ -133,6 +135,8 @@ public sealed class AppDbContext(
             e.Property(b => b.Status).HasConversion<string>();
             e.Property(b => b.Channel).HasConversion<string>();
             e.Property(b => b.InsuranceStatus).HasConversion<string>();
+            e.Property(b => b.WalkInPatientName).HasColumnName("walk_in_patient_name_encrypted").HasConversion(phiConverter);
+            e.Property(b => b.WalkInPatientPhone).HasColumnName("walk_in_patient_phone_encrypted").HasConversion(phiConverter);
         });
 
         // ─── ClinicalDocument ─────────────────────────────────────────────────

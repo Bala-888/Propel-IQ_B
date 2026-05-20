@@ -55,9 +55,7 @@ c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\New
 c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\Npgsql.dll
 c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\UglyToad.PdfPig.Core.dll
-c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\UglyToad.PdfPig.DocumentLayoutAnalysis.dll
 c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\UglyToad.PdfPig.Fonts.dll
-c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\UglyToad.PdfPig.Package.dll
 c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\UglyToad.PdfPig.Tokenization.dll
 c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\UglyToad.PdfPig.Tokens.dll
 c:\Users\Admin\Desktop\propelIQ kanini\Propel-IQ_B\src\api\bin\Debug\net10.0\UglyToad.PdfPig.dll

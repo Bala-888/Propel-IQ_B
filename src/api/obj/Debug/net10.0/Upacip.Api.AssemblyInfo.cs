@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Upacip.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bdf658e6cc0ef0135d58651ab6c794a97132a2ff")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e5eedb05110e6dc47cac1bf879d080d49bbabb68")]
 [assembly: System.Reflection.AssemblyProductAttribute("Upacip.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Upacip.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
