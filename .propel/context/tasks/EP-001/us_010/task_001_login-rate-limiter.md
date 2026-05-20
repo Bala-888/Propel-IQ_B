@@ -130,9 +130,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] The 429 check (`GetFailCountAsync >= 5`) occurs before any database lookup in `LoginAsync` — no DB round-trip wasted on a blocked IP (AC-004; performance)
-- [ ] `IncrementAsync` is called only after credential failure (wrong password, non-existent email) — NOT after inactive account 401, to avoid blocking users whose accounts are intentionally deactivated (AC-004 — failure-specific counting)
-- [ ] HTTP 429 response includes `Retry-After: 900` response header (`Response.Headers.Append("Retry-After", "900")`) to allow clients to implement a backoff timer (AC-004; RFC 6585 §4)
-- [ ] `AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15)` is set on the cache entry so the counter auto-expires after 15 minutes — satisfies AC-005 without a scheduled cleanup job
-- [ ] `ResetAsync` calls `IDistributedCache.RemoveAsync(key)` so a successful login fully clears the counter — not just sets it to 0, which would still occupy cache space (AC-005)
-- [ ] `Program.cs` comment documents the Redis swap path for multi-instance deployments — the service contract (`ILoginRateLimiter`) is unchanged when swapping the DI backing store (Edge: load-balanced instances)
+- [x] The 429 check (`GetFailCountAsync >= 5`) occurs before any database lookup in `LoginAsync` — no DB round-trip wasted on a blocked IP (AC-004; performance)
+- [x] `IncrementAsync` is called only after credential failure (wrong password, non-existent email) — NOT after inactive account 401, to avoid blocking users whose accounts are intentionally deactivated (AC-004 — failure-specific counting)
+- [x] HTTP 429 response includes `Retry-After: 900` response header (`Response.Headers.Append("Retry-After", "900")`) to allow clients to implement a backoff timer (AC-004; RFC 6585 §4)
+- [x] `AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15)` is set on the cache entry so the counter auto-expires after 15 minutes — satisfies AC-005 without a scheduled cleanup job
+- [x] `ResetAsync` calls `IDistributedCache.RemoveAsync(key)` so a successful login fully clears the counter — not just sets it to 0, which would still occupy cache space (AC-005)
+- [x] `Program.cs` comment documents the Redis swap path for multi-instance deployments — the service contract (`ILoginRateLimiter`) is unchanged when swapping the DI backing store (Edge: load-balanced instances)

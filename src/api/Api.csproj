@@ -25,6 +25,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <!-- JWT Bearer authentication — us_009/AC-001; TR-005 -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.*" />
+    <!-- BCrypt password verification — us_009/AC-005; OWASP A02 constant-time hash comparison -->
+    <PackageReference Include="BCrypt.Net-Next" Version="4.*" />
   </ItemGroup>
 
 </Project>

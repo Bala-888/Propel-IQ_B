@@ -138,10 +138,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `RegisterPatientRequest` has `[Required]` on `Name`, `DateOfBirth`, `Email`, `Phone`; `[EmailAddress]` on `Email`; `InsuranceProvider` and `InsuranceId` are nullable with no `[Required]` attribute (AC-003; Edge: insurance optional)
-- [ ] `ModelState.IsValid` is checked first; if invalid, `BadRequest` is returned with a `validationErrors` keyed response — no database query occurs before this check (AC-003; Edge: email format — OWASP A03 validation at boundary)
-- [ ] DOB future-date guard fires after `ModelState.IsValid` passes, returns HTTP 400 with `{"dateOfBirth": "Date of birth cannot be in the future"}` if `request.DateOfBirth > DateOnly.FromDateTime(DateTime.UtcNow)` (Edge: DOB future)
-- [ ] Duplicate email lookup encrypts the query email using `IPhiEncryptionService.Encrypt(request.Email)` and matches against the encrypted `email` column — avoids full-table decryption scan (AC-002; performance)
-- [ ] Empty-string `InsuranceProvider` and `InsuranceId` are normalised to `null` before entity creation so the column stores `NULL` not an encrypted empty string (Edge: insurance optional)
-- [ ] `IAuditLogger.Log(userId, "PatientRegistration", patientId)` is called after `SaveChangesAsync` succeeds — not before, to avoid audit entries for failed registrations (AC-001)
-- [ ] HTTP 201 response body is `{"userId": "<guid>", "role": "Patient"}` — no sensitive PHI fields are included in the response (AC-001; OWASP A02 — PHI never in API response)
+- [x] `RegisterPatientRequest` has `[Required]` on `Name`, `DateOfBirth`, `Email`, `Phone`; `[EmailAddress]` on `Email`; `InsuranceProvider` and `InsuranceId` are nullable with no `[Required]` attribute (AC-003; Edge: insurance optional)
+- [x] `ModelState.IsValid` is checked first; if invalid, `BadRequest` is returned with a `validationErrors` keyed response — no database query occurs before this check (AC-003; Edge: email format — OWASP A03 validation at boundary)
+- [x] DOB future-date guard fires after `ModelState.IsValid` passes, returns HTTP 400 with `{"dateOfBirth": "Date of birth cannot be in the future"}` if `request.DateOfBirth > DateOnly.FromDateTime(DateTime.UtcNow)` (Edge: DOB future)
+- [x] Duplicate email lookup encrypts the query email using `IPhiEncryptionService.Encrypt(request.Email)` and matches against the encrypted `email` column — avoids full-table decryption scan (AC-002; performance)
+- [x] Empty-string `InsuranceProvider` and `InsuranceId` are normalised to `null` before entity creation so the column stores `NULL` not an encrypted empty string (Edge: insurance optional)
+- [x] `IAuditLogger.Log(userId, "PatientRegistration", patientId)` is called after `SaveChangesAsync` succeeds — not before, to avoid audit entries for failed registrations (AC-001)
+- [x] HTTP 201 response body is `{"userId": "<guid>", "role": "Patient"}` — no sensitive PHI fields are included in the response (AC-001; OWASP A02 — PHI never in API response)

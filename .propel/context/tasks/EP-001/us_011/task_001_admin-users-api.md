@@ -153,11 +153,11 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `AdminUsersController` is decorated with `[Authorize(Roles = "Admin")]` at the class level — all sub-routes inherit the restriction without per-method decoration drift (AC-001, AC-002, AC-003; OWASP A01)
-- [ ] `UserManagementService.CreateAsync` performs the duplicate email check via `AnyAsync` before inserting; returns HTTP 409 with a safe message — does not reveal whether the existing account is active or deactivated (AC-005; OWASP A07)
-- [ ] `PatchUserRequest.Role`, when present, is validated against `{"Patient", "Staff", "Admin"}` before `SaveChangesAsync` is called — ensures invalid role payloads return 400 without a partial DB write (Edge: invalid role; OWASP A03)
-- [ ] `AuthController.LoginAsync` checks `user.IsActive` after password verification and before JWT issuance; returns the identical 401 message as an invalid-password response — prevents account-status enumeration (AC-003; OWASP A07)
-- [ ] `IEmailSender` SMTP configuration (`SmtpHost`, `SmtpPort`, `FromAddress`, credentials) is bound from environment variables only — never committed to source code or `appsettings.json` in plain text (AC-001; OWASP A02)
-- [ ] `ApplicationUser` gains a `MustChangePassword` boolean column (default `true` on creation); the welcome email is sent only once per account creation, not on re-activation (AC-001 — credential lifecycle)
-- [ ] Audit log entries for `RoleChanged` store the `{"from": previousRole, "to": newRole}` JSON payload in the log record's `Details` column — enables compliance traceability (AC-002; OWASP A09)
-- [ ] All `AdminUsersController` action methods return `ActionResult<T>` and do not expose internal exception messages in the response body — unhandled exceptions are caught by the global exception middleware (OWASP A05 — security misconfiguration)
+- [x] `AdminUsersController` is decorated with `[Authorize(Roles = "Admin")]` at the class level — all sub-routes inherit the restriction without per-method decoration drift (AC-001, AC-002, AC-003; OWASP A01)
+- [x] `UserManagementService.CreateAsync` performs the duplicate email check via `AnyAsync` before inserting; returns HTTP 409 with a safe message — does not reveal whether the existing account is active or deactivated (AC-005; OWASP A07)
+- [x] `PatchUserRequest.Role`, when present, is validated against `{"Patient", "Staff", "Admin"}` before `SaveChangesAsync` is called — ensures invalid role payloads return 400 without a partial DB write (Edge: invalid role; OWASP A03)
+- [x] `AuthController.LoginAsync` checks `user.IsActive` after password verification and before JWT issuance; returns the identical 401 message as an invalid-password response — prevents account-status enumeration (AC-003; OWASP A07)
+- [x] `IEmailSender` SMTP configuration (`SmtpHost`, `SmtpPort`, `FromAddress`, credentials) is bound from environment variables only — never committed to source code or `appsettings.json` in plain text (AC-001; OWASP A02)
+- [x] `ApplicationUser` gains a `MustChangePassword` boolean column (default `true` on creation); the welcome email is sent only once per account creation, not on re-activation (AC-001 — credential lifecycle)
+- [x] Audit log entries for `RoleChanged` store the `{"from": previousRole, "to": newRole}` JSON payload in the log record's `Details` column — enables compliance traceability (AC-002; OWASP A09)
+- [x] All `AdminUsersController` action methods return `ActionResult<T>` and do not expose internal exception messages in the response body — unhandled exceptions are caught by the global exception middleware (OWASP A05 — security misconfiguration)

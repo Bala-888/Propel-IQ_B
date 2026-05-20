@@ -1,0 +1,174 @@
+/* MOD-006 — Create / Edit User modal styles */
+
+.um-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.um-modal {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-3);
+  max-width: 520px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.um-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.um-modal__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.um-modal__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--color-text-disabled);
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  line-height: 1;
+}
+
+.um-modal__close:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+.um-modal__close:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.um-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.um-modal__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.um-modal__input,
+.um-modal__select {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.um-modal__input:focus,
+.um-modal__select:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.18);
+}
+
+.um-modal__input--error {
+  border-color: var(--color-status-error);
+}
+
+.um-modal__input:disabled {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+.um-modal__hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.um-modal__field-error {
+  font-size: 12px;
+  color: var(--color-status-error);
+}
+
+.um-modal__form-error {
+  font-size: 14px;
+  color: var(--color-status-error);
+  background: var(--color-error-surface);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.um-modal__actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+/* Shared button base */
+.um-btn {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.um-btn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.um-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.um-btn--primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.um-btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.um-btn--secondary {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.um-btn--secondary:hover {
+  background: var(--color-bg-subtle);
+}

@@ -1,7 +1,12 @@
+import { Header } from '../components/layout/Header'
+
 export function IntakePage() {
   return (
-    <main>
-      <h1>Intake</h1>
-    </main>
+    <>
+      <Header />
+      <main>
+        <h1>Intake</h1>
+      </main>
+    </>
   )
 }

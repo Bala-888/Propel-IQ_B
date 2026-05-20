@@ -1,0 +1,388 @@
+/* SCR-017 — User Management Page */
+
+/* -----------------------------------------------------------------------
+   Page shell: sidebar + main
+------------------------------------------------------------------------ */
+.um-page {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-bg-page);
+  font-family: var(--font-sans);
+}
+
+/* Sidebar */
+.um-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--color-bg-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+}
+
+.um-sidebar__brand {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-8);
+  letter-spacing: -0.02em;
+}
+
+.um-sidebar__nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.um-sidebar__link {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: background 0.1s, color 0.1s;
+}
+
+.um-sidebar__link:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+.um-sidebar__link--active {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Main content */
+.um-main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-8);
+}
+
+/* -----------------------------------------------------------------------
+   Page header
+------------------------------------------------------------------------ */
+.um-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.um-page__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.um-page__subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+/* Primary page button */
+.um-btn-primary {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  transition: background 0.15s;
+}
+
+.um-btn-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.um-btn-primary:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* -----------------------------------------------------------------------
+   Alert banner
+------------------------------------------------------------------------ */
+.um-alert {
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.um-alert--error {
+  background: var(--color-error-surface);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-status-error);
+}
+
+/* -----------------------------------------------------------------------
+   Filters
+------------------------------------------------------------------------ */
+.um-filters {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.um-filter__search {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  outline: none;
+  flex: 1 1 220px;
+  min-width: 0;
+  transition: border-color 0.15s;
+}
+
+.um-filter__search:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.18);
+}
+
+.um-filter__select {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.um-filter__select:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.18);
+}
+
+/* -----------------------------------------------------------------------
+   Table
+------------------------------------------------------------------------ */
+.um-table-wrapper {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-1);
+  overflow-x: auto;
+}
+
+.um-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.um-table thead tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.um-table th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-subtle);
+}
+
+.um-table td {
+  padding: var(--space-3) var(--space-4);
+  vertical-align: middle;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.um-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.um-table tbody tr:hover td {
+  background: var(--color-bg-subtle);
+}
+
+.um-table__empty {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: var(--space-10) var(--space-4);
+}
+
+/* -----------------------------------------------------------------------
+   Name cell
+------------------------------------------------------------------------ */
+.um-name-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.um-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.um-name-cell__name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.um-name-cell__unnamed {
+  color: var(--color-text-disabled);
+  font-style: italic;
+}
+
+.um-name-cell__email {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.3;
+}
+
+/* -----------------------------------------------------------------------
+   Role badges
+------------------------------------------------------------------------ */
+.um-role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.um-role-badge--patient {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+}
+
+.um-role-badge--staff {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.um-role-badge--admin {
+  background: var(--color-ai-accent-surface);
+  color: var(--color-ai-accent);
+}
+
+/* -----------------------------------------------------------------------
+   Status badge (imported from UserStatusBadge.tsx)
+------------------------------------------------------------------------ */
+.user-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.user-status-badge--active {
+  background: var(--color-success-surface);
+  color: var(--color-status-success);
+}
+
+.user-status-badge--inactive {
+  background: var(--color-error-surface);
+  color: var(--color-status-error);
+}
+
+/* -----------------------------------------------------------------------
+   Action buttons
+------------------------------------------------------------------------ */
+.um-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.um-action-btn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  min-height: 32px;
+  transition: background 0.1s;
+}
+
+.um-action-btn:hover {
+  background: var(--color-bg-subtle);
+}
+
+.um-action-btn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.um-action-btn--danger {
+  border-color: var(--color-destructive);
+  color: var(--color-destructive);
+}
+
+.um-action-btn--danger:hover {
+  background: var(--color-error-surface);
+}
+
+/* AC-004: own-account deactivate button — visually disabled but remains in DOM */
+.um-action-btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* -----------------------------------------------------------------------
+   State messages
+------------------------------------------------------------------------ */
+.um-state-msg {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  padding: var(--space-5) 0;
+}
+
+/* Screen-reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

@@ -1,0 +1,239 @@
+/* ── Login form styles — SCR-001 Hi-Fi wireframe tokens ──────────────────────
+   Token values sourced from :root in wireframe-SCR-001-login.html.
+   All colour literals must trace to a semantic token (design-compliance-report token audit). */
+
+/* WORDMARK */
+.wordmark {
+  position: fixed;
+  top: var(--space-6);
+  left: var(--space-8);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.3px;
+  z-index: 10;
+}
+
+/* CENTRED LAYOUT */
+.auth-shell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-6);
+  min-height: 100vh;
+}
+
+.auth-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  width: 100%;
+  max-width: 440px;
+  padding: var(--space-10);
+}
+
+/* TYPOGRAPHY */
+.auth-heading {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.auth-subheading {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-8);
+}
+
+/* ALERT BANNER (root API errors) — UXR-105: icon + text, not color-only */
+.alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+  margin-bottom: var(--space-6);
+  font-size: 14px;
+}
+
+.alert-banner.error {
+  background: var(--color-error-surface);
+  border-color: var(--color-error-border);
+  color: var(--color-status-error);
+}
+
+/* Session-expired info banner — persistent on arrival from timeout redirect (AC-002) */
+.alert-banner.info {
+  background: var(--color-warning-surface);
+  border-color: var(--color-warning-border);
+  color: var(--color-status-warning);
+}
+
+/* FORM GROUPS */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.form-group.no-mb {
+  margin-bottom: var(--space-3);
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.form-input {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-input:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.18);
+}
+
+.form-input:hover {
+  border-color: var(--color-border-strong);
+}
+
+.form-input.error {
+  border-color: var(--color-status-error);
+}
+
+/* INLINE FIELD ERRORS — UXR-105: icon bullet + text */
+.inline-error {
+  font-size: 13px;
+  color: var(--color-status-error);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+/* FORGOT PASSWORD */
+.forgot-row {
+  text-align: right;
+  margin-bottom: var(--space-6);
+}
+
+/* BUTTONS */
+.btn {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  transition: background 0.15s, box-shadow 0.15s;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  width: 100%;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--color-primary-active);
+}
+
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* LOADING SPINNER */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* LINK */
+.link {
+  font-size: 14px;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:hover {
+  text-decoration: underline;
+  color: var(--color-primary-hover);
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* FOOTER */
+.auth-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: var(--space-8) var(--space-6);
+    border: none;
+    box-shadow: none;
+  }
+
+  .wordmark {
+    position: static;
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .auth-shell {
+    padding: 0;
+    align-items: flex-start;
+  }
+}

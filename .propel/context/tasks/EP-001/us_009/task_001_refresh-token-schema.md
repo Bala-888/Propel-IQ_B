@@ -127,7 +127,7 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `RefreshToken` entity includes `Guid FamilyId` column — required by task_002's family-level revocation logic; without this column the replay attack edge case cannot be implemented (Edge: refresh token replay attack)
-- [ ] Unique index on `Token` is configured in `OnModelCreating` with `.HasIndex(rt => rt.Token).IsUnique()` — prevents two rows with the same token string from being stored (security invariant)
-- [ ] FK to `User` is configured with `OnDelete(DeleteBehavior.Cascade)` — refresh tokens for a deleted user are automatically removed (data integrity)
-- [ ] Generated migration DDL includes `family_id uuid NOT NULL` — confirm before applying that the column is present and not nullable (Edge: family-level revocation requires non-null FamilyId for reliable WHERE clause)
+- [x] `RefreshToken` entity includes `Guid FamilyId` column — required by task_002's family-level revocation logic; without this column the replay attack edge case cannot be implemented (Edge: refresh token replay attack)
+- [x] Unique index on `Token` is configured in `OnModelCreating` with `.HasIndex(rt => rt.Token).IsUnique()` — prevents two rows with the same token string from being stored (security invariant)
+- [x] FK to `User` is configured with `OnDelete(DeleteBehavior.Cascade)` — refresh tokens for a deleted user are automatically removed (data integrity)
+- [x] Generated migration DDL includes `family_id uuid NOT NULL` — confirmed before applying that the column is present and not nullable (Edge: family-level revocation requires non-null FamilyId for reliable WHERE clause)

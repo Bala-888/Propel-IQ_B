@@ -144,10 +144,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `WalkInAccountModal` toggle is a controlled boolean in `WalkInBookingForm` state — the modal's open/closed state is driven by the parent; the modal itself never controls its own visibility (AC-001, AC-002 — clear state ownership)
-- [ ] Zod schema for MOD-004 uses `.email()` for format validation AND `.min(1, "Email is required to create an account")` for presence — both rules produce distinct, user-readable messages surfaced via react-hook-form `errors.email.message` (Edge: empty email; AC-002; UXR-105)
-- [ ] `WalkInAccountModal` error messages render inside `<span role="alert">` with a named icon component + text string — colour is supplementary, never the sole error indicator (UXR-105; WCAG 1.4.1)
-- [ ] Conflict view in `WalkInAccountModal` is driven by internal `mode` state (`'email-capture'` vs `'conflict'`) — the component is not unmounted and re-mounted on 409, preserving form context for the No-path reset (AC-004; user experience continuity)
-- [ ] "Yes, link account" re-calls `createWalkIn` with `linkExistingAccountId`; the existing patient's ID is parsed from the 409 response body and held in component state — not re-fetched via a separate GET (AC-004 Yes path; avoids extra round-trip)
-- [ ] Warning banner in `WalkInConfirmation` uses `<div role="alert">` and does NOT use `setTimeout` or auto-dismiss logic — staff must manually acknowledge the delivery failure and provide credentials (Edge: delivery failure; OWASP A09 — audit-visible outcome)
-- [ ] `walkInApi.ts` uses the `Authorization: Bearer <accessToken>` header from `AuthContext`; a 401 response triggers the existing session-expiry flow (all ACs; OWASP A01)
+- [x] `WalkInAccountModal` toggle is a controlled boolean in `WalkInBookingForm` state — the modal's open/closed state is driven by the parent; the modal itself never controls its own visibility (AC-001, AC-002 — clear state ownership)
+- [x] Zod schema for MOD-004 uses `.email()` for format validation AND `.min(1, "Email is required to create an account")` for presence — both rules produce distinct, user-readable messages surfaced via react-hook-form `errors.email.message` (Edge: empty email; AC-002; UXR-105)
+- [x] `WalkInAccountModal` error messages render inside `<span role="alert">` with a named icon component + text string — colour is supplementary, never the sole error indicator (UXR-105; WCAG 1.4.1)
+- [x] Conflict view in `WalkInAccountModal` is driven by internal `mode` state (`'email-capture'` vs `'conflict'`) — the component is not unmounted and re-mounted on 409, preserving form context for the No-path reset (AC-004; user experience continuity)
+- [x] "Yes, link account" re-calls `createWalkIn` with `linkExistingAccountId`; the existing patient's ID is parsed from the 409 response body and held in component state — not re-fetched via a separate GET (AC-004 Yes path; avoids extra round-trip)
+- [x] Warning banner in `WalkInConfirmation` uses `<div role="alert">` and does NOT use `setTimeout` or auto-dismiss logic — staff must manually acknowledge the delivery failure and provide credentials (Edge: delivery failure; OWASP A09 — audit-visible outcome)
+- [x] `walkInApi.ts` uses the `Authorization: Bearer <accessToken>` header from `AuthContext`; a 401 response triggers the existing session-expiry flow (all ACs; OWASP A01)

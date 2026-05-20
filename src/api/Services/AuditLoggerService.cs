@@ -12,13 +12,15 @@ public sealed class AuditLoggerService : IAuditLogger
     private static readonly Serilog.ILogger _log = Serilog.Log.ForContext<AuditLoggerService>();
 
     /// <inheritdoc />
-    public void Log(string actorId, string actionType, string resourceId)
+    public void Log(string actorId, string actionType, string resourceId, string? details = null)
     {
         _log
             .ForContext("EventType", "AuditLog")
             .ForContext("ActorId", actorId)
             .ForContext("ActionType", actionType)
             .ForContext("ResourceId", resourceId)
+            // Details: empty string when absent so Seq always has the field present (AC-002; OWASP A09)
+            .ForContext("Details", details ?? string.Empty)
             .Information(
                 "Audit event: {ActionType} on {ResourceId} by {ActorId} at {OccurredAt}",
                 actionType,

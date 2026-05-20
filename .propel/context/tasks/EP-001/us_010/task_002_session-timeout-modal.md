@@ -140,10 +140,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `useInactivityTimer` attaches `passive: true` event listeners to avoid blocking the scroll thread — critical for usability on scroll-heavy pages (Edge: activity detection; browser performance)
-- [ ] Both timer refs (`warningTimerRef` and `timeoutTimerRef`) are cleared in the cleanup function returned from `useEffect` — prevents stale timers firing after component unmount or re-render (AC-001, AC-002 — timer hygiene)
-- [ ] `SessionTimeoutModal` countdown is driven by `setInterval(1000)` inside a `useEffect` that stops the interval when `secondsLeft` reaches 0 and calls `onTimeout()` — the 60-second countdown is the last line of defence before forced sign-out (AC-001; UXR-202)
-- [ ] "Stay signed in" broadcasts `{ type: 'SESSION_EXTENDED' }` via `BroadcastChannel('upacip-session')` before closing the modal — ensures other tabs receive the signal before the originating tab's timer resets (Edge: multiple tabs — message must fire before local state changes)
-- [ ] `BroadcastChannel` is instantiated once per hook instance and closed in the `useEffect` cleanup — prevents memory leaks from orphaned channel listeners (Edge: multiple tabs; resource management)
-- [ ] `LoginForm.tsx` renders `location.state?.message` as a visible info/warning element (not a toast that auto-dismisses) so a returning user sees the session-expired message when they arrive at the login page (AC-002)
-- [ ] `useInactivityTimer` is only mounted inside the authenticated layout wrapper in `App.tsx` — unauthenticated users visiting `/login` or `/register` are not affected by the inactivity timeout (AC-001 — timer scope)
+- [x] `useInactivityTimer` attaches `passive: true` event listeners to avoid blocking the scroll thread — critical for usability on scroll-heavy pages (Edge: activity detection; browser performance)
+- [x] Both timer refs (`warningTimerRef` and `timeoutTimerRef`) are cleared in the cleanup function returned from `useEffect` — prevents stale timers firing after component unmount or re-render (AC-001, AC-002 — timer hygiene)
+- [x] `SessionTimeoutModal` countdown is driven by `setInterval(1000)` inside a `useEffect` that stops the interval when `secondsLeft` reaches 0 and calls `onTimeout()` — the 60-second countdown is the last line of defence before forced sign-out (AC-001; UXR-202)
+- [x] "Stay signed in" broadcasts `{ type: 'SESSION_EXTENDED' }` via `BroadcastChannel('upacip-session')` before closing the modal — ensures other tabs receive the signal before the originating tab's timer resets (Edge: multiple tabs — message must fire before local state changes)
+- [x] `BroadcastChannel` is instantiated once per hook instance and closed in the `useEffect` cleanup — prevents memory leaks from orphaned channel listeners (Edge: multiple tabs; resource management)
+- [x] `LoginForm.tsx` renders `location.state?.message` as a visible info/warning element (not a toast that auto-dismisses) so a returning user sees the session-expired message when they arrive at the login page (AC-002)
+- [x] `useInactivityTimer` is only mounted inside the authenticated layout wrapper in `App.tsx` — unauthenticated users visiting `/login` or `/register` are not affected by the inactivity timeout (AC-001 — timer scope)

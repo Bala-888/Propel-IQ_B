@@ -141,9 +141,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `registrationSchema.ts` marks `insuranceProvider` and `insuranceId` as `z.string().optional()` — omitting them does not trigger client-side validation errors (Edge: insurance optional client-side)
-- [ ] Every field error `<p>` or `<span>` node renders a warning icon element alongside the message text — satisfies UXR-105 (no color-only validation encoding) (AC-004)
-- [ ] Submit `<button>` carries `disabled={!formState.isValid || formState.isSubmitting}` — covers both the "has errors" and "API call in flight" disabled states (AC-004)
-- [ ] `onSubmit` maps HTTP 400 `validationErrors` keys to react-hook-form `setError(fieldName, { message })` so server-side errors (email format, DOB future) surface as inline field errors without re-rendering the whole page (AC-004; Edge server errors surfaced in form)
-- [ ] `authContext.setPatientName(...)` is called synchronously before `navigate('/intake')` so the header component receives the name in the same render cycle — meets the 1-second display requirement (AC-005)
-- [ ] `/register` route is added to the router configuration and the `RegistrationForm` component is the route element — the form is accessible at the correct path (AC-004, AC-005)
+- [x] `registrationSchema.ts` marks `insuranceProvider` and `insuranceId` as `z.string().optional()` — omitting them does not trigger client-side validation errors (Edge: insurance optional client-side)
+- [x] Every field error `<p>` or `<span>` node renders a warning icon element alongside the message text — satisfies UXR-105 (no color-only validation encoding) (AC-004)
+- [x] Submit `<button>` carries `disabled={!formState.isValid || formState.isSubmitting}` — covers both the "has errors" and "API call in flight" disabled states (AC-004)
+- [x] `onSubmit` maps HTTP 400 `validationErrors` keys to react-hook-form `setError(fieldName, { message })` so server-side errors (email format, DOB future) surface as inline field errors without re-rendering the whole page (AC-004; Edge server errors surfaced in form)
+- [x] `authContext.setPatientName(...)` is called synchronously before `navigate('/intake')` so the header component receives the name in the same render cycle — meets the 1-second display requirement (AC-005)
+- [x] `/register` route is added to the router configuration and the `RegistrationForm` component is the route element — the form is accessible at the correct path (AC-004, AC-005)

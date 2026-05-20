@@ -152,10 +152,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `TokenService.GenerateAccessToken` sets `exp = DateTime.UtcNow.AddMinutes(15)` — verified by decoding `exp` claim: `exp - iat == 900` (AC-001)
-- [ ] JWT is signed with HMAC-SHA256 using `JWT_SECRET` from `Environment.GetEnvironmentVariable("JWT_SECRET")` — not from `appsettings.json` (AC-001; OWASP A02 — no secrets in source)
-- [ ] `LoginAsync` returns the same `{"error": "Invalid email or password"}` HTTP 401 body whether the email does not exist or the password is wrong — no branching on error message (AC-005; OWASP A07 — prevent account enumeration)
-- [ ] `IAuditLogger.Log(userId ?? "unknown", "LoginFailure", email)` is called for both non-existent-email and wrong-password paths — before returning the 401 response (AC-005)
-- [ ] JWT Bearer `OnChallenge` event inspects `context.AuthenticateFailure` — if the failure is `SecurityTokenExpiredException`, writes `{"error": "Token expired"}`; otherwise writes generic unauthorized (Edge: JWT expiry → 401 not 403)
-- [ ] `RefreshAsync` marks ALL `RefreshToken` rows with matching `FamilyId` as revoked when a reuse is detected — not just the submitted token — then returns 401 (Edge: replay attack; RFC 6819 §5.2.2.3 token family invalidation)
-- [ ] `BCrypt.Verify(request.Password, user.PasswordHash)` is called with constant-time comparison provided by BCrypt — raw string comparison (`==`) must never be used for password verification (OWASP A02)
+- [x] `TokenService.GenerateAccessToken` sets `exp = DateTime.UtcNow.AddMinutes(15)` — verified by decoding `exp` claim: `exp - iat == 900` (AC-001)
+- [x] JWT is signed with HMAC-SHA256 using `JWT_SECRET` from `Environment.GetEnvironmentVariable("JWT_SECRET")` — not from `appsettings.json` (AC-001; OWASP A02 — no secrets in source)
+- [x] `LoginAsync` returns the same `{"error": "Invalid email or password"}` HTTP 401 body whether the email does not exist or the password is wrong — no branching on error message (AC-005; OWASP A07 — prevent account enumeration)
+- [x] `IAuditLogger.Log(userId ?? "unknown", "LoginFailure", email)` is called for both non-existent-email and wrong-password paths — before returning the 401 response (AC-005)
+- [x] JWT Bearer `OnChallenge` event inspects `context.AuthenticateFailure` — if the failure is `SecurityTokenExpiredException`, writes `{"error": "Token expired"}`; otherwise writes generic unauthorized (Edge: JWT expiry → 401 not 403)
+- [x] `RefreshAsync` marks ALL `RefreshToken` rows with matching `FamilyId` as revoked when a reuse is detected — not just the submitted token — then returns 401 (Edge: replay attack; RFC 6819 §5.2.2.3 token family invalidation)
+- [x] `BCrypt.Verify(request.Password, user.PasswordHash)` is called with constant-time comparison provided by BCrypt — raw string comparison (`==`) must never be used for password verification (OWASP A02)

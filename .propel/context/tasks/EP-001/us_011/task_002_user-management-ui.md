@@ -149,11 +149,11 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `UserStatusBadge` renders both a named icon and a text string for Active and Inactive states — colour is supplementary, not the sole differentiator; satisfies WCAG 1.4.1 non-text contrast (UXR-105; AC-003)
-- [ ] `UserModal.tsx` zod schema validates `email` with `.email()` and `role` with `.enum(['Patient', 'Staff', 'Admin'])` — client-side validation mirrors API validation to catch errors before the network round-trip (AC-001, AC-005; OWASP A03)
-- [ ] `UserModal.tsx` submit handler sets a `formError` state on 409 and renders the error message inside the modal body — `onClose` is NOT called; the modal stays open so the admin can correct the email (AC-005)
-- [ ] Own-account Deactivate button in `UserManagementPage.tsx` is detected by comparing `user.id === authContext.userId` (not by role); the button receives `aria-disabled="true"` and `onClick` shows the error banner without dispatching a `patchUser` call — avoids an additional API round-trip (AC-004; accessibility)
-- [ ] `DeactivateDialog.tsx` is reused for both deactivation and reactivation — the message copy and the `PatchUserRequest.isActive` value differ based on a `targetState: boolean` prop; no duplicated dialog components (AC-003; Edge: reactivation — DRY)
-- [ ] `adminUsersApi.ts` includes the `Authorization` header from `AuthContext` on every request; a 401 response triggers the same session-expired flow as other API calls (AC-001, AC-002, AC-003; OWASP A01)
-- [ ] Table rows are updated in-place after successful modal or dialog submission (optimistic update on local `users` state); no full page re-fetch required — immediate feedback per AC-002 and AC-003 (AC-002, AC-003; UX responsiveness)
-- [ ] MOD-006 form fields include associated `<label>` elements with `htmlFor`; error messages use `role="alert"` for screen reader announcement — accessibility requirement aligned with UXR-105 spirit (AC-001, AC-005; WCAG 2.1)
+- [x] `UserStatusBadge` renders both a named icon and a text string for Active and Inactive states — colour is supplementary, not the sole differentiator; satisfies WCAG 1.4.1 non-text contrast (UXR-105; AC-003)
+- [x] `UserModal.tsx` zod schema validates `email` with `.email()` and `role` with `.enum(['Patient', 'Staff', 'Admin'])` — client-side validation mirrors API validation to catch errors before the network round-trip (AC-001, AC-005; OWASP A03)
+- [x] `UserModal.tsx` submit handler sets a `formError` state on 409 and renders the error message inside the modal body — `onClose` is NOT called; the modal stays open so the admin can correct the email (AC-005)
+- [x] Own-account Deactivate button in `UserManagementPage.tsx` is detected by comparing `user.id === authContext.userId` (not by role); the button receives `aria-disabled="true"` and `onClick` shows the error banner without dispatching a `patchUser` call — avoids an additional API round-trip (AC-004; accessibility)
+- [x] `DeactivateDialog.tsx` is reused for both deactivation and reactivation — the message copy and the `PatchUserRequest.isActive` value differ based on a `targetState: boolean` prop; no duplicated dialog components (AC-003; Edge: reactivation — DRY)
+- [x] `adminUsersApi.ts` includes the `Authorization` header from `AuthContext` on every request; a 401 response triggers the same session-expired flow as other API calls (AC-001, AC-002, AC-003; OWASP A01)
+- [x] Table rows are updated in-place after successful modal or dialog submission (optimistic update on local `users` state); no full page re-fetch required — immediate feedback per AC-002 and AC-003 (AC-002, AC-003; UX responsiveness)
+- [x] MOD-006 form fields include associated `<label>` elements with `htmlFor`; error messages use `role="alert"` for screen reader announcement — accessibility requirement aligned with UXR-105 spirit (AC-001, AC-005; WCAG 2.1)

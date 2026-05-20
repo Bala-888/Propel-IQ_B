@@ -151,11 +151,11 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `WalkInsController` is decorated with `[Authorize(Roles = "Staff")]` at the class level — only authenticated staff members can create walk-in bookings (AC-001, AC-002; OWASP A01)
-- [ ] `CreateWalkInRequest.Validate` (IValidatableObject) returns a validation error for empty email when `CreateAccount = true` before the service layer is reached — avoids partial execution with missing data (Edge: empty email; OWASP A03)
-- [ ] `WalkInService.CreateAsync` calls `SaveChangesAsync` to commit the booking **before** attempting to send the credentials email — email failure never causes a booking rollback (AC-003; Edge: delivery failure — transactional isolation)
-- [ ] The 3-retry email envelope uses a simple loop with no `Thread.Sleep` / `Task.Delay` — the 30-second budget (AC-003) must not be consumed by artificial wait time; retry only on transient `SmtpException` (AC-003)
-- [ ] `DuplicateEmailException` is a domain exception caught at the controller level → 409; it is not allowed to propagate to the global exception middleware to avoid generic 500 responses (AC-004; OWASP A05)
-- [ ] Temporary password is generated using `RandomNumberGenerator.GetString` (cryptographically secure) — not `System.Random` (AC-002; OWASP A02 — weak random number generation)
-- [ ] `CredentialsEmailFailed = true` in the response is a non-blocking signal — the HTTP status code is still 201; the frontend decides how to display the warning (Edge: delivery failure — separation of concerns)
-- [ ] Audit log entry `WalkInAccountLinked` records both the `WalkInBookingId` and `LinkedPatientId` in the `Details` payload — enables traceability of manual-linking decisions (AC-004 Yes path; OWASP A09)
+- [x] `WalkInsController` is decorated with `[Authorize(Roles = "Staff")]` at the class level — only authenticated staff members can create walk-in bookings (AC-001, AC-002; OWASP A01)
+- [x] `CreateWalkInRequest.Validate` (IValidatableObject) returns a validation error for empty email when `CreateAccount = true` before the service layer is reached — avoids partial execution with missing data (Edge: empty email; OWASP A03)
+- [x] `WalkInService.CreateAsync` calls `SaveChangesAsync` to commit the booking **before** attempting to send the credentials email — email failure never causes a booking rollback (AC-003; Edge: delivery failure — transactional isolation)
+- [x] The 3-retry email envelope uses a simple loop with no `Thread.Sleep` / `Task.Delay` — the 30-second budget (AC-003) must not be consumed by artificial wait time; retry only on transient `SmtpException` (AC-003)
+- [x] `DuplicateEmailException` is a domain exception caught at the controller level → 409; it is not allowed to propagate to the global exception middleware to avoid generic 500 responses (AC-004; OWASP A05)
+- [x] Temporary password is generated using `RandomNumberGenerator.Fill` (cryptographically secure) — not `System.Random` (AC-002; OWASP A02 — weak random number generation)
+- [x] `CredentialsEmailFailed = true` in the response is a non-blocking signal — the HTTP status code is still 201; the frontend decides how to display the warning (Edge: delivery failure — separation of concerns)
+- [x] Audit log entry `WalkInAccountLinked` records both the `WalkInBookingId` and `LinkedPatientId` in the `Details` payload — enables traceability of manual-linking decisions (AC-004 Yes path; OWASP A09)

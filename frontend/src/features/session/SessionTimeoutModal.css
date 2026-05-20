@@ -1,0 +1,143 @@
+/* ── SessionTimeoutModal styles — MOD-001 Hi-Fi wireframe tokens ─────────────
+   Token values sourced from :root in wireframe-MOD-001-session-timeout-warning.html.
+   All colour literals must trace to a semantic token (design-compliance-report token audit). */
+
+/* OVERLAY — UXR-202: full-viewport scrim; focus trap implemented in component */
+.session-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* MODAL CARD */
+.session-modal {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-10);
+  box-shadow: var(--shadow-3);
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+}
+
+/* CLOCK ICON CONTAINER */
+.session-modal__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-warning-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-6);
+}
+
+/* TITLE */
+.session-modal__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+}
+
+/* BODY TEXT */
+.session-modal__body {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+/* COUNTDOWN TIMER (UXR-202 — visible countdown; font-mono for fixed-width digits) */
+.session-modal__timer {
+  font-family: var(--font-mono);
+  font-size: 48px;
+  font-weight: 400;
+  color: var(--color-status-warning);
+  margin: var(--space-6) 0;
+  letter-spacing: 2px;
+  line-height: 1;
+  transition: color 0.3s;
+}
+
+/* Critical state — last 10 seconds (colour shifts to error red; UXR-202) */
+.session-modal__timer--critical {
+  color: var(--color-status-error);
+}
+
+/* TIMER LABEL */
+.session-modal__timer-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-8);
+}
+
+/* INLINE ERROR (extend failure) */
+.session-modal__error {
+  font-size: 13px;
+  color: var(--color-status-error);
+  margin-bottom: var(--space-4);
+}
+
+/* BUTTONS */
+.session-modal__btn {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  width: 100%;
+  margin-bottom: var(--space-3);
+  transition: background 0.15s;
+}
+
+.session-modal__btn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.session-modal__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Primary — "Stay signed in" */
+.session-modal__btn--primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.session-modal__btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.session-modal__btn--primary:active:not(:disabled) {
+  background: var(--color-primary-active);
+}
+
+/* Secondary — "Sign out now" */
+.session-modal__btn--secondary {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.session-modal__btn--secondary:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+}
+
+/* FOOTER NOTE */
+.session-modal__footer {
+  font-size: 12px;
+  color: var(--color-text-disabled);
+  margin-top: var(--space-5);
+}

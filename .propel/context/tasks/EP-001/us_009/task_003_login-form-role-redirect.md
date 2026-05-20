@@ -142,9 +142,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `decodeJwtRole` uses `atob(token.split('.')[1])` and `JSON.parse` — no third-party JWT library introduced for client-side role decode (AC-002, AC-003, AC-004; bundle-size hygiene)
-- [ ] `accessToken` is stored in `AuthContext` React state (in-memory), NOT in `localStorage` or `document.cookie` — prevents XSS token theft (OWASP A02; token storage best practice)
-- [ ] Root error from a 401 API response is rendered with a `<WarningIcon />` element alongside the text — satisfies UXR-105 (no color-only error indication) (AC-002, AC-003, AC-004 — login failure display)
-- [ ] Role-based redirect uses an exhaustive switch/if-else covering all three roles; an unknown role defaults to `/login` to prevent silent access to a wrong dashboard (AC-002, AC-003, AC-004 — unknown role guard)
-- [ ] `sessionStorage.getItem('redirectAfterLogin')` is checked before the role-based default redirect and cleared immediately after use — prevents stale redirect paths affecting future logins (AC-002)
-- [ ] `PrivateRoute` stores `location.pathname + location.search` as `redirectAfterLogin` in `sessionStorage` before navigating to `/login` — enables the redirect restoration flow tested in validation (AC-002)
+- [x] `decodeJwtRole` uses `atob(token.split('.')[1])` and `JSON.parse` — no third-party JWT library introduced for client-side role decode (AC-002, AC-003, AC-004; bundle-size hygiene)
+- [x] `accessToken` is stored in `AuthContext` React state (in-memory), NOT in `localStorage` or `document.cookie` — prevents XSS token theft (OWASP A02; token storage best practice)
+- [x] Root error from a 401 API response is rendered with a `<WarningIcon />` element alongside the text — satisfies UXR-105 (no color-only error indication) (AC-002, AC-003, AC-004 — login failure display)
+- [x] Role-based redirect uses an exhaustive switch/if-else covering all three roles; an unknown role defaults to `/login` to prevent silent access to a wrong dashboard (AC-002, AC-003, AC-004 — unknown role guard)
+- [x] `sessionStorage.getItem('redirectAfterLogin')` is checked before the role-based default redirect and cleared immediately after use — prevents stale redirect paths affecting future logins (AC-002)
+- [x] `PrivateRoute` stores `location.pathname + location.search` as `redirectAfterLogin` in `sessionStorage` before navigating to `/login` — enables the redirect restoration flow tested in validation (AC-002)

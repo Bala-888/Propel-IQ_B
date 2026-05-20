@@ -27,6 +27,8 @@ public class AppDbContext : DbContext
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<ReminderSchedule> ReminderSchedules => Set<ReminderSchedule>();
     public DbSet<InsuranceRecord> InsuranceRecords => Set<InsuranceRecord>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<WalkInBooking> WalkInBookings => Set<WalkInBooking>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -138,5 +140,20 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ClinicalDocument>()
             .Property(d => d.FileHash)
             .HasMaxLength(64);
+
+        // ── RefreshToken (us_009/task_001) ─────────────────────────────────────────
+        // FK → User with cascade delete: tokens are removed when the user is deleted (data integrity).
+        // HasOne(rt => rt.User) binds the navigation property so EF does not create a second shadow FK
+        // (UserId1 anti-pattern) when the RefreshToken.User nav property was added in task_002.
+        modelBuilder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany()
+            .HasForeignKey(rt => rt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Unique index on Token — prevents two rows with the same token string (security invariant)
+        modelBuilder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.Token)
+            .IsUnique();
     }
 }
