@@ -126,15 +126,15 @@ Author `docker/nginx/nginx.conf` and the Nginx `Dockerfile` to implement:
 ---
 
 ## Implementation Validation Strategy
-- [ ] `curl -I http://localhost:80/` returns HTTP 301 with `Location: https://localhost/` header
-- [ ] `curl -k -I https://localhost/` returns HTTP 200 with `Content-Type: text/html` header confirming SPA shell is served
+- [x] `curl -I http://localhost:80/` returns HTTP 301 with `Location: https://localhost/` header
+- [x] `curl -k -I https://localhost/` returns HTTP 200 with `Content-Type: text/html` header confirming SPA shell is served
 
 ---
 
 ## Implementation Checklist
-- [ ] `nginx.conf` port-80 `server` block contains `return 301 https://$host$request_uri;` and no other `location` blocks (AC-003)
-- [ ] `nginx.conf` port-443 `server` block sets `ssl_protocols TLSv1.2 TLSv1.3` and restricts `ssl_ciphers` to ECDHE-ECDSA-AES128-GCM-SHA256 / ECDHE-RSA-AES128-GCM-SHA256 suites or the Mozilla intermediate profile (NFR-005 / TR-008)
-- [ ] `location /` uses `root /usr/share/nginx/html;` and `try_files $uri $uri/ /index.html;` so direct navigation to any React route returns SPA shell (AC-005)
-- [ ] `location /api/` reverse-proxies to `api:8080` with `proxy_set_header Host`, `X-Real-IP`, and `X-Forwarded-Proto https` headers (AC-005 integration)
-- [ ] `index.html` is served with `Cache-Control: no-cache, no-store, must-revalidate` and hashed static assets with `Cache-Control: max-age=31536000, immutable` (AC-005 correctness)
-- [ ] `docker/nginx/Dockerfile` copies `nginx.conf` and runs `openssl req -x509 -nodes -days 365 -newkey rsa:2048` to produce dev TLS cert at image build time; no hardcoded secrets in the Dockerfile (AC-003, AC-005, OWASP A02 — no credentials in image layers)
+- [x] `nginx.conf` port-80 `server` block contains `return 301 https://$host$request_uri;` and no other `location` blocks (AC-003)
+- [x] `nginx.conf` port-443 `server` block sets `ssl_protocols TLSv1.2 TLSv1.3` and restricts `ssl_ciphers` to ECDHE-ECDSA-AES128-GCM-SHA256 / ECDHE-RSA-AES128-GCM-SHA256 suites or the Mozilla intermediate profile (NFR-005 / TR-008)
+- [x] `location /` uses `root /usr/share/nginx/html;` and `try_files $uri $uri/ /index.html;` so direct navigation to any React route returns SPA shell (AC-005)
+- [x] `location /api/` reverse-proxies to `api:8080` with `proxy_set_header Host`, `X-Real-IP`, and `X-Forwarded-Proto https` headers (AC-005 integration)
+- [x] `index.html` is served with `Cache-Control: no-cache, no-store, must-revalidate` and hashed static assets with `Cache-Control: max-age=31536000, immutable` (AC-005 correctness)
+- [x] `docker/nginx/Dockerfile` copies `nginx.conf` and runs `openssl req -x509 -nodes -days 365 -newkey rsa:2048` to produce dev TLS cert at image build time; no hardcoded secrets in the Dockerfile (AC-003, AC-005, OWASP A02 — no credentials in image layers)

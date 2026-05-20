@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    # AC-005: entire job must complete within 10 minutes
+    timeout-minutes: 10
+
+    env:
+      # Required by docker-compose.yml services.
+      # Configure the following as GitHub repository secrets before merging to main:
+      #   PHI_ENCRYPTION_KEY, DOCUMENT_MASTER_KEY, POSTGRES_PASSWORD,
+      #   JWT_SECRET, GRAFANA_ADMIN_PASSWORD
+      PHI_ENCRYPTION_KEY: ${{ secrets.PHI_ENCRYPTION_KEY }}
+      DOCUMENT_MASTER_KEY: ${{ secrets.DOCUMENT_MASTER_KEY }}
+      POSTGRES_DB: upacip
+      POSTGRES_USER: upacip
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Frontend ─────────────────────────────────────────────────────────────
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          # Built-in npm cache keyed on frontend/package-lock.json
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Lint frontend
+        run: |
+          npm ci --prefix frontend
+          npm run lint --prefix frontend
+
+      # ── Backend ──────────────────────────────────────────────────────────────
+      - name: Set up .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Api.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # Edge: NuGet rate limiting — retries once before failing (max_attempts: 2 = 1 retry)
+      - name: Restore .NET packages
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 2
+          retry_wait_seconds: 30
+          command: dotnet restore src/api
+
+      - name: Build .NET API
+        run: dotnet build src/api --configuration Release --no-restore
+
+      # ── Frontend build ────────────────────────────────────────────────────────
+      - name: Build frontend
+        run: npm run build --prefix frontend
+
+      # ── Integration smoke test ────────────────────────────────────────────────
+      - name: Start Docker Compose stack
+        timeout-minutes: 3
+        run: docker compose up --wait
+
+      - name: Smoke test health endpoint
+        run: curl -f --insecure https://localhost/api/health

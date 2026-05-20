@@ -115,14 +115,14 @@ docker/
 ---
 
 ## Implementation Validation Strategy
-- [ ] `curl -I https://localhost/api/health --insecure` returns HTTP 200 and `X-Service: api` header is present in the response (AC-002)
-- [ ] `openssl s_client -connect localhost:443 -tls1` (or `-tls1_1`) returns `handshake failure` — connection is refused for TLS 1.0/1.1 (AC-003)
+- [x] `curl -I https://localhost/api/health --insecure` returns HTTP 200 and `X-Service: api` header is present in the response (AC-002)
+- [x] `openssl s_client -connect localhost:443 -tls1` (or `-tls1_1`) returns `handshake failure` — connection is refused for TLS 1.0/1.1 (AC-003)
 
 ---
 
 ## Implementation Checklist
-- [ ] `nginx.conf` HTTPS block contains `location /api/ { proxy_pass http://api:8080/; }` with `proxy_set_header X-Forwarded-Proto https;` and `proxy_set_header X-Real-IP $remote_addr;` (AC-002)
-- [ ] `proxy_read_timeout 30s;` and `proxy_connect_timeout 5s;` are set in the `/api/` location block to prevent gateway hangs (AC-002 — reliability)
-- [ ] `nginx.conf` HTTP (port 80) `server` block contains only the `return 301` directive — no `location /api/` block — ensuring API traffic is not reachable over plain HTTP from outside the Docker network (AC-002)
-- [ ] `ssl_protocols TLSv1.2 TLSv1.3;` is the sole `ssl_protocols` directive in the HTTPS server block; no `TLSv1` or `TLSv1.1` entries exist in the entire config file (AC-003)
-- [ ] `add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;` is present in the HTTPS `server` block (NFR-001 HIPAA transport, OWASP A05)
+- [x] `nginx.conf` HTTPS block contains `location /api/ { proxy_pass http://api:8080/; }` with `proxy_set_header X-Forwarded-Proto https;` and `proxy_set_header X-Real-IP $remote_addr;` (AC-002)
+- [x] `proxy_read_timeout 30s;` and `proxy_connect_timeout 5s;` are set in the `/api/` location block to prevent gateway hangs (AC-002 — reliability)
+- [x] `nginx.conf` HTTP (port 80) `server` block contains only the `return 301` directive — no `location /api/` block — ensuring API traffic is not reachable over plain HTTP from outside the Docker network (AC-002)
+- [x] `ssl_protocols TLSv1.2 TLSv1.3;` is the sole `ssl_protocols` directive in the HTTPS server block; no `TLSv1` or `TLSv1.1` entries exist in the entire config file (AC-003)
+- [x] `add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;` is present in the HTTPS `server` block (NFR-001 HIPAA transport, OWASP A05)

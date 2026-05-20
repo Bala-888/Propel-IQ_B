@@ -135,17 +135,17 @@ Author `docker-compose.yml` defining all 8 services (nginx, frontend, api, db, o
 ---
 
 ## Implementation Validation Strategy
-- [ ] `docker compose up --wait` exits with code 0 and all 8 services show `Status: running (healthy)` in `docker compose ps`
-- [ ] `docker compose down` then `docker compose up` — query `SELECT 1 FROM pg_extension WHERE extname='pgvector'` returns a row (volume persistence AC-002)
+- [x] `docker compose up --wait` exits with code 0 and all 8 services show `Status: running (healthy)` in `docker compose ps`
+- [x] `docker compose down` then `docker compose up` — query `SELECT 1 FROM pg_extension WHERE extname='pgvector'` returns a row (volume persistence AC-002)
 
 ---
 
 ## Implementation Checklist
-- [ ] `docker-compose.yml` defines exactly 8 services: nginx, frontend, api, db, ollama, prometheus, grafana, seq — each with `image:` or `build:` directive (AC-001)
-- [ ] Each service has a `healthcheck:` block and `depends_on:` uses `condition: service_healthy` for ordered startup; `--wait` flag resolves within 120s (AC-001)
-- [ ] `volumes:` top-level key declares `db_data`, `ollama_models`, `seq_data`, `prometheus_data`, `grafana_data` as named volumes with no `driver:` override (AC-002)
-- [ ] `restart: always` is set on db, ollama, seq, prometheus, grafana services; api uses `restart: on-failure` (AC-004)
-- [ ] Port bindings use `<host>:<container>` short syntax; no `0.0.0.0` catchall or range bindings that could silently reroute on conflict (Edge: port conflict)
-- [ ] `db` service `healthcheck` command includes a shell check `test -n "$PHI_ENCRYPTION_KEY"` before `pg_isready`; compose exits non-zero if var is unset (Edge: missing .env)
-- [ ] `.env.example` lists every required variable with `# REQUIRED:` comment prefix and `# OPTIONAL:` for non-critical vars; `.gitignore` includes `.env` (Edge: missing .env)
-- [ ] `docker/prometheus/prometheus.yml` declares a `static_configs` target for `api:8080/metrics` and `docker/db/init.sql` runs `CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE EXTENSION IF NOT EXISTS vector;` (AC-001 — db service must be fully functional on startup)
+- [x] `docker-compose.yml` defines exactly 8 services: nginx, frontend, api, db, ollama, prometheus, grafana, seq — each with `image:` or `build:` directive (AC-001)
+- [x] Each service has a `healthcheck:` block and `depends_on:` uses `condition: service_healthy` for ordered startup; `--wait` flag resolves within 120s (AC-001)
+- [x] `volumes:` top-level key declares `db_data`, `ollama_models`, `seq_data`, `prometheus_data`, `grafana_data` as named volumes with no `driver:` override (AC-002)
+- [x] `restart: always` is set on db, ollama, seq, prometheus, grafana services; api uses `restart: on-failure` (AC-004)
+- [x] Port bindings use `<host>:<container>` short syntax; no `0.0.0.0` catchall or range bindings that could silently reroute on conflict (Edge: port conflict)
+- [x] `db` service `healthcheck` command includes a shell check `test -n "$PHI_ENCRYPTION_KEY"` before `pg_isready`; compose exits non-zero if var is unset (Edge: missing .env)
+- [x] `.env.example` lists every required variable with `# REQUIRED:` comment prefix and `# OPTIONAL:` for non-critical vars; `.gitignore` includes `.env` (Edge: missing .env)
+- [x] `docker/prometheus/prometheus.yml` declares a `static_configs` target for `api:8080/metrics` and `docker/db/init.sql` runs `CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE EXTENSION IF NOT EXISTS vector;` (AC-001 — db service must be fully functional on startup)

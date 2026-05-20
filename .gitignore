@@ -1,0 +1,13 @@
+# ── Environment secrets — NEVER commit ──────────────────────────────────────
+.env
+
+# ── .NET build outputs ───────────────────────────────────────────────────────
+src/api/bin/
+src/api/obj/
+
+# ── Node / Vite build outputs ────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+
+# ── Docker Compose local overrides ───────────────────────────────────────────
+docker-compose.override.yml

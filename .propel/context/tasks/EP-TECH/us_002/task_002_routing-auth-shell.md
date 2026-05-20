@@ -146,16 +146,16 @@ frontend/
 ---
 
 ## Implementation Validation Strategy
-- [ ] `npm run build` in `frontend/` completes with zero errors after all new files are added (AC-001 regression — confirmed via task_001 validation strategy)
-- [ ] Manual navigation to each of `/login`, `/intake`, `/queue`, `/admin` in development renders the correct placeholder `<h1>` and the browser URL bar matches the target path (AC-002)
+- [x] `npm run build` in `frontend/` completes with zero errors after all new files are added (AC-001 regression — confirmed via task_001 validation strategy)
+- [x] Manual navigation to each of `/login`, `/intake`, `/queue`, `/admin` in development renders the correct placeholder `<h1>` and the browser URL bar matches the target path (AC-002)
 
 ---
 
 ## Implementation Checklist
-- [ ] `frontend/src/router/index.tsx` defines exactly four routes (`/login`, `/intake`, `/queue`, `/admin`) using `createBrowserRouter`; protected routes wrap children in `<ProtectedRoute>` (AC-002)
-- [ ] `ProtectedRoute` reads `token` from `AuthContext`; when `token` is `null`, calls `navigate('/login?redirect=' + encodeURIComponent(location.pathname))` and returns `null` — no full page reload (AC-003)
-- [ ] `AuthContext` provides `{ token: string | null; setToken }` shape; `AuthProvider` wraps the `RouterProvider` in `App.tsx` so context is available to all route components (AC-003)
-- [ ] `useRoleRedirect` hook defines `ROLE_PATHS = { Patient: '/intake', Staff: '/queue', Admin: '/admin' }` and returns the mapped path for each known role (AC-004)
-- [ ] `useRoleRedirect` returns `'/login'` and calls `console.warn(\`Unknown role: \${role}\`)` for any role value not in `ROLE_PATHS` — no `throw`, no uncaught exception (Edge: unknown role)
-- [ ] All four placeholder page components are plain functional components returning `<main><h1>[Page name]</h1></main>` with no business logic and correct TypeScript return types (AC-002)
-- [ ] `npm run build` passes with zero TypeScript errors after all router/context/hook files are added — `useNavigate` is only called inside components that are rendered within a `<RouterProvider>` (Edge: concurrent navigation safety / AC-001 regression)
+- [x] `frontend/src/router/index.tsx` defines exactly four routes (`/login`, `/intake`, `/queue`, `/admin`) using `createBrowserRouter`; protected routes wrap children in `<ProtectedRoute>` (AC-002)
+- [x] `ProtectedRoute` reads `token` from `AuthContext`; when `token` is `null`, calls `navigate('/login?redirect=' + encodeURIComponent(location.pathname))` and returns `null` — no full page reload (AC-003)
+- [x] `AuthContext` provides `{ token: string | null; setToken }` shape; `AuthProvider` wraps the `RouterProvider` in `App.tsx` so context is available to all route components (AC-003)
+- [x] `useRoleRedirect` hook defines `ROLE_PATHS = { Patient: '/intake', Staff: '/queue', Admin: '/admin' }` and returns the mapped path for each known role (AC-004)
+- [x] `useRoleRedirect` returns `'/login'` and calls `console.warn(\`Unknown role: \${role}\`)` for any role value not in `ROLE_PATHS` — no `throw`, no uncaught exception (Edge: unknown role)
+- [x] All four placeholder page components are plain functional components returning `<main><h1>[Page name]</h1></main>` with no business logic and correct TypeScript return types (AC-002)
+- [x] `npm run build` passes with zero TypeScript errors after all router/context/hook files are added — `useNavigate` is only called inside components that are rendered within a `<RouterProvider>` (Edge: concurrent navigation safety / AC-001 regression)

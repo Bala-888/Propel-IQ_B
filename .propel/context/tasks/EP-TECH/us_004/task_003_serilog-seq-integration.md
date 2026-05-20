@@ -137,10 +137,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `Api.csproj` references `Serilog.AspNetCore` (8.x), `Serilog.Sinks.Seq` (6.x), `Serilog.Enrichers.Environment`, and `Serilog.Enrichers.Thread` (AC-003, AC-004)
-- [ ] `builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration))` is called in `Program.cs` before `builder.Build()`, making `ILogger<T>` injection use Serilog (AC-003)
-- [ ] `app.UseSerilogRequestLogging(...)` is placed before `UseRouting()` in the pipeline and enriches each request with `RequestPath`, `StatusCode`, and `Elapsed` via `EnrichDiagnosticContext` (AC-003)
-- [ ] `appsettings.json` `Serilog.WriteTo` entry uses `serverUrl: http://seq:5341` (Docker internal hostname, not `localhost`) and the Seq sink's default in-memory queue buffers up to the permitted capacity — API does not crash if Seq is unreachable at startup (Edge: Seq not ready)
-- [ ] `IAuditLogger.Log(actorId, actionType, resourceId)` is a void method on the interface; the implementation uses `ForContext` to attach `EventType: AuditLog`, `ActorId`, `ActionType`, and `ResourceId` before writing (AC-004)
-- [ ] `AuditLoggerService` sets `OccurredAt` to `DateTime.UtcNow` — not `DateTime.Now` or `DateTimeOffset.UtcNow.LocalDateTime` — ensuring the property is always UTC regardless of server timezone (AC-004)
-- [ ] `services.AddSingleton<IAuditLogger, AuditLoggerService>()` is registered in `Program.cs`; all controllers that need audit logging receive it via constructor injection, not via `new` (AC-004, OWASP A09 — centralised audit logging)
+- [x] `Api.csproj` references `Serilog.AspNetCore` (8.x), `Serilog.Sinks.Seq` (6.x), `Serilog.Enrichers.Environment`, and `Serilog.Enrichers.Thread` (AC-003, AC-004)
+- [x] `builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration))` is called in `Program.cs` before `builder.Build()`, making `ILogger<T>` injection use Serilog (AC-003)
+- [x] `app.UseSerilogRequestLogging(...)` is placed before `UseRouting()` in the pipeline and enriches each request with `RequestPath`, `StatusCode`, and `Elapsed` via `EnrichDiagnosticContext` (AC-003)
+- [x] `appsettings.json` `Serilog.WriteTo` entry uses `serverUrl: http://seq:5341` (Docker internal hostname, not `localhost`) and the Seq sink's default in-memory queue buffers up to the permitted capacity — API does not crash if Seq is unreachable at startup (Edge: Seq not ready)
+- [x] `IAuditLogger.Log(actorId, actionType, resourceId)` is a void method on the interface; the implementation uses `ForContext` to attach `EventType: AuditLog`, `ActorId`, `ActionType`, and `ResourceId` before writing (AC-004)
+- [x] `AuditLoggerService` sets `OccurredAt` to `DateTime.UtcNow` — not `DateTime.Now` or `DateTimeOffset.UtcNow.LocalDateTime` — ensuring the property is always UTC regardless of server timezone (AC-004)
+- [x] `services.AddSingleton<IAuditLogger, AuditLoggerService>()` is registered in `Program.cs`; all controllers that need audit logging receive it via constructor injection, not via `new` (AC-004, OWASP A09 — centralised audit logging)

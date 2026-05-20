@@ -139,16 +139,16 @@ frontend/
 ---
 
 ## Implementation Validation Strategy
-- [ ] `cd frontend && npm run build` exits with code 0; `dist/index.html` exists and `dist/assets/` contains at least one file with a hash in its name (AC-001)
-- [ ] `cd frontend && npm run lint` exits with code 0 — zero ESLint errors (AC-001)
+- [x] `cd frontend && npm run build` exits with code 0; `dist/index.html` exists and `dist/assets/` contains at least one file with a hash in its name (AC-001)
+- [x] `cd frontend && npm run lint` exits with code 0 — zero ESLint errors (AC-001)
 
 ---
 
 ## Implementation Checklist
-- [ ] `frontend/` Vite React TypeScript project initialised; all boilerplate demo files (counter, `App.css`, logo SVG) removed (AC-001)
-- [ ] `tsconfig.json` sets `"strict": true`, `"noUnusedLocals": true`, `"noUnusedParameters": true`; TypeScript version ≥ 5.x installed in `devDependencies` (AC-001)
-- [ ] `.eslintrc.cjs` extends `plugin:@typescript-eslint/recommended` and `plugin:react-hooks/recommended`; `npm run lint` passes with zero errors on the initial scaffold (AC-001)
-- [ ] `package.json` `"scripts"` contains `"build": "tsc && vite build"` so TypeScript compilation errors block the build (AC-001)
-- [ ] `frontend/index.html` `<head>` contains `<link rel="preconnect" href="https://fonts.googleapis.com">` and the IBM Plex Sans stylesheet link (AC-005)
-- [ ] `frontend/src/index.css` `body` selector sets `font-family: 'IBM Plex Sans', sans-serif;` and the file is imported in `main.tsx` (AC-005)
-- [ ] `npm run build` produces `dist/index.html` and at least one hashed JS asset in `dist/assets/` — verified by listing `dist/` after build (AC-001)
+- [x] `frontend/` Vite React TypeScript project initialised; all boilerplate demo files (counter, `App.css`, logo SVG) removed (AC-001)
+- [x] `tsconfig.json` sets `"strict": true`, `"noUnusedLocals": true`, `"noUnusedParameters": true`; TypeScript version ≥ 5.x installed in `devDependencies` (AC-001)
+- [x] `.eslintrc.cjs` extends `plugin:@typescript-eslint/recommended` and `plugin:react-hooks/recommended`; `npm run lint` passes with zero errors on the initial scaffold (AC-001)
+- [x] `package.json` `"scripts"` contains `"build": "tsc && vite build"` so TypeScript compilation errors block the build (AC-001)
+- [x] `frontend/index.html` `<head>` contains `<link rel="preconnect" href="https://fonts.googleapis.com">` and the IBM Plex Sans stylesheet link (AC-005)
+- [x] `frontend/src/index.css` `body` selector sets `font-family: 'IBM Plex Sans', sans-serif;` and the file is imported in `main.tsx` (AC-005)
+- [x] `npm run build` produces `dist/index.html` and at least one hashed JS asset in `dist/assets/` — verified by listing `dist/` after build (AC-001)

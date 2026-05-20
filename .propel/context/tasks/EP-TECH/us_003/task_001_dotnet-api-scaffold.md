@@ -129,16 +129,16 @@ src/
 ---
 
 ## Implementation Validation Strategy
-- [ ] `dotnet build src/api/Api.csproj` exits with code 0 — zero compile errors (AC-001, AC-004 prerequisite)
+- [x] `dotnet build src/api/Api.csproj` exits with code 0 — zero compile errors (AC-001, AC-004 prerequisite)
 - [ ] `docker compose up --wait api` then `curl -f https://localhost/api/health` returns `{"status":"Healthy"}` (AC-001)
 
 ---
 
 ## Implementation Checklist
-- [ ] `src/api/Api.csproj` targets `net8.0` and references `prometheus-net.AspNetCore` NuGet package (AC-004)
-- [ ] `Program.cs` startup guard: `if (string.IsNullOrWhiteSpace(config["JWT_SECRET"])) { Console.Error.WriteLine("FATAL: JWT_SECRET is not configured"); Environment.Exit(1); }` executes before any service registration (Edge: JWT_SECRET)
-- [ ] `builder.Services.AddHealthChecks()` registered and `app.MapHealthChecks("/health")` returns `{"status":"Healthy"}` as JSON (AC-001)
-- [ ] `app.UseForwardedHeaders()` with `XForwardedFor | XForwardedProto` is the first middleware in the pipeline, before `UseAuthentication` (AC-002 — correct client IP and proto visible to API)
-- [ ] `app.UseHttpMetrics()` and `app.MapMetrics("/metrics")` registered; response `Content-Type` header is `text/plain; version=0.0.4` (AC-004)
-- [ ] `ServiceHeaderMiddleware.InvokeAsync` sets `context.Response.Headers["X-Service"] = "api"` before calling `_next(context)`; registered with `app.UseMiddleware<ServiceHeaderMiddleware>()` (AC-002)
-- [ ] `src/api/docker/Dockerfile` uses two-stage build (`sdk:8.0` build stage, `aspnet:8.0` runtime stage); no source code or secrets copied into the runtime image layer (AC-001, OWASP A02 — no secrets in image layers)
+- [x] `src/api/Api.csproj` targets `net8.0` and references `prometheus-net.AspNetCore` NuGet package (AC-004)
+- [x] `Program.cs` startup guard: `if (string.IsNullOrWhiteSpace(config["JWT_SECRET"])) { Console.Error.WriteLine("FATAL: JWT_SECRET is not configured"); Environment.Exit(1); }` executes before any service registration (Edge: JWT_SECRET)
+- [x] `builder.Services.AddHealthChecks()` registered and `app.MapHealthChecks("/health")` returns `{"status":"Healthy"}` as JSON (AC-001)
+- [x] `app.UseForwardedHeaders()` with `XForwardedFor | XForwardedProto` is the first middleware in the pipeline, before `UseAuthentication` (AC-002 — correct client IP and proto visible to API)
+- [x] `app.UseHttpMetrics()` and `app.MapMetrics("/metrics")` registered; response `Content-Type` header is `text/plain; version=0.0.4` (AC-004)
+- [x] `ServiceHeaderMiddleware.InvokeAsync` sets `context.Response.Headers["X-Service"] = "api"` before calling `_next(context)`; registered with `app.UseMiddleware<ServiceHeaderMiddleware>()` (AC-002)
+- [x] `src/api/docker/Dockerfile` uses two-stage build (`sdk:8.0` build stage, `aspnet:8.0` runtime stage); no source code or secrets copied into the runtime image layer (AC-001, OWASP A02 — no secrets in image layers)

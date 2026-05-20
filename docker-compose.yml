@@ -1,0 +1,221 @@
+version: "3.9"
+
+# UPACIP platform — full-stack Docker Compose manifest
+# Services: nginx · frontend · api · db · ollama · prometheus · grafana · seq
+#
+# Start: docker compose up --wait
+# All 8 services must reach `healthy` within 120 seconds (AC-001).
+
+services:
+
+  # ── PostgreSQL database ────────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      # Guard 1: refuse to start if PHI_ENCRYPTION_KEY is absent (Edge: missing .env).
+      # Guard 2: pg_isready confirms the server is accepting connections.
+      test:
+        - "CMD-SHELL"
+        - >-
+          test -n "$$PHI_ENCRYPTION_KEY"
+          || { echo 'FATAL: PHI_ENCRYPTION_KEY is not set — refusing to start'; exit 1; };
+          pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 10s
+    networks:
+      - upacip_net
+
+  # ── Ollama local AI inference ──────────────────────────────────────────────
+  # The api service waits for the Ollama API to be responsive (service_healthy),
+  # NOT for any model pull to complete.  Model pulls are performed out-of-band
+  # (e.g. `docker exec upacip-ollama-1 ollama pull llama3.1:8b`).
+  ollama:
+    image: ollama/ollama:latest
+    restart: always
+    volumes:
+      - ollama_models:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/version || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    networks:
+      - upacip_net
+
+  # ── ASP.NET Core backend API ───────────────────────────────────────────────
+  # restart: on-failure (not always) — a crash loop surfaces misconfiguration
+  # rather than masking it with endless restarts.
+  api:
+    build:
+      context: ./src/api
+      dockerfile: docker/Dockerfile
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: >-
+        Host=db;Port=5432;Database=${POSTGRES_DB};
+        Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY}
+      DOCUMENT_MASTER_KEY: ${DOCUMENT_MASTER_KEY}
+      DOCUMENT_BLOB_DIR: ${DOCUMENT_BLOB_DIR:-/data/documents}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      SEQ_URL: http://seq:80
+      SEQ_API_KEY: ${SEQ_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+    healthcheck:
+      # Requires the api Dockerfile to include curl (or use a base image that has it).
+      # The /health endpoint is registered via ASP.NET Core health-check middleware.
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 30s
+    networks:
+      - upacip_net
+
+  # ── React/Vite frontend ────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+    restart: on-failure
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      # Assumes the production frontend Dockerfile serves on port 80 (nginx:alpine).
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
+    networks:
+      - upacip_net
+
+  # ── Nginx reverse proxy / TLS terminator ──────────────────────────────────
+  nginx:
+    build:
+      context: ./docker/nginx
+    restart: always
+    depends_on:
+      frontend:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    healthcheck:
+      # Port 80 returns 301; check HTTPS directly with --no-check-certificate
+      # (cert is self-signed in development — BusyBox wget supports this flag).
+      test: ["CMD-SHELL", "wget -qO /dev/null --no-check-certificate https://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 10s
+    networks:
+      - upacip_net
+
+  # ── Prometheus metrics collection ─────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/healthy > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 10s
+    networks:
+      - upacip_net
+
+  # ── Grafana operational dashboards ────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.0.0
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      # Provisioning: datasource + dashboard provider configs
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      # Dashboard JSON files served from the provider path
+      - ./docker/grafana/provisioning/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      # Dev-only: allow anonymous Viewer access — do not enable in production
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
+    networks:
+      - upacip_net
+
+  # ── Seq structured log ingest + UI ────────────────────────────────────────
+  # Standard Seq Docker mapping: host port 5341 → container port 80.
+  # Access the Seq web UI at http://localhost:5341 after startup.
+  seq:
+    image: datalust/seq:2023.4
+    restart: always
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+    environment:
+      ACCEPT_EULA: "Y"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/api > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
+    networks:
+      - upacip_net
+
+# ── Named persistent volumes ────────────────────────────────────────────────
+# No driver override — uses the Docker default local driver on all platforms.
+# Data survives `docker compose down` + `docker compose up` cycles (AC-002).
+volumes:
+  db_data:
+  ollama_models:
+  seq_data:
+  prometheus_data:
+  grafana_data:
+
+# ── Isolated bridge network ─────────────────────────────────────────────────
+# All inter-service communication uses service names as hostnames.
+# No service name or IP is reachable from the host except via published ports.
+networks:
+  upacip_net:
+    driver: bridge

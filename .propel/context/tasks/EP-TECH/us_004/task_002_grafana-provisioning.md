@@ -130,8 +130,8 @@ docker/
 ---
 
 ## Implementation Checklist
-- [ ] `docker/grafana/provisioning/datasources/prometheus.yml` sets `url: http://prometheus:9090` using the Docker Compose internal hostname — not `localhost:9090` (Edge: datasource provisioning failure)
-- [ ] Dashboard provider YAML maps `/var/lib/grafana/dashboards` as the `path` under `options`; `docker-compose.yml` bind-mounts the dashboard JSON dir to that exact path (AC-002)
-- [ ] `upacip-base.json` contains exactly three panel objects with non-empty `targets[0].expr` values: p95 latency histogram, 5xx error rate, and `up{job="api"}` (AC-002)
-- [ ] `GF_AUTH_ANONYMOUS_ENABLED=true` and `GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer` are set as environment variables on the `grafana` service — dev-only convenience, not a production security setting (AC-002 — frictionless UI access in dev)
-- [ ] Each panel `datasource` field references the provisioned datasource name `Prometheus` so panels bind correctly on first load (AC-002)
+- [x] `docker/grafana/provisioning/datasources/prometheus.yml` sets `url: http://prometheus:9090` using the Docker Compose internal hostname — not `localhost:9090` (Edge: datasource provisioning failure)
+- [x] Dashboard provider YAML maps `/var/lib/grafana/dashboards` as the `path` under `options`; `docker-compose.yml` bind-mounts the dashboard JSON dir to that exact path (AC-002)
+- [x] `upacip-base.json` contains exactly three panel objects with non-empty `targets[0].expr` values: p95 latency histogram, 5xx error rate, and `up{job="api"}` (AC-002)
+- [x] `GF_AUTH_ANONYMOUS_ENABLED=true` and `GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer` are set as environment variables on the `grafana` service — dev-only convenience, not a production security setting (AC-002 — frictionless UI access in dev)
+- [x] Each panel `datasource` field references the provisioned datasource name `Prometheus` so panels bind correctly on first load (AC-002)

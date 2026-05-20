@@ -117,16 +117,16 @@ Author `.github/workflows/ci.yml` as a GitHub Actions workflow that triggers on 
 ---
 
 ## Implementation Validation Strategy
-- [ ] Open a test pull request against `main`; confirm the `ci` workflow appears in the PR checks panel and all steps show green within 10 minutes (AC-005)
-- [ ] Temporarily remove the NuGet cache step and throttle the network (or simulate); confirm the `dotnet restore` step is retried once before succeeding or failing (Edge: CI Docker cache)
+- [x] Open a test pull request against `main`; confirm the `ci` workflow appears in the PR checks panel and all steps show green within 10 minutes (AC-005)
+- [x] Temporarily remove the NuGet cache step and throttle the network (or simulate); confirm the `dotnet restore` step is retried once before succeeding or failing (Edge: CI Docker cache)
 
 ---
 
 ## Implementation Checklist
-- [ ] `ci.yml` trigger is `on: pull_request: branches: [main]` — workflow fires exactly on PRs to `main`, not on direct pushes (AC-005)
-- [ ] `npm ci --prefix frontend` followed by `npm run lint --prefix frontend` is an explicit step with `name: Lint frontend` — lint failure blocks subsequent steps (AC-005)
-- [ ] `dotnet restore` is wrapped in `nick-fields/retry@v3` with `max_attempts: 2` and `retry_wait_seconds: 30` — retries once on failure before marking the step failed (Edge: CI Docker cache retry)
-- [ ] `dotnet build src/api --configuration Release --no-restore` step uses `--no-restore` to avoid double restore and respects the cached packages from the restore step (AC-005)
-- [ ] `npm run build --prefix frontend` step produces the `frontend/dist/` artifact; step fails if `tsc` or `vite build` exits non-zero (AC-005)
-- [ ] `docker compose up --wait` step has `timeout-minutes: 3`; the smoke-test step `curl -f --insecure https://localhost/api/health` follows immediately and fails the job if it returns non-200 (AC-005)
-- [ ] NuGet packages are cached using `actions/cache@v4` keyed on `hashFiles('**/Api.csproj')` to speed up subsequent runs within the 10-minute budget (AC-005 — performance)
+- [x] `ci.yml` trigger is `on: pull_request: branches: [main]` — workflow fires exactly on PRs to `main`, not on direct pushes (AC-005)
+- [x] `npm ci --prefix frontend` followed by `npm run lint --prefix frontend` is an explicit step with `name: Lint frontend` — lint failure blocks subsequent steps (AC-005)
+- [x] `dotnet restore` is wrapped in `nick-fields/retry@v3` with `max_attempts: 2` and `retry_wait_seconds: 30` — retries once on failure before marking the step failed (Edge: CI Docker cache retry)
+- [x] `dotnet build src/api --configuration Release --no-restore` step uses `--no-restore` to avoid double restore and respects the cached packages from the restore step (AC-005)
+- [x] `npm run build --prefix frontend` step produces the `frontend/dist/` artifact; step fails if `tsc` or `vite build` exits non-zero (AC-005)
+- [x] `docker compose up --wait` step has `timeout-minutes: 3`; the smoke-test step `curl -f --insecure https://localhost/api/health` follows immediately and fails the job if it returns non-200 (AC-005)
+- [x] NuGet packages are cached using `actions/cache@v4` keyed on `hashFiles('**/Api.csproj')` to speed up subsequent runs within the 10-minute budget (AC-005 — performance)

@@ -107,13 +107,13 @@ docker/
 ---
 
 ## Implementation Validation Strategy
-- [ ] `docker compose up --wait` then open `http://localhost:9090/targets` — `api` target shows `State: UP` (AC-001)
-- [ ] `http://localhost:9090/graph?g0.expr=http_requests_received_total` returns data points confirming the API metrics are being scraped (AC-001)
+- [x] `docker compose up --wait` then open `http://localhost:9090/targets` — `api` target shows `State: UP` (AC-001)
+- [x] `http://localhost:9090/graph?g0.expr=http_requests_received_total` returns data points confirming the API metrics are being scraped (AC-001)
 
 ---
 
 ## Implementation Checklist
-- [ ] `prometheus.yml` sets `global: scrape_interval: 15s` and `evaluation_interval: 15s` (AC-001 — scrape recency < 30s)
-- [ ] `scrape_configs` defines `job_name: api` with `static_configs: [{targets: ['api:8080']}]` and `metrics_path: /metrics` (AC-001)
-- [ ] The `targets` hostname `api` matches the exact Docker Compose service name from `docker-compose.yml` — not `localhost` or an IP — so DNS resolution works inside the Docker bridge network (AC-001)
-- [ ] `honor_labels: true` is set on the `api` scrape job to preserve metric labels set by prometheus-net (AC-001 — data fidelity)
+- [x] `prometheus.yml` sets `global: scrape_interval: 15s` and `evaluation_interval: 15s` (AC-001 — scrape recency < 30s)
+- [x] `scrape_configs` defines `job_name: api` with `static_configs: [{targets: ['api:8080']}]` and `metrics_path: /metrics` (AC-001)
+- [x] The `targets` hostname `api` matches the exact Docker Compose service name from `docker-compose.yml` — not `localhost` or an IP — so DNS resolution works inside the Docker bridge network (AC-001)
+- [x] `honor_labels: true` is set on the `api` scrape job to preserve metric labels set by prometheus-net (AC-001 — data fidelity)
