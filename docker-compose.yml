@@ -1,0 +1,173 @@
+version: "3.9"
+
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge
+  monitoring_net:
+    driver: bridge
+
+volumes:
+  db_data:
+  ollama_models:
+  seq_data:
+  prometheus_data:
+  grafana_data:
+
+services:
+  # ─── Reverse Proxy ──────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: upacip_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - frontend_net
+      - backend_net
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: always
+
+  # ─── .NET API ────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile
+    container_name: upacip_api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=upacip;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Jwt__Key: "${JWT_SECRET_KEY}"
+      Jwt__Issuer: "upacip"
+      Jwt__Audience: "upacip-users"
+      Jwt__ExpiryMinutes: "15"
+      Ollama__BaseUrl: "http://ollama:11434"
+      Seq__ServerUrl: "http://seq:5341"
+      Smtp__Host: "mailpit"
+      Smtp__Port: "1025"
+      Smtp__FromAddress: "noreply@upacip.local"
+      Twilio__AccountSid: "${TWILIO_ACCOUNT_SID}"
+      Twilio__AuthToken: "${TWILIO_AUTH_TOKEN}"
+      Twilio__FromNumber: "${TWILIO_FROM_NUMBER}"
+      Phi__EncryptionKey: "${PHI_ENCRYPTION_KEY}"
+    networks:
+      - backend_net
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+      seq:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+
+  # ─── PostgreSQL ──────────────────────────────────────────────────────────────
+  db:
+    image: postgres:15.3
+    container_name: upacip_db
+    environment:
+      POSTGRES_DB: upacip
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - backend_net
+    # No external port exposure — internal network only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d upacip"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: always
+
+  # ─── Ollama (Local LLM) ──────────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:0.1.29
+    container_name: upacip_ollama
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - backend_net
+    # Port 11434 internal only — no external binding
+    restart: always
+
+  # ─── Seq (Structured Logging) ────────────────────────────────────────────────
+  seq:
+    image: datalust/seq:2023.4
+    container_name: upacip_seq
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_ADMINPASSWORDHASH: "${SEQ_ADMIN_PASSWORD_HASH}"
+    volumes:
+      - seq_data:/data
+    networks:
+      - backend_net
+      - monitoring_net
+    ports:
+      - "5341:5341"   # Seq ingestion (localhost only in prod — bind via nginx or firewall)
+      - "8081:80"     # Seq UI
+    restart: always
+
+  # ─── Prometheus ──────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: upacip_prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+    networks:
+      - monitoring_net
+      - backend_net
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  # ─── Grafana ─────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: upacip_grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - monitoring_net
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # ─── Mailpit (Dev SMTP) ───────────────────────────────────────────────────────
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: upacip_mailpit
+    networks:
+      - backend_net
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    restart: unless-stopped

@@ -50,11 +50,20 @@ All tokens originate from `designsystem.md` (UPACIP design system specification)
 | `--color-status-warning` | `#D97706` | Warning alerts, no-show rate, amber badges |
 | `--color-status-error` | `#DC2626` | Error states, conflict banners, failed badges |
 | `--color-status-info` | `#0284C7` | Info toasts, informational banners |
-| `--color-ai-accent` | `#6366F1` | AILabel text, AI message bubbles |
+| `--color-ai-accent` | `#4F46E5` | AILabel text, AI message bubbles — **corrected from #6366F1 for WCAG 1.4.3 compliance (contrast 5.1:1 on #EEF2FF)** |
 | `--color-ai-bg` | `#EEF2FF` | AILabel background, AI chat bubbles |
 | `--color-row-highlight` | `#EBF3FE` | New queue row animation (UXR-502) |
 | `--color-destructive` | `#DC2626` | Destructive action buttons |
 | `--color-destructive-hover` | `#B91C1C` | Destructive button hover |
+| `--color-status-error-bg` | `#FEF2F2` | Error alert band background |
+| `--color-status-error-border` | `#FEE2E2` | Error alert band border |
+| `--color-status-error-text` | `#7F1D1D` | Body text inside error bands |
+| `--color-status-warning-bg` | `#FFFBEB` | Warning alert band background |
+| `--color-status-warning-border` | `#FEF3C7` | Warning alert band border |
+| `--color-status-success-bg` | `#F0FDF4` | Success alert band background |
+| `--color-status-success-border` | `#BBF7D0` | Success alert band border |
+| `--color-status-info-bg` | `#F0F9FF` | Info alert band background |
+| `--color-status-info-border` | `#E0F2FE` | Info alert band border |
 
 ### Typography tokens
 

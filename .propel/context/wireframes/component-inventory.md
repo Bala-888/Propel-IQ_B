@@ -13,6 +13,24 @@ This document catalogs all UI components used across the UPACIP hi-fi wireframe 
 - **Structure:** Sidebar (240px) + main wrapper (flex-1)
 - **Responsive:** Sidebar hides at ≤1279px; bottom tab bar at ≤768px (max 5 tabs, UXR-302)
 - **Used in:** SCR-003 through SCR-017
+- **Required:** Must include `<a href="#main-content" class="skip-link">Skip to main content</a>` as first child of `<body>` (WCAG 2.4.1 — see SkipLink component)
+
+### SkipLink *(required on all authenticated screens — CRIT-003)*
+- **Placement:** First focusable element in `<body>`, before sidebar
+- **Target:** `<main id="main-content">` wrapping `.main-wrapper`
+- **Default state:** Visually hidden (`position: absolute; left: -9999px`)
+- **Focused state:** Revealed at `top: var(--space-3); left: var(--space-4); z-index: 9999`
+- **Styles:**
+  ```css
+  .skip-link {
+    position: absolute; left: -9999px; top: var(--space-3);
+    z-index: 9999; background: var(--color-bg-surface); color: var(--color-primary);
+    padding: var(--space-2) var(--space-4); border: 2px solid var(--color-border-focus);
+    border-radius: var(--radius-sm); font-size: 14px; font-weight: 600;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: var(--space-4); }
+  ```
 
 ### Sidebar
 - **Contents:** Logo lockup · nav items · user info chip · sign-out
@@ -40,7 +58,7 @@ This document catalogs all UI components used across the UPACIP hi-fi wireframe 
 ### TextField / Input
 - **Border:** `1px solid var(--color-border)`; hover: `var(--color-border-strong)`; focus: `var(--color-border-focus)` + 3px box-shadow
 - **Padding:** `var(--space-3) var(--space-4)`
-- **Font:** `var(--font-sans)` 15px
+- **Font:** `var(--font-sans)` **16px** (minimum — prevents iOS Safari auto-zoom; UX-HIGH-003)
 - **Error state:** `border-color: var(--color-status-error)` + `aria-invalid="true"` + FieldError message (UXR-601)
 - **Used in:** SCR-001, SCR-002, SCR-005, SCR-008, SCR-012, SCR-015, MOD-004, MOD-006
 
@@ -115,13 +133,18 @@ This document catalogs all UI components used across the UPACIP hi-fi wireframe 
 - **`aria-live="assertive"`** (WCAG 2.2 AA)
 - **Used in:** SCR-014 (Amoxicillin / Penicillin conflict)
 
-### Toast Notification (UXR-605)
-- **Position:** `position: fixed; bottom: 24px; right: 24px`
+### Toast Notification (UXR-605) *(HIGH-005 — spec expanded)*
+- **Position:** `position: fixed; bottom: 24px; right: 24px` (desktop); `bottom: 16px; left: 50%; transform: translateX(-50%)` (≤768px)
 - **Non-blocking:** Stays on same screen
-- **Auto-dismiss:** 5 seconds
-- **Variants:** success · info · error
-- **`role="status"` + `aria-live="polite"`**
-- **Used in:** SCR-007 (calendar sync), SCR-008 (save settings)
+- **Auto-dismiss:** 4 seconds (success / info); **no auto-dismiss** (error)
+- **Dismiss button:** `×` with `aria-label="Dismiss notification"`, `min-height: 44px; min-width: 44px`
+- **Max stacked:** 1 visible at a time; queue subsequent
+- **Variants:**
+  - `success` — `background: var(--color-status-success-bg); border: 1px solid var(--color-status-success-border); color: var(--color-status-success)`
+  - `error` — `background: var(--color-status-error-bg); border: 1px solid var(--color-status-error-border); color: var(--color-status-error)`
+  - `info` — `background: var(--color-status-info-bg); border: 1px solid var(--color-status-info-border); color: var(--color-status-info)`
+- **`role="status"` + `aria-live="polite"`** on container; `aria-atomic="true"` per toast
+- **Used in:** SCR-007 (calendar sync), SCR-008 (save settings), SCR-009 (upload success — HIGH-005), SCR-015 (code accepted — HIGH-005)
 
 ### Spinner / Loading indicator
 - CSS border animation: `border-top-color` animated

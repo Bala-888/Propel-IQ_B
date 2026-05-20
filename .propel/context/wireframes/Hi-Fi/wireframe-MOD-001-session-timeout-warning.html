@@ -51,7 +51,9 @@ body{font-family:var(--font-sans);background:#F1F5F9;min-height:100vh;display:fl
     </div>
     <h1 class="modal-title" id="session-title">Your session is about to expire</h1>
     <p class="modal-body" id="session-desc">For your security, you will be automatically signed out in</p>
-    <div class="timer" role="timer" aria-label="Time remaining before session expires" aria-live="polite" id="countdown">13:00</div>
+    <div class="timer" role="timer" aria-label="Time remaining before session expires" id="countdown">13:00</div>
+    <!-- Screen reader announcements at key thresholds only (HIGH-002: avoid flooding SR with every-second updates) -->
+    <div id="timer-announce" aria-live="polite" aria-atomic="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"></div>
     <div class="timer-label">minutes remaining</div>
     <button class="btn btn-primary" id="stay-signed-in-btn" onclick="resetTimer()" autofocus>Stay signed in</button>
     <a href="wireframe-SCR-001-login.html" class="btn btn-secondary" id="sign-out-btn">Sign out now</a>
@@ -62,13 +64,20 @@ body{font-family:var(--font-sans);background:#F1F5F9;min-height:100vh;display:fl
 <script>
 // Wireframe demo: countdown from 13:00
 var seconds = 13 * 60;
+var announceAt = [300, 120, 60, 30]; // seconds at which to announce to screen readers
 function formatTime(s){ var m=Math.floor(s/60); var sec=s%60; return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec; }
 var countdownEl = document.getElementById('countdown');
+var announceEl = document.getElementById('timer-announce');
 var interval = setInterval(function(){
   seconds--;
   if(seconds < 0){ clearInterval(interval); window.location.href='wireframe-SCR-001-login.html'; return; }
   countdownEl.textContent = formatTime(seconds);
   if(seconds <= 60) countdownEl.style.color = '#DC2626';
+  // HIGH-002 fix: announce only at key thresholds, not every second
+  if(announceAt.includes(seconds)){
+    var mins = Math.ceil(seconds / 60);
+    announceEl.textContent = mins > 1 ? 'Session expires in ' + mins + ' minutes' : 'Session expires in less than 1 minute';
+  }
 }, 1000);
 function resetTimer(){
   clearInterval(interval);
