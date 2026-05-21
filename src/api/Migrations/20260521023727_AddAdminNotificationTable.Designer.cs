@@ -4,6 +4,7 @@ using System.Text.Json;
 using Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -13,9 +14,11 @@ using Pgvector;
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260521023727_AddAdminNotificationTable")]
+    partial class AddAdminNotificationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,47 +99,37 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Data.Entities.AuditLog", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ActionType")
+                    b.Property<string>("Action")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("action_type");
+                        .HasColumnName("action");
 
-                    b.Property<string>("ActorId")
+                    b.Property<string>("EntityId")
                         .HasColumnType("text")
-                        .HasColumnName("actor_id");
+                        .HasColumnName("entity_id");
 
-                    b.Property<string>("ActorRole")
+                    b.Property<string>("EntityType")
                         .HasColumnType("text")
-                        .HasColumnName("actor_role");
+                        .HasColumnName("entity_type");
 
                     b.Property<string>("IpAddress")
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)")
+                        .HasColumnType("text")
                         .HasColumnName("ip_address");
 
                     b.Property<DateTime>("OccurredAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("occurred_at");
 
-                    b.Property<string>("ResourceId")
+                    b.Property<string>("UserId")
                         .HasColumnType("text")
-                        .HasColumnName("resource_id");
-
-                    b.Property<string>("ResourceType")
-                        .HasColumnType("text")
-                        .HasColumnName("resource_type");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("user_agent");
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id")
                         .HasName("pk_audit_logs");

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Api.Constants;
 using Api.DTOs;
 using Api.Exceptions;
 using Api.Services;
@@ -14,7 +15,7 @@ namespace Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("walkins")]
-[Authorize(Roles = "Staff")]
+[Authorize(Roles = Roles.Staff)]
 public sealed class WalkInsController : ControllerBase
 {
     private readonly IWalkInService _walkInService;

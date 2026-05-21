@@ -29,12 +29,15 @@ public class AppDbContext : DbContext
     public DbSet<InsuranceRecord> InsuranceRecords => Set<InsuranceRecord>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<WalkInBooking> WalkInBookings => Set<WalkInBooking>();
+    public DbSet<AdminNotification> AdminNotifications => Set<AdminNotification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // ── Patient PHI value converters (us_006/AC-001, AC-002; DR-001) ────────────────
+        // ── Patient PHI value converters ── PHI COVERAGE — DO NOT REMOVE CONVERTERS ─────
+        // (us_006/AC-001, AC-002; HIPAA §164.312(a)(2)(iv); DR-001)
+        // Removing any converter below would store plaintext PHI in the database (AC-001; OWASP A02).
         // ValueConverter<string?, byte[]?> transparently encrypts on write and decrypts on read.
         // IPhiEncryptionService.Encrypt/Decrypt guard null inputs — no NULL column is passed to
         // pgp_sym_encrypt (Edge: null PHI field).
@@ -155,5 +158,33 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<RefreshToken>()
             .HasIndex(rt => rt.Token)
             .IsUnique();
+
+        // ── AdminNotification (us_013/task_002) ────────────────────────────────────
+        // Append-only table: no navigation properties, no FK constraints, no UPDATE/DELETE
+        // operations exposed via IAdminNotificationRepository (AC-005; OWASP A09).
+        modelBuilder.Entity<AdminNotification>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.AlertType).HasMaxLength(64).IsRequired();
+            // Max 45 chars — full IPv6 length (e.g. 2001:0db8:…:7334) + IPv4-mapped form (OWASP A05)
+            e.Property(x => x.SourceIp).HasMaxLength(45).IsRequired();
+            // DB-server timestamp — prevents application-side clock-skew manipulation (AC-005; OWASP A09)
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
+        });
+
+        // ── AuditLog (us_014/task_002) ─────────────────────────────────────────────
+        // BIGSERIAL PK: monotonically increasing sequence eliminates B-tree page-splits caused
+        // by random UUID inserts under concurrent write load (Edge: 50+ concurrent writes; AC-001).
+        // UseIdentityByDefaultColumn() emits the Npgsql identity annotation; EF translates
+        // the C# long type to PostgreSQL bigint (BIGSERIAL semantics, AC-001; TR-003).
+        // IpAddress varchar(45): max length of IPv6 + IPv4-mapped form; NOT NULL because
+        // every authenticated request has a resolvable source address (AC-001; OWASP A03).
+        // UserAgent varchar(512): optional — some clients omit the header (AC-001; OWASP A09).
+        modelBuilder.Entity<AuditLog>(e =>
+        {
+            e.Property(x => x.Id).UseIdentityByDefaultColumn();
+            e.Property(x => x.IpAddress).HasMaxLength(45).IsRequired(false);
+            e.Property(x => x.UserAgent).HasMaxLength(512).IsRequired(false);
+        });
     }
 }

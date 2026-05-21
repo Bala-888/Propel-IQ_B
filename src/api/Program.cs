@@ -8,11 +8,14 @@ using Pgvector.EntityFrameworkCore;
 using Prometheus;
 using Serilog;
 using System.Text;
+using Api.Constants;
 using Api.Data;
 using Api.Exceptions;
+using Api.Infrastructure.Auth;
 using Api.Middleware;
 using Api.Repositories;
 using Api.Services;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +26,25 @@ if (string.IsNullOrWhiteSpace(builder.Configuration["JWT_SECRET"]))
     Environment.Exit(1);
 }
 
-// Serilog: read sink/enricher configuration from appsettings.json; replaces default ILogger (AC-003, AC-004)
-builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
+// Startup guard: PHI_ENCRYPTION_KEY must supply ≥ 32 bytes of key material for AES-256.
+// A shorter key would silently downgrade to AES-128, violating HIPAA §164.312(a)(2)(iv) and OWASP A02.
+// Encoding.UTF8.GetByteCount is used instead of .Length because multi-byte UTF-8 characters can satisfy
+// a character-count check while providing fewer bytes of actual entropy (Edge: AES key guard; checklist).
+var _phiKeyRaw = Environment.GetEnvironmentVariable("PHI_ENCRYPTION_KEY") ?? string.Empty;
+if (System.Text.Encoding.UTF8.GetByteCount(_phiKeyRaw) < 32)
+{
+    throw new InvalidOperationException(
+        "PHI_ENCRYPTION_KEY must be at least 32 bytes for AES-256. The application will not start with a shorter key.");
+}
+
+// Serilog: SEQ_URL env var prevents the Seq server URL from being committed to source
+// control (AC-003; OWASP A02). Falls back to the Docker Compose service name for local dev.
+builder.Host.UseSerilog((ctx, lc) =>
+{
+    var seqUrl = Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://seq:5341";
+    lc.ReadFrom.Configuration(ctx.Configuration)
+      .WriteTo.Seq(seqUrl, queueSizeLimit: 500);
+});
 
 builder.Services.AddHealthChecks();
 // JWT Bearer authentication — ValidateLifetime=true enforces exp claim; ClockSkew=Zero ensures
@@ -54,17 +74,26 @@ builder.Services
         opts.MapInboundClaims = false;
         opts.Events = new JwtBearerEvents
         {
-            // Edge: JWT expiry → must return HTTP 401 {"error":"Token expired"}, NOT 403 (OWASP A07)
+            // Edge: token expiry ordering — expired tokens must yield HTTP 401 BEFORE
+            // authorization policy evaluation, preventing a 403 from firing first (OWASP A07).
+            // context.HandleResponse() suppresses the default WWW-Authenticate challenge header
+            // so the custom JSON body is the only response content (AC-002).
             OnChallenge = async ctx =>
             {
                 ctx.HandleResponse();
                 ctx.Response.StatusCode  = StatusCodes.Status401Unauthorized;
                 ctx.Response.ContentType = "application/json";
-                var isExpired = ctx.AuthenticateFailure is SecurityTokenExpiredException;
-                await ctx.Response.WriteAsJsonAsync(
-                    isExpired
-                        ? new { error = "Token expired" }
-                        : (object)new { error = "Unauthorized" });
+                // AC-002: exact error body as specified — covers both missing and expired tokens.
+                await ctx.Response.WriteAsJsonAsync(new { error = "Authentication required." });
+            },
+            // AC-001, AC-004, AC-005: authenticated user lacks the required role.
+            // Delegates to the scoped JsonAuthorizationMiddlewareResultHandler which writes the
+            // JSON body, persists the audit entry, and increments the per-IP 403 counter.
+            OnForbidden = async ctx =>
+            {
+                var handler = ctx.HttpContext.RequestServices
+                    .GetRequiredService<JsonAuthorizationMiddlewareResultHandler>();
+                await handler.HandleForbiddenAsync(ctx.HttpContext);
             },
         };
     });
@@ -78,6 +107,20 @@ builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddDistributedMemoryCache();
 // Login failure-specific rate limiter — counts wrong-password / unknown-email 401s per client IP
 builder.Services.AddScoped<ILoginRateLimiter, LoginRateLimiterService>();
+// IMemoryCache for DatabaseRoleClaimsTransformation — caches DB role lookups with 60-second
+// sliding expiration to avoid a DB hit on every authenticated request (Edge: role changed after token).
+builder.Services.AddMemoryCache();
+// RBAC enforcement layer (us_013/task_001; AC-001–005)
+// Scoped service: handles JSON 403 body, audit log entry, and per-IP 403 counter.
+// Wired through JwtBearerOptions.Events.OnForbidden above.
+builder.Services.AddScoped<JsonAuthorizationMiddlewareResultHandler>();
+// Per-record ownership check for patient endpoints (AC-003; OWASP A01).
+builder.Services.AddScoped<IOwnershipAuthorizationService, OwnershipAuthorizationService>();
+// Validates JWT role claim against live DB role; clears claims on mismatch to force 401 (Edge).
+builder.Services.AddTransient<IClaimsTransformation, DatabaseRoleClaimsTransformation>();
+// IDistributedCache-backed 403 counter — inserts AdminNotification on threshold breach (AC-005).
+builder.Services.AddScoped<IAdminNotificationRepository, AdminNotificationRepository>();
+builder.Services.AddScoped<RepeatedUnauthorizedAccessTracker>();
 // MVC controllers — InvalidModelStateResponseFactory emits {validationErrors:{...}} (AC-003; OWASP A03)
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -93,7 +136,18 @@ builder.Services.AddControllers()
         };
     });
 // Centralised audit logging — OWASP A09: all audit events flow through IAuditLogger (AC-004)
-builder.Services.AddSingleton<IAuditLogger, AuditLoggerService>();
+builder.Services.AddSingleton<Api.Services.IAuditLogger, AuditLoggerService>();
+// Persistence-capable audit logger (us_014/task_001; AC-001, AC-002, AC-003).
+// Scoped to the request lifetime so it shares the AuditDbContext transaction scope.
+// AuditDbContext is a dedicated context isolated from AppDbContext (checklist: transaction isolation).
+builder.Services.AddDbContext<AuditDbContext>(opt =>
+{
+    opt.UseNpgsql(Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")!);
+    opt.UseSnakeCaseNamingConvention();
+});
+builder.Services.AddScoped<Api.Audit.IAuditLogger, Api.Audit.PostgresAuditLogger>();
+// AuditMiddleware is resolved per-request (IMiddleware requires Scoped or Transient registration).
+builder.Services.AddScoped<AuditMiddleware>();
 // PHI field encryption service — key sourced from PHI_ENCRYPTION_KEY env var (us_006/AC-004; OWASP A02)
 builder.Services.AddSingleton<IPhiEncryptionService, PhiEncryptionService>();
 // Patient repository — PHI decryption is transparent via EF Core value converters (us_006/AC-002)
@@ -166,6 +220,13 @@ app.UseHttpMetrics();
 
 app.UseAuthentication();
 app.UseAuthorization();
+// Audit middleware — runs for every authenticated+authorized request; writes audit entry
+// BEFORE the controller action; returns HTTP 503 if audit write fails (AC-001, AC-002; HIPAA §164.312(b)).
+// Placed after UseAuthorization so it only runs when the request has already passed role checks.
+// Unauthenticated routes (login, register) call IAuditLogger.RecordAsync directly (AC-005).
+app.UseWhen(
+    ctx => ctx.User.Identity?.IsAuthenticated == true,
+    branch => branch.UseMiddleware<AuditMiddleware>());
 app.MapControllers();
 
 // Health check endpoint — returns {"status":"Healthy"} (AC-001)

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Api.Constants;
 using Api.DTOs;
 using Api.Exceptions;
 using Api.Services;
@@ -14,7 +15,7 @@ namespace Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("admin/users")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = Roles.Admin)]
 public sealed class AdminUsersController : ControllerBase
 {
     private static readonly HashSet<string> AllowedRoles =

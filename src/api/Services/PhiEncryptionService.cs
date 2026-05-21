@@ -24,6 +24,15 @@ public sealed class PhiEncryptionService : IPhiEncryptionService
         if (string.IsNullOrWhiteSpace(raw))
             throw new InvalidOperationException("PHI_ENCRYPTION_KEY environment variable is not set");
 
+        // Defence-in-depth key-length guard — mirrors the Program.cs startup check (Edge: AES key length; OWASP A02).
+        // GetByteCount, not raw.Length: a multi-byte UTF-8 string can satisfy a character-count check
+        // while providing fewer than 32 bytes of actual key material, silently downgrading to AES-128
+        // and violating HIPAA §164.312(a)(2)(iv) (AC-001; checklist: defence-in-depth pair).
+        if (Encoding.UTF8.GetByteCount(raw) < 32)
+            throw new ArgumentException(
+                "PHI_ENCRYPTION_KEY must be at least 32 bytes for AES-256.",
+                nameof(raw));
+
         // Store the key as UTF-8 bytes — prevents easy string inspection in memory dumps
         _keyBytes = Encoding.UTF8.GetBytes(raw);
     }
