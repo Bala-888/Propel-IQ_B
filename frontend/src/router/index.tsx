@@ -4,9 +4,11 @@ import { LoginForm } from '../features/auth/LoginForm'
 import { IntakePage } from '../pages/IntakePage'
 import { QueuePage } from '../pages/QueuePage'
 import { AdminPage } from '../pages/AdminPage'
+import { AdminKpiDashboardPage } from '../pages/AdminKpiDashboardPage'
 import { RegistrationForm } from '../features/registration/RegistrationForm'
 import { UserManagementPage } from '../features/admin/UserManagementPage'
 import { WalkInBookingForm } from '../features/walkin/WalkInBookingForm'
+import { WalkinBookingPage } from '../pages/WalkinBookingPage'
 import { AiIntakePage } from '../features/intake/AiIntakePage'
 import { ManualIntakeForm } from '../features/intake/ManualIntakeForm'
 import { IntakeConfirmationPage } from '../pages/IntakeConfirmationPage'
@@ -36,6 +38,11 @@ export const router = createBrowserRouter([
     path: '/admin',
     element: <ProtectedRoute><AdminPage /></ProtectedRoute>,
   },
+  // SCR-016 — Admin KPI dashboard (us_034/task_002)
+  {
+    path: '/admin/kpi',
+    element: <ProtectedRoute><AdminKpiDashboardPage /></ProtectedRoute>,
+  },
   // SCR-017 — User management screen (us_011/task_002)
   {
     path: '/admin/users',
@@ -45,6 +52,11 @@ export const router = createBrowserRouter([
   {
     path: '/walkin',
     element: <ProtectedRoute><WalkInBookingForm /></ProtectedRoute>,
+  },
+  // SCR-012 — New walk-in booking (us_030/task_002): Staff/Admin only; role guard inside page
+  {
+    path: '/walkin/new',
+    element: <ProtectedRoute><WalkinBookingPage /></ProtectedRoute>,
   },
   // SCR-004 — AI conversational intake (us_016-I/task_002)
   {

@@ -135,9 +135,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `booking.CheckedInAt` is assigned `DateTimeOffset.UtcNow` exclusively inside `QueueService.MarkArrivedAsync`; the PATCH endpoint accepts no body and no timestamp field — the request body is empty by design (AC-003 — server time only)
-- [ ] The idempotent branch returns 200 with the existing `CheckedInAt` value without calling `dbContext.SaveChangesAsync()` or `_auditService.LogAsync()` — exactly zero DB writes and zero audit entries on a re-call for an already-`Arrived` entry (AC-004)
-- [ ] `_auditService.LogAsync(ActionType.PatientMarkedArrived, staffId, bookingId)` is called only after a successful `SaveChangesAsync()` on the `Waiting → Arrived` transition — never before the save and never on the idempotent path (OWASP A02; AC-004)
-- [ ] `staffId` is extracted from the JWT claim in the controller action; it is not accepted as a query parameter or request body field (OWASP A01; A07)
-- [ ] The GUID `queueEntryId` is used as a parameterised EF Core predicate `.Where(b => b.Id == queueEntryId)` — it is never concatenated into a raw SQL string (OWASP A03)
-- [ ] Endpoint returns 403 for Patient role and 401 for unauthenticated requests via `[Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]` attribute (OWASP A01)
+- [x] `booking.CheckedInAt` is assigned `DateTimeOffset.UtcNow` exclusively inside `QueueService.MarkArrivedAsync`; the PATCH endpoint accepts no body and no timestamp field — the request body is empty by design (AC-003 — server time only)
+- [x] The idempotent branch returns 200 with the existing `CheckedInAt` value without calling `dbContext.SaveChangesAsync()` or `_auditService.LogAsync()` — exactly zero DB writes and zero audit entries on a re-call for an already-`CheckedIn` entry (AC-004; decision logged: F007)
+- [x] `_audit.Log(AuditActionTypes.PatientMarkedArrived, staffId, bookingId.ToString())` is called only after a successful `SaveChangesAsync()` on the `Confirmed → CheckedIn` transition — never before the save and never on the idempotent path (OWASP A02; AC-004)
+- [x] `staffId` is extracted from the JWT claim `User.FindFirstValue("sub")` in the controller action; it is not accepted as a query parameter or request body field (OWASP A01; A07)
+- [x] The int `bookingId` is used as a parameterised EF Core predicate `.FindAsync([bookingId])` — it is never concatenated into a raw SQL string (OWASP A03; decision logged: F008)
+- [x] Endpoint returns 403 for Patient role and 401 for unauthenticated requests via `[Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]` attribute (OWASP A01)

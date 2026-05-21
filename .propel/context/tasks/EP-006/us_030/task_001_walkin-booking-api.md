@@ -148,10 +148,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `GET /patients/search` rejects `q` with fewer than 3 characters with 400 at the controller boundary — no DB query is executed for under-length input (OWASP A03; AC-002 SLA guard)
-- [ ] `ILIKE` query uses parameterised EF Core `EF.Functions.ILike(column, $"%{term}%")` — the `term` value is never interpolated directly into raw SQL (OWASP A03 — SQL injection prevention)
-- [ ] `staffId` is extracted exclusively from the JWT claim in both `POST /bookings/walkin` and `POST /patients/walkin-create`; neither endpoint accepts a `staffId` field in the request body (OWASP A01; A07)
-- [ ] Duplicate-today check runs before the `IDbContextTransaction` opens; if 409 is returned for duplicate, no slot lock is acquired (Edge: duplicate — avoids unnecessary lock hold)
-- [ ] `SELECT FOR UPDATE` with `SET LOCAL lock_timeout = '5s'` is applied inside the transaction; a `PostgresException` with SqlState `"55P03"` (lock timeout) returns 503 to the caller (AC-003; OWASP A04 — consistent with us_020 pattern)
-- [ ] `POST /patients/walkin-create` creates a minimal patient record only — no intake form, no insurance record, no full registration flow is triggered from this endpoint (AC-004 — minimum required fields only)
-- [ ] Both endpoints are decorated with `[Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]`; Patient role receives 403; unauthenticated callers receive 401 (OWASP A01)
+- [x] `GET /patients/search` rejects `q` with fewer than 3 characters with 400 at the controller boundary — no DB query is executed for under-length input (OWASP A03; AC-002 SLA guard)
+- [x] `ILIKE` query uses parameterised EF Core `EF.Functions.ILike(column, $"%{term}%")` — the `term` value is never interpolated directly into raw SQL (OWASP A03 — SQL injection prevention)
+- [x] `staffId` is extracted exclusively from the JWT claim in both `POST /bookings/walkin` and `POST /patients/walkin-create`; neither endpoint accepts a `staffId` field in the request body (OWASP A01; A07)
+- [x] Duplicate-today check runs before the `IDbContextTransaction` opens; if 409 is returned for duplicate, no slot lock is acquired (Edge: duplicate — avoids unnecessary lock hold)
+- [x] `SELECT FOR UPDATE` with `SET LOCAL lock_timeout = '5s'` is applied inside the transaction; a `PostgresException` with SqlState `"55P03"` (lock timeout) returns 503 to the caller (AC-003; OWASP A04 — consistent with us_020 pattern)
+- [x] `POST /patients/walkin-create` creates a minimal patient record only — no intake form, no insurance record, no full registration flow is triggered from this endpoint (AC-004 — minimum required fields only)
+- [x] Both endpoints are decorated with `[Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]`; Patient role receives 403; unauthenticated callers receive 401 (OWASP A01)

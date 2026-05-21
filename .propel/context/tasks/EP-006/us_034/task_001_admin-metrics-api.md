@@ -138,9 +138,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `[Authorize(Roles = Roles.Admin)]` is the sole RBAC decorator — `Roles.Staff` and `Roles.Patient` are not included; any non-Admin JWT receives 403 (AC-004; OWASP A01)
-- [ ] `CancellationTokenSource` is disposed via `using` even when cancellation is not triggered — no `CancellationTokenSource` instances are left undisposed on success paths (Edge: timeout; resource management)
-- [ ] The 503 response body is a static string `{"error": "Metrics temporarily unavailable."}` — the `OperationCanceledException` message, stack trace, and inner exception are never serialised to the response (OWASP A04 — no internal detail exposure)
-- [ ] `AdminMetricsDto` contains only aggregate numeric fields — no `patientId`, `patientName`, or any other PHI-bearing field; the DTO is sufficient to populate all metric cards in the frontend without requiring a second API call (AC-001; OWASP A02)
-- [ ] All LINQ aggregation operations use `.DefaultIfEmpty()` or `.Count()` which return zero on empty collections — no `InvalidOperationException` on an empty booking set (Edge: no bookings)
-- [ ] `date` query parameter is validated with `DateOnly.TryParse` before use; the parsed value is passed to a parameterised EF Core `.Where` predicate — never interpolated into raw SQL (OWASP A03)
+- [x] `[Authorize(Roles = Roles.Admin)]` is the sole RBAC decorator — `Roles.Staff` and `Roles.Patient` are not included; any non-Admin JWT receives 403 (AC-004; OWASP A01)
+- [x] `CancellationTokenSource` is disposed via `using` even when cancellation is not triggered — no `CancellationTokenSource` instances are left undisposed on success paths (Edge: timeout; resource management)
+- [x] The 503 response body is a static string `{"error": "Metrics temporarily unavailable."}` — the `OperationCanceledException` message, stack trace, and inner exception are never serialised to the response (OWASP A04 — no internal detail exposure)
+- [x] `AdminMetricsDto` contains only aggregate numeric fields — no `patientId`, `patientName`, or any other PHI-bearing field; the DTO is sufficient to populate all metric cards in the frontend without requiring a second API call (AC-001; OWASP A02)
+- [x] All LINQ aggregation operations use `arrivedBookings.Count > 0` guard before `.Average()` which returns null on empty collections — no `InvalidOperationException` on an empty booking set (Edge: no bookings)
+- [x] `date` query parameter is validated with `DateOnly.TryParse` before use; the parsed value is passed to a parameterised EF Core `.Where` predicate — never interpolated into raw SQL (OWASP A03; decision logged: F012, F013)

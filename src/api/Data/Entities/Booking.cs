@@ -28,6 +28,26 @@ public class Booking
     public DateTimeOffset? Reminder24hSentAt { get; set; }
     public DateTimeOffset? Reminder2hSentAt  { get; set; }
 
+    // ── Walk-in booking supplemental columns (us_030/AC-003) ──────────────────────────────────
+    // Nullable: only populated for walk-in bookings created via POST /bookings/walkin.
+    // Regular patient-self-service bookings leave these null (backward-compatible; no default needed).
+
+    /// <summary>Free-text reason supplied by front-desk staff at walk-in time.</summary>
+    public string? ReasonForVisit { get; set; }
+
+    /// <summary>Priority tier assigned at intake — e.g. "Normal", "Urgent".</summary>
+    public string? Priority { get; set; }
+
+    /// <summary>String ID of the staff user who created this walk-in booking (from JWT sub claim).</summary>
+    public string? CreatedByStaffId { get; set; }
+
+    // ── Queue / check-in tracking (us_031/AC-001) ─────────────────────────────────────────────
+    /// <summary>
+    /// UTC timestamp when staff marked the patient as arrived (PATCH /bookings/{id}/status → CheckedIn).
+    /// Null until the patient checks in — used as <c>ArrivalTime</c> in <c>QueueEntryDto</c>.
+    /// </summary>
+    public DateTimeOffset? CheckedInAt { get; set; }
+
     public Patient Patient { get; set; } = null!;
     public AppointmentSlot AppointmentSlot { get; set; } = null!;
 }

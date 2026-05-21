@@ -75,6 +75,19 @@ builder.Services
         opts.MapInboundClaims = false;
         opts.Events = new JwtBearerEvents
         {
+            // SignalR WebSocket connections cannot send Authorization headers.
+            // Extract the JWT access_token from the query string for /hubs/queue connections
+            // (us_033/AC-005; OWASP A01 — token sourced from in-memory auth context on the client).
+            OnMessageReceived = ctx =>
+            {
+                if (ctx.Request.Path.StartsWithSegments("/hubs/queue"))
+                {
+                    var token = ctx.Request.Query["access_token"];
+                    if (!string.IsNullOrWhiteSpace(token))
+                        ctx.Token = token;
+                }
+                return Task.CompletedTask;
+            },
             // Edge: token expiry ordering — expired tokens must yield HTTP 401 BEFORE
             // authorization policy evaluation, preventing a 403 from firing first (OWASP A07).
             // context.HandleResponse() suppresses the default WWW-Authenticate challenge header
@@ -136,6 +149,10 @@ builder.Services.AddControllers()
             return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new { validationErrors = errors });
         };
     });
+// SignalR: real-time queue push to Staff/Admin clients (us_033/AC-001, AC-002, AC-005)
+builder.Services.AddSignalR();
+// IQueueHubService: scoped so each request scope resolves its own IHubContext wrapper (us_033)
+builder.Services.AddScoped<Api.Features.Queue.IQueueHubService, Api.Features.Queue.QueueHubService>();
 // Centralised audit logging — OWASP A09: all audit events flow through IAuditLogger (AC-004)
 builder.Services.AddSingleton<Api.Services.IAuditLogger, AuditLoggerService>();
 // Persistence-capable audit logger (us_014/task_001; AC-001, AC-002, AC-003).
@@ -196,6 +213,14 @@ builder.Services.AddScoped<IInsurancePreCheckService, InsurancePreCheckService>(
 builder.Services.AddScoped<IPreferredSlotService, PreferredSlotService>();
 // PatientPreferencesService: partial update for PATCH /api/patients/{id}/preferences (us_029)
 builder.Services.AddScoped<IPatientPreferencesService, PatientPreferencesService>();
+// WalkinBookingService: ACID walk-in booking with slot lock + duplicate guard (us_030/AC-003; OWASP A04)
+builder.Services.AddScoped<Api.Features.Bookings.IWalkinBookingService, Api.Features.Bookings.WalkinBookingService>();
+// WalkinPatientService: minimal patient record creation for walk-in pre-fill (us_030/AC-004)
+builder.Services.AddScoped<Api.Features.Patients.IWalkinPatientService, Api.Features.Patients.WalkinPatientService>();
+// QueueService: same-day queue dashboard query with DTO projection (us_031/AC-001; OWASP A01, A02)
+builder.Services.AddScoped<Api.Features.Queue.IQueueService, Api.Features.Queue.QueueService>();
+// AdminMetricsService: Admin-only KPI aggregation with 5-second timeout guard (us_034/AC-001, AC-004)
+builder.Services.AddScoped<Api.Features.Admin.IAdminMetricsService, Api.Features.Admin.AdminMetricsService>();
 
 // ── No-show risk scoring pipeline (us_021) ───────────────────────────────────────────────────────
 // Bounded channel: capacity=1000, FullMode=Wait means writes block if full — TryWrite is used from
@@ -355,6 +380,8 @@ app.UseWhen(
     ctx => ctx.User.Identity?.IsAuthenticated == true,
     branch => branch.UseMiddleware<AuditMiddleware>());
 app.MapControllers();
+// SignalR hub endpoint — JWT authorisation via query-string access_token for WebSocket (us_033/AC-005)
+app.MapHub<Api.Hubs.QueueHub>("/hubs/queue");
 
 // Health check endpoint — returns {"status":"Healthy"} (AC-001)
 app.MapHealthChecks("/health", new HealthCheckOptions

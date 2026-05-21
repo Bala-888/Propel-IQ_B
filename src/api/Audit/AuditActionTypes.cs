@@ -24,4 +24,10 @@ public static class AuditActionTypes
     public const string InsurancePreCheck     = "InsurancePreCheck";
     // Notification/calendar-sync preference updated (us_029/AC-003; OWASP A02 — field name only, no value)
     public const string PreferenceUpdated     = "PreferenceUpdated";
+    // Walk-in booking created by staff (us_030/AC-003; OWASP A02 — staffId + bookingId only, no PHI)
+    public const string WalkinBookingCreated  = "WalkinBookingCreated";
+    // Walk-in patient record created by staff (us_030/AC-004; OWASP A02 — staffId + patientId only, no PHI)
+    public const string WalkinPatientCreated  = "WalkinPatientCreated";
+    // Patient marked as arrived by staff (us_032/AC-002; OWASP A02 — staffId + bookingId only, no PHI)
+    public const string PatientMarkedArrived  = "PatientMarkedArrived";
 }

@@ -129,9 +129,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] "Mark Arrived" button is conditionally rendered with `{entry.status === "Waiting" && <button>…</button>}` — it is absent from the DOM entirely when `status === "Arrived"`, not hidden with CSS; this ensures the button reappears naturally on error revert without additional state management (AC-001; UXR-106)
-- [ ] `loadingRows` uses `Set<string>` so the loading state is keyed per row; setting one row as loading does not affect the `disabled` state of other rows' buttons (AC-001 — inline action, not global block)
-- [ ] `queue` state is updated immutably on success via `setQueue(q => q.map(...))` — the spread `{ ...r, status: "Arrived", arrivedAt }` creates a new object reference, triggering a re-render only for the affected row (AC-002 — in-place update)
-- [ ] On PATCH failure the catch block must not call `setQueue` — the `queue` state remains unchanged so `entry.status` stays `"Waiting"` and the "Mark Arrived" button reappears automatically on the next render (Edge: network failure; AC-001)
-- [ ] Status cells for both "Waiting" and "Arrived" states render an SVG icon alongside the visible text label; the colour accent is supplementary — never the sole indicator of status (UXR-105; WCAG 2.1 SC 1.4.1)
-- [ ] The `markArrived` fetch wrapper sends no request body (PATCH with empty body); it does not attach a client-side timestamp to the request in any field or header (AC-003 — server-side timestamp enforced at API layer, frontend must not attempt to override)
+- [x] "Mark Arrived" button is conditionally rendered with `{entry.status === 'Confirmed' && <button>…</button>}` — it is absent from the DOM entirely when `status === 'CheckedIn'`, not hidden with CSS; this ensures the button reappears naturally on error revert without additional state management (AC-001; UXR-106; decision logged: F009)
+- [x] `loadingRows` uses `Set<number>` so the loading state is keyed per row; setting one row as loading does not affect the `disabled` state of other rows' buttons (AC-001 — inline action, not global block)
+- [x] `queue` state is updated immutably on success via `setQueue(q => q.map(...))` — the spread `{ ...r, status: response.status, arrivalTime: response.arrivedAt }` creates a new object reference, triggering a re-render only for the affected row (AC-002 — in-place update)
+- [x] On PATCH failure the catch block must not call `setQueue` — the `queue` state remains unchanged so `entry.status` stays `'Confirmed'` and the "Mark Arrived" button reappears automatically on the next render (Edge: network failure; AC-001)
+- [x] Status cells for both "Confirmed" and "CheckedIn" states render an SVG icon alongside the visible text label; the colour accent is supplementary — never the sole indicator of status (UXR-105; WCAG 2.1 SC 1.4.1)
+- [x] The `markArrived` fetch wrapper sends no request body (PATCH with empty body); it does not attach a client-side timestamp to the request in any field or header (AC-003 — server-side timestamp enforced at API layer, frontend must not attempt to override)

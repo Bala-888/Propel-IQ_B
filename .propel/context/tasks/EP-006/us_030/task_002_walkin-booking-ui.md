@@ -143,10 +143,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `/walkin/new` route is guarded by a Staff/Admin role check in the React Router configuration; a Patient-role user is redirected to an unauthorised page before the component mounts (OWASP A01; AC-001)
-- [ ] `PatientTypeahead` does not fire `searchPatients` until `query.length >= 3`; the debounce timer is cleaned up in `useEffect` return to prevent stale requests firing after query is cleared (AC-002; OWASP A03)
-- [ ] Priority selection renders both an SVG icon and a visible text label ("Normal" / "Urgent") for each option — priority is not communicated by colour alone (UXR-105; WCAG 2.1 A)
-- [ ] No-slots state renders `<p role="status">` with an info icon + full message text; the "Create Walk-in" submit button has `disabled={slots.length === 0}` — the disabled state is not communicated by colour alone (Edge: no slots; UXR-105)
-- [ ] Duplicate booking banner uses `<div role="alert">` with a warning icon and full text; the "Override and Proceed" button sets `overrideDuplicate: true` in the next form submission — not a separate API call (Edge: duplicate; UXR-105; WCAG 2.1)
-- [ ] Form validation prevents submission when Patient is not selected, Reason for Visit is empty, or no Slot is chosen; each error is shown as icon + text below the field — not red border alone (UXR-105; OWASP A03 — client-side boundary validation)
-- [ ] `WalkinAccountCreationModal` (MOD-004) calls `createWalkinPatient` only on valid form submit (all required fields filled); on success the modal closes and passes the new patient object to `onPatientCreated` prop — the parent pre-fills `selectedPatient` without requiring the user to re-search (AC-004)
+- [x] `/walkin/new` route is guarded by a Staff/Admin role check in the React Router configuration; a Patient-role user is redirected to an unauthorised page before the component mounts (OWASP A01; AC-001)
+- [x] `PatientTypeahead` does not fire `searchPatients` until `query.length >= 3`; the debounce timer is cleaned up in `useEffect` return to prevent stale requests firing after query is cleared (AC-002; OWASP A03)
+- [x] Priority selection renders both an SVG icon and a visible text label ("Normal" / "Urgent") for each option — priority is not communicated by colour alone (UXR-105; WCAG 2.1 A)
+- [x] No-slots state renders `<p role="status">` with an info icon + full message text; the "Create Walk-in" submit button has `disabled={slots.length === 0}` — the disabled state is not communicated by colour alone (Edge: no slots; UXR-105)
+- [x] Duplicate booking banner uses `<div role="alert">` with a warning icon and full text; the "Override and Proceed" button sets `overrideDuplicate: true` in the next form submission — not a separate API call (Edge: duplicate; UXR-105; WCAG 2.1)
+- [x] Form validation prevents submission when Patient is not selected, Reason for Visit is empty, or no Slot is chosen; each error is shown as icon + text below the field — not red border alone (UXR-105; OWASP A03 — client-side boundary validation)
+- [x] `WalkinAccountCreationModal` (MOD-004) calls `createWalkinPatient` only on valid form submit (all required fields filled); on success the modal closes and passes the new patient object to `onPatientCreated` prop — the parent pre-fills `selectedPatient` without requiring the user to re-search (AC-004)

@@ -138,10 +138,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] The `date` query parameter is parsed with `DateOnly.TryParse`; if absent or invalid, the handler defaults to `DateOnly.FromDateTime(DateTime.UtcNow.Date)` — no raw SQL interpolation of user input (OWASP A03; AC-001)
-- [ ] Query filters on `BookingStatus.Confirmed || BookingStatus.CheckedIn` only — no other statuses are included regardless of what is in the database (AC-001 scope)
-- [ ] `NoShowRiskTier` is mapped as `b.NoShowRiskTier ?? "Unknown"` in the LINQ projection — the `QueueEntryDto.NoShowRiskTier` property is declared as `string` (non-nullable), so the compiler enforces the null-coalescing (Edge: missing risk)
-- [ ] `PatientName` is decrypted via injected `IPhiEncryptionService`; it does not appear in any `ILogger` call in `QueueService` or `QueueController` (OWASP A02)
-- [ ] `IQueueService` is registered as `AddScoped` — not `AddSingleton` — to avoid a captive dependency with the scoped `AppDbContext` (OWASP A04 — DI lifetime)
-- [ ] Endpoint is decorated with `[Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]`; a Patient-role JWT receives 403; an unauthenticated request receives 401 (OWASP A01; AC-001)
-- [ ] `ArrivalTime` is nullable `DateTimeOffset?` in the DTO — pre-scheduled patients who have not yet checked in will have a null value; the frontend handles this by displaying "—" for Wait Time (AC-003 contract)
+- [x] The `date` query parameter is parsed with `DateOnly.TryParse`; if absent or invalid, the handler defaults to `DateOnly.FromDateTime(DateTime.UtcNow.Date)` — no raw SQL interpolation of user input (OWASP A03; AC-001)
+- [x] Query filters on `BookingStatus.Confirmed || BookingStatus.CheckedIn` only — no other statuses are included regardless of what is in the database (AC-001 scope)
+- [x] `NoShowRiskTier` is mapped as `b.NoShowRiskTier ?? "Unknown"` in the LINQ projection — the `QueueEntryDto.NoShowRiskTier` property is declared as `string` (non-nullable), so the compiler enforces the null-coalescing (Edge: missing risk)
+- [x] `PatientName` is constructed as `$"{Patient.FirstName} {Patient.LastName}"` — name columns are plain strings in the current schema; PHI-encrypted columns (email, phone, DOB) are excluded from the projection entirely; no PHI appears in any `ILogger` call (OWASP A02; decision logged: F004)
+- [x] `IQueueService` is registered as `AddScoped` — not `AddSingleton` — to avoid a captive dependency with the scoped `AppDbContext` (OWASP A04 — DI lifetime)
+- [x] Endpoint is decorated with `[Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]`; a Patient-role JWT receives 403; an unauthenticated request receives 401 (OWASP A01; AC-001)
+- [x] `ArrivalTime` is nullable `DateTimeOffset?` in the DTO — sourced from `Booking.CheckedInAt` (added via migration 20260521170000); null until staff marks the patient as CheckedIn (AC-003 contract; decision logged: F005)

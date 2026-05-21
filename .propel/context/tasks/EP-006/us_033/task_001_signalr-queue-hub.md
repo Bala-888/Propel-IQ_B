@@ -151,10 +151,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `QueueHub` is decorated with `[Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]`; the hub has no methods exposed to clients — it is used exclusively for server-to-client push via `IHubContext<QueueHub>` (AC-005; OWASP A01)
-- [ ] `JwtBearerOptions.Events.OnMessageReceived` reads `access_token` from the query string only when the request path starts with `/hubs/queue` — this handler is not applied to regular API routes (AC-005; OWASP A01)
-- [ ] Both `BroadcastEntryAddedAsync` and `BroadcastEntryUpdatedAsync` in `QueueHubService` are wrapped individually in `try/catch`; exceptions are logged as `LogWarning` and swallowed — they never propagate to the calling service (Edge: 0 clients; OWASP A04)
-- [ ] Broadcast is invoked only after `CommitAsync()` or `SaveChangesAsync()` succeeds — broadcast is never called speculatively before the DB write; if the DB write fails the broadcast is not attempted (OWASP A04; AC-001, AC-002 — data consistency)
-- [ ] `Stopwatch` measures the duration of `SendAsync`; if elapsed > 2000ms, `_logger.LogWarning("QueueHub broadcast latency {LatencyMs}ms exceeds 2s SLA", elapsed)` is emitted — no exception is thrown, no transaction is rolled back (Edge: lag > 2s; OWASP A02 — no PHI in log values)
-- [ ] `since` query parameter in `GET /api/queue` is validated with `DateTimeOffset.TryParse` and used only as a parameterised EF Core `.Where` predicate — never interpolated into raw SQL (AC-004; OWASP A03)
-- [ ] `IQueueHubService` is registered as `AddScoped` to share the DI lifetime with the scoped `DbContext` in services that inject both (OWASP A04 — DI lifetime consistency)
+- [x] `QueueHub` is decorated with `[Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]`; the hub has no methods exposed to clients — it is used exclusively for server-to-client push via `IHubContext<QueueHub>` (AC-005; OWASP A01)
+- [x] `JwtBearerOptions.Events.OnMessageReceived` reads `access_token` from the query string only when the request path starts with `/hubs/queue` — this handler is not applied to regular API routes (AC-005; OWASP A01)
+- [x] Both `BroadcastEntryAddedAsync` and `BroadcastEntryUpdatedAsync` in `QueueHubService` are wrapped individually in `try/catch`; exceptions are logged as `LogWarning` and swallowed — they never propagate to the calling service (Edge: 0 clients; OWASP A04)
+- [x] Broadcast is invoked only after `CommitAsync()` or `SaveChangesAsync()` succeeds — broadcast is never called speculatively before the DB write; if the DB write fails the broadcast is not attempted (OWASP A04; AC-001, AC-002 — data consistency)
+- [x] `Stopwatch` measures the duration of `SendAsync`; if elapsed > 2000ms, `_logger.LogWarning("QueueHub broadcast latency {LatencyMs}ms exceeds 2s SLA", elapsed)` is emitted — no exception is thrown, no transaction is rolled back (Edge: lag > 2s; OWASP A02 — no PHI in log values)
+- [x] `since` query parameter in `GET /api/queue` is validated with `DateTimeOffset.TryParse` and used only as a parameterised EF Core `.Where` predicate — never interpolated into raw SQL (AC-004; OWASP A03; decision logged: F011)
+- [x] `IQueueHubService` is registered as `AddScoped` to share the DI lifetime with the scoped `DbContext` in services that inject both (OWASP A04 — DI lifetime consistency)

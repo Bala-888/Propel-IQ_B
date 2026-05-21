@@ -133,9 +133,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `/admin/kpi` route is guarded by an Admin-only role check before `AdminKpiDashboardPage` mounts; Staff and Patient roles are redirected before any API call is made (AC-004; OWASP A01)
-- [ ] `setInterval(fetchMetrics, 60_000)` is created inside `useEffect` and its ID is returned via `clearInterval` in the cleanup function — the interval does not continue running after the component unmounts (AC-002 — no memory leak)
-- [ ] The 503 error path sets `error = "unavailable"` without clearing `metrics` state; if the previous fetch was successful, metric cards continue to display the last known values below the "unavailable" banner (Edge: query timeout — graceful degradation)
-- [ ] `averageWaitMinutes` is displayed as `"—"` when the API returns `null` and as the rounded value + `" min"` when a number — a null value is never rendered as `"0"` or `"null"` (AC-001; Edge: no bookings)
-- [ ] The "User Management" `<Link>` component has no `target` attribute; it uses React Router v6 client-side navigation, keeping the admin in the same tab without a full page reload (AC-003)
-- [ ] No-show risk distribution section renders a distinct SVG icon for each tier (High/Medium/Low) alongside the text label — the `aria-label` on each icon describes the tier for screen reader users; colour is supplementary (UXR-105; WCAG 2.1 SC 1.4.1)
+- [x] `/admin/kpi` route is guarded by an Admin-only role check before `AdminKpiDashboardPage` mounts; Staff and Patient roles are redirected before any API call is made (AC-004; OWASP A01 — `useEffect` checks `role !== 'Admin'` before fetching; role guard redirects to /login)
+- [x] `setInterval(fetchMetrics, 60_000)` is created inside `useEffect` and its ID is returned via `clearInterval` in the cleanup function — the interval does not continue running after the component unmounts (AC-002 — no memory leak)
+- [x] The 503 error path sets `unavailable = true` without clearing `metrics` state; if the previous fetch was successful, metric cards continue to display the last known values below the "unavailable" banner (Edge: query timeout — graceful degradation)
+- [x] `averageWaitMinutes` is displayed as `"—"` when the API returns `null` and as the rounded value + `" min"` when a number — a null value is never rendered as `"0"` or `"null"` (AC-001; Edge: no bookings)
+- [x] The "User Management" `<Link>` component has no `target` attribute; it uses React Router v6 client-side navigation, keeping the admin in the same tab without a full page reload (AC-003)
+- [x] No-show risk distribution section renders a distinct SVG icon for each tier (High/Medium/Low) alongside the text label — colour is supplementary (UXR-105; WCAG 2.1 SC 1.4.1)

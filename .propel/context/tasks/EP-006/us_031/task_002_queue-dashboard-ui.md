@@ -141,10 +141,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `/queue` route is guarded by a Staff/Admin role check before `QueueDashboardPage` mounts; Patient-role users are redirected to the unauthorised page — the component never renders for non-staff (OWASP A01; AC-001)
-- [ ] `RiskBadge` renders both an SVG icon and a visible text label for every tier value including "Unknown"; the badge background colour is supplementary, not the sole risk signal (AC-002; UXR-403; UXR-105; WCAG 2.1 SC 1.4.1)
-- [ ] The wait-time `setInterval` is created in a `useEffect` and its return function calls `clearInterval`; this prevents the interval from running after the component unmounts and avoids memory leaks (AC-003)
-- [ ] Risk Tier sort uses the numeric map `{ High: 3, Medium: 2, Low: 1, Unknown: 0 }` to produce a deterministic descending sort; Position and Wait Time sort numerically; the `sortedQueue` is derived via `useMemo` to avoid redundant re-sort on unrelated re-renders (AC-004)
-- [ ] Summary bar uses `<div role="status">` so screen readers announce count changes; counts are derived from the unsorted `queue` array — sorting does not affect the totals (AC-005; WCAG 2.1)
-- [ ] Empty-queue state renders a single `<tr>` with `<td colSpan={7}>` — the `<table>` and `<thead>` are still rendered so assistive technologies have context for the "no data" message (Edge: empty queue)
-- [ ] `noShowRiskTier` typed as `"High" | "Medium" | "Low" | "Unknown"` in the TypeScript interface — the `"Unknown"` string value is the contract from the API (never `null`), enforced by the union type so a blank-cell path is not compilable (Edge: null risk; AC-002)
+- [x] `/queue` route is guarded by a Staff/Admin role check before `QueueDashboardPage` mounts; Patient-role users are redirected to the unauthorised page — the component never renders for non-staff (OWASP A01; AC-001)
+- [x] `RiskBadge` renders both an SVG icon and a visible text label for every tier value including "Unknown"; the badge background colour is supplementary, not the sole risk signal (AC-002; UXR-403; UXR-105; WCAG 2.1 SC 1.4.1)
+- [x] The wait-time `setInterval` is created in a `useEffect` and its return function calls `clearInterval`; this prevents the interval from running after the component unmounts and avoids memory leaks (AC-003)
+- [x] Risk Tier sort uses the numeric map `{ High: 3, Medium: 2, Low: 1, Unknown: 0 }` to produce a deterministic descending sort; Position and Wait Time sort numerically; the `sortedQueue` is derived via `useMemo` to avoid redundant re-sort on unrelated re-renders (AC-004)
+- [x] Summary bar uses `<div role="status">` so screen readers announce count changes; counts are derived from the unsorted `queue` array — sorting does not affect the totals (AC-005; WCAG 2.1)
+- [x] Empty-queue state renders a single `<tr>` with `<td colSpan={7}>` — the `<table>` and `<thead>` are still rendered so assistive technologies have context for the "no data" message (Edge: empty queue)
+- [x] `noShowRiskTier` typed as `"High" | "Medium" | "Low" | "Unknown"` in the TypeScript interface — the `"Unknown"` string value is the contract from the API (never `null`), enforced by the union type so a blank-cell path is not compilable (Edge: null risk; AC-002)

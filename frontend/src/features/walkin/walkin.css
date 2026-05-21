@@ -405,3 +405,329 @@
   gap: var(--space-3);
   flex-wrap: wrap;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════
+   us_030 — WalkinBookingPage, PatientTypeahead, WalkinAccountCreationModal
+   ══════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* Page subtitle */
+.walkin-form-card__subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: calc(var(--space-2) * -1) 0 var(--space-6) 0;
+}
+
+/* Field info — used for no-slots message (UXR-105; WCAG 2.1: not colour alone) */
+.field-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+  line-height: 1.4;
+}
+
+/* Alert banners (duplicate booking, API error) */
+.alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-4);
+}
+
+.alert-banner--error {
+  background: var(--color-error-surface);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-status-error);
+}
+
+.alert-banner--warning {
+  background: var(--color-warning-surface);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-text-primary);
+}
+
+.alert-banner__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Priority selector (UXR-105: icon + text label, not colour alone) */
+.priority-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--space-4) 0;
+}
+
+.priority-options {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.priority-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.priority-option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+  position: relative;
+}
+
+.priority-option:hover {
+  background: var(--color-bg-subtle);
+}
+
+.priority-option--selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.priority-option--urgent {
+  color: var(--color-status-warning);
+}
+
+.priority-option--urgent.priority-option--selected {
+  border-color: var(--color-status-warning);
+  background: var(--color-bg-warning-subtle);
+  color: var(--color-status-warning);
+}
+
+/* ── PatientTypeahead ─────────────────────────────────────────────────────────────────────────── */
+
+.typeahead-root {
+  position: relative;
+}
+
+.typeahead-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.typeahead-input-icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  display: flex;
+}
+
+.typeahead-input {
+  padding-left: 36px;
+  width: 100%;
+}
+
+.typeahead-loading {
+  position: absolute;
+  right: var(--space-3);
+  display: flex;
+  align-items: center;
+}
+
+.typeahead-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: typeahead-spin 0.6s linear infinite;
+}
+
+@keyframes typeahead-spin {
+  to { transform: rotate(360deg); }
+}
+
+.typeahead-listbox {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  z-index: 100;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.typeahead-option {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  font-size: 0.875rem;
+  gap: 2px;
+}
+
+.typeahead-option--active,
+.typeahead-option:hover {
+  background: var(--color-bg-subtle);
+}
+
+.typeahead-option--empty {
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+
+.typeahead-option__name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.typeahead-option__dob {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.typeahead-option--create {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-weight: 500;
+  margin-top: var(--space-1);
+  padding-top: var(--space-2);
+}
+
+/* Confirmation row */
+.typeahead-confirmation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-primary-subtle);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.typeahead-confirmation__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.typeahead-confirmation__name {
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.typeahead-confirmation__dob {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.typeahead-confirmation__clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  padding: 0 var(--space-1);
+  line-height: 1;
+}
+
+.typeahead-confirmation__clear:hover {
+  color: var(--color-text-primary);
+}
+
+/* ── WalkinAccountCreationModal ───────────────────────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: var(--space-4);
+}
+
+.modal-dialog {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-3);
+  width: 100%;
+  max-width: 480px;
+  padding: var(--space-6);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.modal-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+.modal-close-btn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.modal-description {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-5) 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
