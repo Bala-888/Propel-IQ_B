@@ -149,10 +149,10 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] MIME validation reads the first 8 bytes of the file stream and resets the stream position to 0 before further processing — the file extension from `IFormFile.FileName` is never used as the sole MIME gate (AC-001; OWASP A03)
-- [ ] Size check is performed using `file.Length` before the file stream is opened for encryption — file bytes are not buffered into memory purely to determine size (AC-002; OWASP A04)
-- [ ] `IDocumentEncryptionService.Encrypt` generates a fresh `RandomNumberGenerator.GetBytes(32)` key and `RandomNumberGenerator.GetBytes(12)` nonce for every invocation — keys are never reused across documents (AC-003; OWASP A02)
-- [ ] The `finally` block in `UploadAsync` always deletes the temp file if it exists; it deletes the final file only if the failure occurred after `File.Move` but before `SaveChangesAsync` — preventing orphaned `.enc` files on DB write failure (Edge: interrupted upload; AC-003)
-- [ ] `document_records` insert is executed only after `File.Move` returns successfully — if `SaveChangesAsync` throws, the `.enc` file is cleaned up in the `finally` block and no partial record persists (AC-004; Edge: interrupted upload)
-- [ ] `patientId` is extracted exclusively from the JWT claim; the endpoint does not accept a `patientId` field in the multipart form body (OWASP A01; A07)
-- [ ] `DOCUMENT_BLOB_DIR` and `DOCUMENT_MASTER_KEY` are read from environment variables via `IConfiguration`; they are never hard-coded or logged (OWASP A02 — no secrets in code or logs)
+- [x] MIME validation reads the first 8 bytes of the file stream and resets the stream position to 0 before further processing — the file extension from `IFormFile.FileName` is never used as the sole MIME gate (AC-001; OWASP A03)
+- [x] Size check is performed using `file.Length` before the file stream is opened for encryption — file bytes are not buffered into memory purely to determine size (AC-002; OWASP A04)
+- [x] `IDocumentEncryptionService.Encrypt` generates a fresh `RandomNumberGenerator.GetBytes(32)` key and `RandomNumberGenerator.GetBytes(12)` nonce for every invocation — keys are never reused across documents (AC-003; OWASP A02)
+- [x] The `finally` block in `UploadAsync` always deletes the temp file if it exists; it deletes the final file only if the failure occurred after `File.Move` but before `SaveChangesAsync` — preventing orphaned `.enc` files on DB write failure (Edge: interrupted upload; AC-003)
+- [x] `document_records` insert is executed only after `File.Move` returns successfully — if `SaveChangesAsync` throws, the `.enc` file is cleaned up in the `finally` block and no partial record persists (AC-004; Edge: interrupted upload)
+- [x] `patientId` is extracted exclusively from the JWT claim; the endpoint does not accept a `patientId` field in the multipart form body (OWASP A01; A07)
+- [x] `DOCUMENT_BLOB_DIR` and `DOCUMENT_MASTER_KEY` are read from environment variables via `IConfiguration`; they are never hard-coded or logged (OWASP A02 — no secrets in code or logs)

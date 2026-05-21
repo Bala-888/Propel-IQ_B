@@ -132,9 +132,9 @@ src/
 ---
 
 ## Implementation Checklist
-- [ ] `<input type="file" accept=".pdf,.docx" capture="environment">` is paired with an associated `<label>` — the input is never unlabelled; `capture="environment"` is present to enable the camera fallback on mobile without a separate code path (AC-005; UXR-303; WCAG 2.1 SC 1.3.1)
-- [ ] Client-side size check sets a validation error and returns early from `handleSubmit` — it does not make a network call for an oversized file; server 413 is still handled as a catch path if the client check is bypassed (AC-002; Edge: client hint)
-- [ ] The upload `status` state machine uses the values `"idle" | "uploading" | "success" | "error"`; the spinner, checkmark, and error icon are each distinct SVG icons — status is never conveyed by colour change alone (UXR-105; WCAG 2.1 SC 1.4.1)
-- [ ] Error messages from 400 and 413 responses are rendered from the server's `error` field in the JSON response body — the frontend does not hard-code the error strings, allowing the API message to be authoritative (AC-001, AC-002)
-- [ ] File input is cleared via `ref.current.value = ""` after a successful upload; `selectedFile` state is reset to `null`; the submit button is disabled when `selectedFile === null` to prevent empty submissions (AC-004; OWASP A03 — no empty form submission)
-- [ ] `documentApi.ts` does not attach any additional headers for authentication beyond what the global fetch interceptor provides (Bearer token from in-memory auth context) — no token duplication or token leakage via custom headers (OWASP A01; A02)
+- [x] `<input type="file" accept=".pdf,.docx" capture="environment">` is paired with an associated `<label>` — the input is never unlabelled; `capture="environment"` is present to enable the camera fallback on mobile without a separate code path (AC-005; UXR-303; WCAG 2.1 SC 1.3.1)
+- [x] Client-side size check sets a validation error and returns early from `handleSubmit` — it does not make a network call for an oversized file; server 413 is still handled as a catch path if the client check is bypassed (AC-002; Edge: client hint)
+- [x] The upload `status` state machine uses the values `"idle" | "uploading" | "success" | "error"`; the spinner, checkmark, and error icon are each distinct SVG icons — status is never conveyed by colour change alone (UXR-105; WCAG 2.1 SC 1.4.1)
+- [x] Error messages from 400 and 413 responses are rendered from the server's `error` field in the JSON response body — the frontend does not hard-code the error strings, allowing the API message to be authoritative (AC-001, AC-002)
+- [x] File input is cleared via `ref.current.value = ""` after a successful upload; `selectedFile` state is reset to `null`; the submit button is disabled when `selectedFile === null` to prevent empty submissions (AC-004; OWASP A03 — no empty form submission)
+- [x] `documentApi.ts` does not attach any additional headers for authentication beyond what the global fetch interceptor provides (Bearer token from in-memory auth context) — no token duplication or token leakage via custom headers (OWASP A01; A02)

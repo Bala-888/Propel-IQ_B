@@ -27,6 +27,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <!-- PDF text extraction — us_036/AC-001; TR-010 (PdfPig page-by-page streaming; heap-bounded for 300+ page docs) -->
+    <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     <!-- JWT Bearer authentication — us_009/AC-001; TR-005 -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.*" />
     <!-- BCrypt password verification — us_009/AC-005; OWASP A02 constant-time hash comparison -->

@@ -197,6 +197,13 @@ builder.Services.AddHttpClient<OllamaIntakeClient>(client =>
     client.BaseAddress = new Uri(ollamaBaseUrl);
     client.Timeout     = TimeSpan.FromSeconds(35); // 35s outer HttpClient safety net; controller CTS fires at 30s
 });
+// Named "ollama-embed" HTTP client for EmbeddingWorker (us_037/AC-001).
+// Base URL is read from the same OLLAMA_BASE_URL env var — never hard-coded (OWASP A02; checklist).
+builder.Services.AddHttpClient("ollama-embed", c =>
+{
+    c.BaseAddress = new Uri(ollamaBaseUrl);
+    c.Timeout     = TimeSpan.FromSeconds(60); // embedding inference may be slower than chat
+});
 // IntakeSessionService: manages IDistributedCache session CRUD with patientId ownership check (AC-001)
 builder.Services.AddScoped<IntakeSessionService>();
 // IntakeRecordService: upserts encrypted IntakeRecord Draft row after each AI turn (AC-005)
@@ -221,6 +228,61 @@ builder.Services.AddScoped<Api.Features.Patients.IWalkinPatientService, Api.Feat
 builder.Services.AddScoped<Api.Features.Queue.IQueueService, Api.Features.Queue.QueueService>();
 // AdminMetricsService: Admin-only KPI aggregation with 5-second timeout guard (us_034/AC-001, AC-004)
 builder.Services.AddScoped<Api.Features.Admin.IAdminMetricsService, Api.Features.Admin.AdminMetricsService>();
+// Document upload pipeline (us_035/AC-001–004; OWASP A02, A03)
+// IDocumentEncryptionService: AES-256-GCM per-document encryption using BouncyCastle GcmBlockCipher;
+//   master key read from DOCUMENT_MASTER_KEY env var (AC-003; OWASP A02).
+// IDocumentUploadService: MIME magic byte check, size guard, atomic blob write, DB insert.
+builder.Services.AddScoped<Api.Features.Documents.IDocumentEncryptionService, Api.Features.Documents.DocumentEncryptionService>();
+builder.Services.AddScoped<Api.Features.Documents.IDocumentUploadService, Api.Features.Documents.DocumentUploadService>();
+
+// ── PDF text extraction and chunking pipeline (us_036/AC-001–004; AIR-003, AIR-004) ────────────
+// Bounded channel: capacity=1000, FullMode=DropOldest — backpressure drops the oldest unprocessed
+// event rather than blocking the HTTP 201 producer thread (OWASP A04 — no HTTP thread blocking; checklist).
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<Api.Features.Documents.DocumentUploadedEvent>(
+        new System.Threading.Channels.BoundedChannelOptions(1000)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.DropOldest,
+        }));
+// Worker: singleton BackgroundService; uses IServiceScopeFactory per event to avoid scoped-lifetime leaks (OWASP A04; checklist)
+builder.Services.AddHostedService<Api.BackgroundServices.DocumentTextExtractionWorker>();
+
+// ── Embedding generation pipeline (us_037/AC-001–004; AIR-001, AIR-004) ──────────────────────────
+// Bounded channel: capacity=1000, FullMode=DropOldest — backpressure drops the oldest unprocessed
+// event rather than blocking the HTTP 201 producer thread (OWASP A04 — no HTTP thread blocking; checklist).
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<Api.Features.Documents.DocumentChunkedEvent>(
+        new System.Threading.Channels.BoundedChannelOptions(1000)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.DropOldest,
+        }));
+// EmbeddingWorker: singleton BackgroundService; uses IServiceScopeFactory per event; IHttpClientFactory injected directly (AC-001; OWASP A04; checklist)
+builder.Services.AddHostedService<Api.BackgroundServices.EmbeddingWorker>();
+
+// ── Entity extraction pipeline (us_038/AC-001–005; AIR-003) ──────────────────────────────────────
+// Bounded channel: capacity=1000, FullMode=DropOldest — EmbeddingWorker publishes after all chunks
+// embedded; EntityExtractionWorker consumes (OWASP A04 — non-blocking; checklist).
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<Api.Features.Documents.DocumentEmbeddingsCompleteEvent>(
+        new System.Threading.Channels.BoundedChannelOptions(1000)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.DropOldest,
+        }));
+// EntityExtractionWorker: singleton BackgroundService; IServiceScopeFactory + IHttpClientFactory (AC-001; OWASP A04)
+builder.Services.AddHostedService<Api.BackgroundServices.EntityExtractionWorker>();
+// Named "ollama-generate" HTTP client for EntityExtractionWorker (us_038/AC-001).
+// Base URL from same OLLAMA_BASE_URL env var — never hard-coded (OWASP A02; checklist).
+builder.Services.AddHttpClient("ollama-generate", c =>
+{
+    c.BaseAddress = new Uri(ollamaBaseUrl);
+    c.Timeout     = TimeSpan.FromSeconds(120); // generate inference is slower than embeddings
+});
+// EmbeddingSearchService: scoped — each call site resolves a fresh AppDbContext for HNSW cosine search (AC-003; OWASP A04)
+builder.Services.AddScoped<Api.Features.Embeddings.EmbeddingSearchService>();
+
+// Pipeline guardian (us_039/AC-002, AC-003): PeriodicTimer every 30 s; SLA = 120 s.
+// Transitions stuck documents (not in terminal state) to TimedOut; logs document_id + previous status.
+builder.Services.AddHostedService<Api.BackgroundServices.PipelineGuardianWorker>();
 
 // ── No-show risk scoring pipeline (us_021) ───────────────────────────────────────────────────────
 // Bounded channel: capacity=1000, FullMode=Wait means writes block if full — TryWrite is used from

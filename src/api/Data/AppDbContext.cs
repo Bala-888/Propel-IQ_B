@@ -1,4 +1,7 @@
 using Api.Data.Entities;
+using Api.Features.Documents;
+using Api.Features.Embeddings;
+using Api.Features.Entities;
 using Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -34,6 +37,14 @@ public class AppDbContext : DbContext
     public DbSet<PatientCalendarToken>  PatientCalendarTokens  => Set<PatientCalendarToken>();
     public DbSet<BookingCalendarSync>   BookingCalendarSyncs   => Set<BookingCalendarSync>();
     public DbSet<PatientPreferences>    PatientPreferences     => Set<PatientPreferences>();
+    // Patient-uploaded encrypted documents — plaintext never persisted (us_035/AC-003, AC-004; OWASP A02)
+    public DbSet<DocumentRecord>        DocumentRecords        => Set<DocumentRecord>();
+    // Sliding-window text chunks produced by DocumentTextExtractionWorker (us_036/AC-003; AIR-003)
+    public DbSet<DocumentChunk>         DocumentChunks         => Set<DocumentChunk>();
+    // pgvector embeddings produced by EmbeddingWorker (us_037/AC-002; AIR-001, AIR-004)
+    public DbSet<DocumentChunkEmbedding> DocumentChunkEmbeddings => Set<DocumentChunkEmbedding>();
+    // Deduplicated clinical entities extracted by EntityExtractionWorker (us_038/AC-003, AC-004; AIR-003)
+    public DbSet<PatientEntity>          PatientEntities          => Set<PatientEntity>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -292,5 +303,68 @@ public class AppDbContext : DbContext
             e.Property(x => x.IpAddress).HasMaxLength(45).IsRequired(false);
             e.Property(x => x.UserAgent).HasMaxLength(512).IsRequired(false);
         });
+
+        // ── DocumentChunk (us_036/AC-003) ──────────────────────────────────────────────────────
+        // FK → DocumentRecords: cascade delete removes chunk rows when the parent document is deleted.
+        // Index on DocumentId: supports efficient query for all chunks belonging to a document.
+        // Index on (DocumentId, ChunkIndex): supports ordered chunk retrieval for embedding pipeline.
+        modelBuilder.Entity<DocumentChunk>()
+            .HasOne(c => c.Document)
+            .WithMany()
+            .HasForeignKey(c => c.DocumentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DocumentChunk>()
+            .HasIndex(c => c.DocumentId)
+            .HasDatabaseName("ix_document_chunks_document_id");
+
+        modelBuilder.Entity<DocumentChunk>()
+            .HasIndex(c => new { c.DocumentId, c.ChunkIndex })
+            .HasDatabaseName("ix_document_chunks_document_id_chunk_index");
+
+        // FailureReason is optional — only populated when Status = "ExtractionFailed" (us_036/AC-004)
+        modelBuilder.Entity<DocumentRecord>()
+            .Property(r => r.FailureReason)
+            .IsRequired(false)
+            .HasMaxLength(500); // OWASP A04 — truncation enforced in DocumentTextExtractionWorker
+
+        // ── DocumentChunkEmbedding (us_037/AC-002, AC-003) ──────────────────────────────────────
+        // Table mapped to document_chunk_embeddings — distinct from legacy chunk_embeddings (us_006).
+        // ChunkId is both PK and FK (1:1 with document_chunks — one embedding per chunk).
+        // embedding column is vector(1536); HNSW cosine index is created in the migration (AC-003).
+        modelBuilder.Entity<DocumentChunkEmbedding>()
+            .ToTable("document_chunk_embeddings");
+
+        modelBuilder.Entity<DocumentChunkEmbedding>()
+            .HasKey(e => e.ChunkId);
+
+        modelBuilder.Entity<DocumentChunkEmbedding>()
+            .HasOne<DocumentChunk>()
+            .WithMany()
+            .HasForeignKey(e => e.ChunkId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DocumentChunkEmbedding>()
+            .Property(e => e.Embedding)
+            .HasColumnType("vector(1536)");
+
+        // pgvector extension — must be declared before any vector column migration is applied (AC-002)
+        modelBuilder.HasPostgresExtension("vector");
+
+        // ── PatientEntity (us_038/AC-003, AC-004) ──────────────────────────────────────────
+        // UNIQUE constraint on (patient_id, type, value): DB-level deduplication enforcement (AC-003).
+        // value max 500 chars: prevents oversized inserts on malformed Ollama output (OWASP A04).
+        modelBuilder.Entity<PatientEntity>()
+            .HasIndex(e => new { e.PatientId, e.Type, e.Value })
+            .IsUnique()
+            .HasDatabaseName("ix_patient_entities_patient_id_type_value");
+
+        modelBuilder.Entity<PatientEntity>()
+            .Property(e => e.Value)
+            .HasMaxLength(500);
+
+        modelBuilder.Entity<PatientEntity>()
+            .Property(e => e.Type)
+            .HasMaxLength(50);
     }
 }

@@ -4,6 +4,7 @@ using System.Text.Json;
 using Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -13,9 +14,11 @@ using Pgvector;
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260521151459_AddDocumentPipeline")]
+    partial class AddDocumentPipeline
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -938,10 +941,6 @@ namespace Api.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("patient_id");
 
-                    b.Property<DateTimeOffset>("ProcessingStartedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("processing_started_at");
-
                     b.Property<long>("SizeBytes")
                         .HasColumnType("bigint")
                         .HasColumnName("size_bytes");
@@ -985,59 +984,6 @@ namespace Api.Migrations
                         .HasName("pk_document_chunk_embeddings");
 
                     b.ToTable("document_chunk_embeddings", (string)null);
-                });
-
-            modelBuilder.Entity("Api.Features.Entities.PatientEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<double>("Confidence")
-                        .HasColumnType("double precision")
-                        .HasColumnName("confidence");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<Guid>("DocumentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("document_id");
-
-                    b.Property<DateTimeOffset>("LastSeenAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_seen_at");
-
-                    b.Property<bool>("LowConfidence")
-                        .HasColumnType("boolean")
-                        .HasColumnName("low_confidence");
-
-                    b.Property<int>("PatientId")
-                        .HasColumnType("integer")
-                        .HasColumnName("patient_id");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("type");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("value");
-
-                    b.HasKey("Id")
-                        .HasName("pk_patient_entities");
-
-                    b.HasIndex("PatientId", "Type", "Value")
-                        .IsUnique()
-                        .HasDatabaseName("ix_patient_entities_patient_id_type_value");
-
-                    b.ToTable("patient_entities", (string)null);
                 });
 
             modelBuilder.Entity("Api.Data.Entities.Booking", b =>

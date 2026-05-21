@@ -15,6 +15,8 @@ import { IntakeConfirmationPage } from '../pages/IntakeConfirmationPage'
 import { SlotCalendar } from '../features/slots/SlotCalendar'
 import { BookingConfirmationPage } from '../pages/BookingConfirmationPage'
 import { PatientSettingsPage } from '../pages/PatientSettingsPage'
+import { DocumentUploadPage }   from '../pages/DocumentUploadPage'
+import { DocumentStatusPage }   from '../pages/DocumentStatusPage'
 
 export const router = createBrowserRouter([
   {
@@ -87,5 +89,15 @@ export const router = createBrowserRouter([
   {
     path: '/settings',
     element: <ProtectedRoute><PatientSettingsPage /></ProtectedRoute>,
+  },
+  // SCR-009 — Document upload: Patient-only; role guard inside page (us_035/AC-001, AC-002, AC-004, AC-005)
+  {
+    path: '/documents/upload',
+    element: <ProtectedRoute><DocumentUploadPage /></ProtectedRoute>,
+  },
+  // SCR-010 — Document processing status: Patient-only; polls GET /documents/{id}/status (us_039/AC-001)
+  {
+    path: '/documents',
+    element: <ProtectedRoute><DocumentStatusPage /></ProtectedRoute>,
   },
 ])
