@@ -7,6 +7,11 @@ import { AdminPage } from '../pages/AdminPage'
 import { RegistrationForm } from '../features/registration/RegistrationForm'
 import { UserManagementPage } from '../features/admin/UserManagementPage'
 import { WalkInBookingForm } from '../features/walkin/WalkInBookingForm'
+import { AiIntakePage } from '../features/intake/AiIntakePage'
+import { ManualIntakeForm } from '../features/intake/ManualIntakeForm'
+import { IntakeConfirmationPage } from '../pages/IntakeConfirmationPage'
+import { SlotCalendar } from '../features/slots/SlotCalendar'
+import { BookingConfirmationPage } from '../pages/BookingConfirmationPage'
 
 export const router = createBrowserRouter([
   {
@@ -39,5 +44,30 @@ export const router = createBrowserRouter([
   {
     path: '/walkin',
     element: <ProtectedRoute><WalkInBookingForm /></ProtectedRoute>,
+  },
+  // SCR-004 — AI conversational intake (us_016-I/task_002)
+  {
+    path: '/intake/ai',
+    element: <ProtectedRoute><AiIntakePage /></ProtectedRoute>,
+  },
+  // SCR-005 — Manual intake form (us_017/task_002)
+  {
+    path: '/intake/manual',
+    element: <ProtectedRoute><ManualIntakeForm /></ProtectedRoute>,
+  },
+  // SCR-005 confirmation screen — shown after POST /intake/manual succeeds (us_017/AC-002)
+  {
+    path: '/intake/confirmation',
+    element: <ProtectedRoute><IntakeConfirmationPage /></ProtectedRoute>,
+  },
+  // SCR-006 — Appointment slot calendar (us_019/task_002)
+  {
+    path: '/slots',
+    element: <ProtectedRoute><SlotCalendar /></ProtectedRoute>,
+  },
+  // Booking confirmation screen — shown after POST /bookings returns 201 (us_020/AC-001)
+  {
+    path: '/booking/confirmation',
+    element: <ProtectedRoute><BookingConfirmationPage /></ProtectedRoute>,
   },
 ])

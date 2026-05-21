@@ -8,6 +8,7 @@ src/api/obj/
 # ── Node / Vite build outputs ────────────────────────────────────────────────
 frontend/node_modules/
 frontend/dist/
+node_modules/
 
 # ── Docker Compose local overrides ───────────────────────────────────────────
 docker-compose.override.yml

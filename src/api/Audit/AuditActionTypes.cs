@@ -18,4 +18,8 @@ public static class AuditActionTypes
     public const string CodeSuggestionReject  = "CodeSuggestionReject";
     public const string AdminUserCRUD         = "AdminUserCRUD";
     public const string UnauthorizedAccess    = "UnauthorizedAccess";
+    // AI intake confirmation audit event (us_016-II/AC-003; OWASP A09)
+    public const string IntakeCompleted       = "IntakeCompleted";
+    // Insurance pre-check audit event (us_023/AC-004; OWASP A09)
+    public const string InsurancePreCheck     = "InsurancePreCheck";
 }

@@ -8,6 +8,7 @@ using Pgvector.EntityFrameworkCore;
 using Prometheus;
 using Serilog;
 using System.Text;
+using Api.AI;
 using Api.Constants;
 using Api.Data;
 using Api.Exceptions;
@@ -167,6 +168,63 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")!, o => o.UseVector());
     opt.UseSnakeCaseNamingConvention();
 });
+
+// ── AI Intake services (us_016-I) ────────────────────────────────────────────────────────────
+// OllamaIntakeClient: typed HttpClient targeting the internal Docker network endpoint.
+// Base URL is sourced from OLLAMA_BASE_URL env var only — never hardcoded (AC-003; OWASP A02;
+// checklist). A 30-second HttpClient timeout acts as a secondary safety net; the primary timeout
+// is the CancellationToken supplied by the controller (Edge: inference timeout).
+var ollamaBaseUrl = Environment.GetEnvironmentVariable("OLLAMA_BASE_URL") ?? "http://ollama:11434";
+builder.Services.AddHttpClient<OllamaIntakeClient>(client =>
+{
+    client.BaseAddress = new Uri(ollamaBaseUrl);
+    client.Timeout     = TimeSpan.FromSeconds(35); // 35s outer HttpClient safety net; controller CTS fires at 30s
+});
+// IntakeSessionService: manages IDistributedCache session CRUD with patientId ownership check (AC-001)
+builder.Services.AddScoped<IntakeSessionService>();
+// IntakeRecordService: upserts encrypted IntakeRecord Draft row after each AI turn (AC-005)
+builder.Services.AddScoped<IntakeRecordService>();
+// IntakeModeSwitchService: bidirectional AI↔Manual field mapping for POST /intake/mode-switch (us_018)
+builder.Services.AddScoped<IntakeModeSwitchService>();
+// SlotsService: paginated appointment slot query for GET /slots (us_019)
+builder.Services.AddScoped<SlotsService>();
+// BookingService: ACID appointment booking transaction for POST /bookings (us_020)
+builder.Services.AddScoped<BookingService>();
+// InsurancePreCheckService: insurance completeness check for GET /api/insurance/pre-check (us_023)
+builder.Services.AddScoped<IInsurancePreCheckService, InsurancePreCheckService>();
+
+// ── No-show risk scoring pipeline (us_021) ───────────────────────────────────────────────────────
+// Bounded channel: capacity=1000, FullMode=Wait means writes block if full — TryWrite is used from
+// the request path so the 201 response is NEVER delayed by back-pressure (AC-003; checklist).
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<BookingCreatedEvent>(
+        new System.Threading.Channels.BoundedChannelOptions(1000)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.Wait,
+        }));
+// Worker: singleton BackgroundService; uses IServiceScopeFactory per event to avoid scoped-lifetime leaks
+builder.Services.AddHostedService<NoShowRiskScoringWorker>();
+// Scoring service: scoped so each worker-created scope resolves a fresh AppDbContext (OWASP A04)
+builder.Services.AddScoped<INoShowRiskScoringService, NoShowRiskScoringService>();
+
+// ── Confirmation PDF service (us_022) ────────────────────────────────────────────────────────────
+// Community licence must be declared before any Document.Create call (QuestPDF requirement).
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+// Scoped: each call site resolves a fresh ConfirmationPdfService instance with no shared state (AC-002; OWASP A04)
+builder.Services.AddScoped<IConfirmationPdfService, ConfirmationPdfService>();
+
+// ── Confirmation email pipeline (us_022) ─────────────────────────────────────────────────────────
+// Bounded channel: capacity=500, FullMode=Wait; TryWrite from request path never blocks the 201 response (AC-003)
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<BookingConfirmedEvent>(
+        new System.Threading.Channels.BoundedChannelOptions(500)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.Wait,
+        }));
+// Worker: singleton BackgroundService; uses IServiceScopeFactory per event to avoid scoped-lifetime leaks
+builder.Services.AddHostedService<ConfirmationEmailWorker>();
+// Service: scoped so each worker-created scope resolves a fresh instance (OWASP A04)
+builder.Services.AddScoped<IConfirmationEmailService, ConfirmationEmailService>();
 
 var app = builder.Build();
 

@@ -165,6 +165,12 @@ namespace Api.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("no_show_risk_score");
 
+                    b.Property<string>("NoShowRiskTier")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("no_show_risk_tier")
+                        .HasDefaultValue("Unknown");
+
                     b.Property<int>("PatientId")
                         .HasColumnType("integer")
                         .HasColumnName("patient_id");

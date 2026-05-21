@@ -9,6 +9,8 @@
   <ItemGroup>
     <!-- Prometheus metrics endpoint — us_003/AC-004 -->
     <PackageReference Include="prometheus-net.AspNetCore" Version="8.*" />
+    <PackageReference Include="QRCoder" Version="1.8.0" />
+    <PackageReference Include="QuestPDF" Version="2026.5.0" />
     <!-- Structured logging pipeline — us_004/AC-003, AC-004 -->
     <PackageReference Include="Serilog.AspNetCore" Version="8.*" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="6.*" />

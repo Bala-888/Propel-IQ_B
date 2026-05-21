@@ -13,6 +13,10 @@ public class Booking
     // AC-002: 0–100 no-show risk score produced by the prediction model; CHECK constraint in task_002 migration
     public int? NoShowRiskScore { get; set; }
 
+    // AC-002 (us_021): risk tier derived from the normalised score — "Low" | "Medium" | "High" | "Unknown"
+    // Defaults to "Unknown" until the async scoring pipeline writes the computed value.
+    public string NoShowRiskTier { get; set; } = "Unknown";
+
     // AC-003: structured risk factor key/value data stored as jsonb; JsonDocument maps to Npgsql jsonb directly
     public JsonDocument? RiskFactors { get; set; }
 
