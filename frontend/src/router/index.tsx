@@ -12,6 +12,7 @@ import { ManualIntakeForm } from '../features/intake/ManualIntakeForm'
 import { IntakeConfirmationPage } from '../pages/IntakeConfirmationPage'
 import { SlotCalendar } from '../features/slots/SlotCalendar'
 import { BookingConfirmationPage } from '../pages/BookingConfirmationPage'
+import { PatientSettingsPage } from '../pages/PatientSettingsPage'
 
 export const router = createBrowserRouter([
   {
@@ -69,5 +70,10 @@ export const router = createBrowserRouter([
   {
     path: '/booking/confirmation',
     element: <ProtectedRoute><BookingConfirmationPage /></ProtectedRoute>,
+  },
+  // SCR-008 — Patient profile & settings: Notifications section (us_029/AC-001, AC-002)
+  {
+    path: '/settings',
+    element: <ProtectedRoute><PatientSettingsPage /></ProtectedRoute>,
   },
 ])

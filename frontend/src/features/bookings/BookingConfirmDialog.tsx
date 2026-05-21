@@ -37,6 +37,16 @@ function SpinnerIcon() {
   )
 }
 
+function CheckCircleIcon() {
+  return (
+    <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="9 12 11 14 15 10" />
+    </svg>
+  )
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────────────────────────
 
 function formatDate(iso: string): string {
@@ -62,7 +72,7 @@ interface BookingConfirmDialogProps {
   slot:      SlotDto
   /** Called when the patient clicks "Confirm Booking". Implementer calls the booking API. */
   onConfirm: () => Promise<void>
-  /** Called on "Cancel" click or native Escape key — closes the dialog without booking. */
+  /** Called on "Cancel" click, native Escape key, or "Done" after a confirmed booking. */
   onClose:   () => void
   /**
    * Result of the insurance pre-check (us_023; AC-002; AC-003).
@@ -71,6 +81,17 @@ interface BookingConfirmDialogProps {
    * The "Confirm Booking" button is never disabled by this value (UXR-604).
    */
   insuranceStatus?: InsuranceStatus | null
+  /**
+   * Booking ID set by the parent after `onConfirm()` succeeds (us_024).
+   * When non-null the dialog transitions to the post-booking success view,
+   * which offers "Choose a Preferred Slot" and "Done" (navigate to confirmation page).
+   */
+  confirmedBookingId?: number | null
+  /**
+   * Called when the patient clicks "Choose a Preferred Slot" in the success view.
+   * The parent is responsible for opening MOD-003 (us_024).
+   */
+  onPreferredSlot?: () => void
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────────────────────────
@@ -86,7 +107,7 @@ interface BookingConfirmDialogProps {
  * during submission it shows a spinner icon — a visual indicator beyond colour alone (UXR-105;
  * WCAG 1.4.1).
  */
-export function BookingConfirmDialog({ slot, onConfirm, onClose, insuranceStatus = null }: BookingConfirmDialogProps) {
+export function BookingConfirmDialog({ slot, onConfirm, onClose, insuranceStatus = null, confirmedBookingId = null, onPreferredSlot }: BookingConfirmDialogProps) {
   const dialogRef              = useRef<HTMLDialogElement>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -149,7 +170,7 @@ export function BookingConfirmDialog({ slot, onConfirm, onClose, insuranceStatus
             id="dialog-title"
             style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}
           >
-            Confirm Appointment Booking
+            {confirmedBookingId !== null ? 'Booking Confirmed' : 'Confirm Appointment Booking'}
           </h2>
           <button
             type="button"
@@ -172,6 +193,69 @@ export function BookingConfirmDialog({ slot, onConfirm, onClose, insuranceStatus
           </button>
         </div>
 
+        {/* ── Success view (post-booking) ──── rendered when confirmedBookingId is set */}
+        {confirmedBookingId !== null ? (
+          <div style={{ padding: 'var(--space-6)' }}>
+            {/* icon + text — never colour alone (UXR-105; WCAG 1.4.1) */}
+            <div
+              role="status"
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                gap: 'var(--space-3)', textAlign: 'center', padding: 'var(--space-4) 0',
+              }}
+            >
+              <span style={{ color: '#10B981' }}><CheckCircleIcon /></span>
+              <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
+                Your appointment has been booked!
+              </p>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                Reference #{confirmedBookingId}
+              </p>
+            </div>
+
+            {onPreferredSlot && (
+              <div
+                style={{
+                  marginTop: 'var(--space-4)', padding: 'var(--space-3) var(--space-4)',
+                  background: 'var(--color-primary-subtle)', borderRadius: 'var(--radius-sm)',
+                  textAlign: 'center',
+                }}
+              >
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 var(--space-2) 0' }}>
+                  Want a different slot if one opens up?
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { onPreferredSlot(); onClose() }}
+                  style={{
+                    background: 'none', border: '1px solid var(--color-primary)',
+                    borderRadius: 'var(--radius-sm)', color: 'var(--color-primary)',
+                    cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: '13px',
+                    fontWeight: 600, padding: 'var(--space-2) var(--space-5)', minHeight: 36,
+                  }}
+                >
+                  Choose a Preferred Slot
+                </button>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-5)' }}>
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  minHeight: 44, padding: 'var(--space-2) var(--space-6)',
+                  background: 'var(--color-primary)', color: 'var(--color-text-inverse)',
+                  border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                  fontFamily: 'var(--font-sans)', fontSize: '14px', fontWeight: 600,
+                }}
+              >
+                View Booking Details
+              </button>
+            </div>
+          </div>
+        ) : (
+        <>
         {/* ── Slot summary ─────────────────────────────────────────────────── */}
         <div style={{ padding: 'var(--space-6)' }}>
           {/* Insurance alert — soft, non-blocking; shown for Missing/Incomplete only (us_023; AC-002; UXR-604) */}
@@ -278,6 +362,8 @@ export function BookingConfirmDialog({ slot, onConfirm, onClose, insuranceStatus
             {isSubmitting ? 'Booking…' : 'Confirm Booking'}
           </button>
         </div>
+        </>
+        )}
       </dialog>
     </>
   )

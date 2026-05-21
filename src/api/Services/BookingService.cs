@@ -53,8 +53,10 @@ public sealed class BookingService
     private readonly SlotsService               _slotsService;
     private readonly Api.Services.IAuditLogger  _audit;
     private readonly ILogger<BookingService>    _logger;
-    private readonly Channel<BookingCreatedEvent>   _channel;
-    private readonly Channel<BookingConfirmedEvent> _confirmationChannel;
+    private readonly Channel<BookingCreatedEvent>        _channel;
+    private readonly Channel<BookingConfirmedEvent>      _confirmationChannel;
+    private readonly Channel<PreferredSlotReleasedEvent> _preferredSlotReleasedChannel;
+    private readonly ICalendarSyncService               _calendarSync;
 
     public BookingService(
         AppDbContext                      db,
@@ -62,14 +64,18 @@ public sealed class BookingService
         Api.Services.IAuditLogger        audit,
         ILogger<BookingService>          logger,
         Channel<BookingCreatedEvent>     channel,
-        Channel<BookingConfirmedEvent>   confirmationChannel)
+        Channel<BookingConfirmedEvent>   confirmationChannel,
+        Channel<PreferredSlotReleasedEvent> preferredSlotReleasedChannel,
+        ICalendarSyncService             calendarSync)
     {
-        _db                  = db;
-        _slotsService        = slotsService;
-        _audit               = audit;
-        _logger              = logger;
-        _channel             = channel;
-        _confirmationChannel = confirmationChannel;
+        _db                           = db;
+        _slotsService                 = slotsService;
+        _audit                        = audit;
+        _logger                       = logger;
+        _channel                      = channel;
+        _confirmationChannel          = confirmationChannel;
+        _preferredSlotReleasedChannel = preferredSlotReleasedChannel;
+        _calendarSync                 = calendarSync;
     }
 
     /// <summary>
@@ -239,4 +245,100 @@ public sealed class BookingService
             return new BookingError { Message = "An unexpected error occurred." };
         }
     }
+
+    // ── Cancel booking ────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Cancels a confirmed booking owned by <paramref name="patientId"/>.
+    /// Deletes any associated <c>preferred_slots</c> row and enqueues a
+    /// <see cref="PreferredSlotReleasedEvent"/> for the us_025 monitoring worker (us_024 Edge: booking cancelled).
+    /// </summary>
+    public async Task<CancelBookingResult> CancelBookingAsync(
+        int               bookingId,
+        int               patientId,
+        CancellationToken ct = default)
+    {
+        var booking = await _db.Bookings
+            .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
+
+        if (booking is null || booking.PatientId != patientId)
+            return new CancelBookingForbidden();
+
+        if (booking.Status == "Cancelled")
+            return new CancelBookingAlreadyCancelled();
+
+        // Delete preferred slot row before status update — ExecuteDeleteAsync is a bulk operation
+        // and does not require the booking to still be in "Confirmed" state (us_024 Edge)
+        var hadPreferredSlot = await _db.PreferredSlots
+            .Where(ps => ps.BookingId == bookingId)
+            .ExecuteDeleteAsync(ct) > 0;
+
+        booking.Status = "Cancelled";
+
+        // Mark the previously-booked slot as available again
+        var slot = await _db.AppointmentSlots.FindAsync(new object[] { booking.AppointmentSlotId }, ct);
+        if (slot is not null)
+            slot.IsAvailable = true;
+
+        await _db.SaveChangesAsync(ct);
+
+        // ── Calendar sync delete hook (us_028; AC-004) ────────────────────────────────────────
+        // Executed after SaveChangesAsync() so the booking cancellation is committed first.
+        // A calendar failure here MUST NOT roll back or affect the booking cancellation (AC-005).
+        // NOTE: When RescheduleAsync is implemented it should call _calendarSync.UpdateAsync() in
+        //       a similar try/catch AFTER committing the reschedule state change (AC-003).
+        try
+        {
+            var syncedRows = await _db.BookingCalendarSyncs
+                .Where(s => s.BookingId == bookingId && s.Status == "Synced")
+                .ToListAsync(ct);
+
+            foreach (var row in syncedRows)
+            {
+                var deleteResult = await _calendarSync.DeleteAsync(bookingId, row.Provider, ct);
+                if (deleteResult == SyncResult.TokenExpired)
+                {
+                    _logger.LogWarning(
+                        "CalendarDeleteTokenExpired: BookingId={BookingId} Provider={Provider}",
+                        bookingId, row.Provider);
+                }
+            }
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex)
+        {
+            // Log only — cancellation is already committed; calendar failure must not resurface
+            _logger.LogError(ex,
+                "CalendarDeleteHookFailed: BookingId={BookingId}", bookingId);
+        }
+
+        // Enqueue PreferredSlotReleasedEvent if a preferred slot was registered — us_025 hook
+        if (hadPreferredSlot)
+        {
+            if (!_preferredSlotReleasedChannel.Writer.TryWrite(new PreferredSlotReleasedEvent(bookingId)))
+            {
+                _logger.LogWarning(
+                    "PreferredSlotReleasedEventDropped: channel full for BookingId={BookingId}",
+                    bookingId);
+            }
+        }
+
+        _audit.Log(
+            actorId:    patientId.ToString(),
+            actionType: AuditActionTypes.BookingModify,
+            resourceId: bookingId.ToString());
+
+        _logger.LogInformation(
+            "Booking cancelled: bookingId={BookingId} patientId={PatientId}",
+            bookingId, patientId);
+
+        return new CancelBookingSuccess();
+    }
 }
+
+// ── Cancel booking result union ───────────────────────────────────────────────────────────────────
+
+public abstract record CancelBookingResult { }
+public sealed record CancelBookingSuccess            : CancelBookingResult;
+public sealed record CancelBookingForbidden          : CancelBookingResult;
+public sealed record CancelBookingAlreadyCancelled   : CancelBookingResult;

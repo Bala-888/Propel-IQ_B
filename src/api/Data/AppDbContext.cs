@@ -30,7 +30,10 @@ public class AppDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<WalkInBooking> WalkInBookings => Set<WalkInBooking>();
     public DbSet<AdminNotification> AdminNotifications => Set<AdminNotification>();
-
+    public DbSet<PreferredSlot> PreferredSlots => Set<PreferredSlot>();
+    public DbSet<PatientCalendarToken>  PatientCalendarTokens  => Set<PatientCalendarToken>();
+    public DbSet<BookingCalendarSync>   BookingCalendarSyncs   => Set<BookingCalendarSync>();
+    public DbSet<PatientPreferences>    PatientPreferences     => Set<PatientPreferences>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -171,6 +174,109 @@ public class AppDbContext : DbContext
             // DB-server timestamp — prevents application-side clock-skew manipulation (AC-005; OWASP A09)
             e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
         });
+
+        // ── PreferredSlot (us_024) ─────────────────────────────────────────────────
+        // FK → bookings: cascade delete cleans up the preferred slot if the booking row is
+        // hard-deleted; business-logic cancellation uses ExecuteDeleteAsync in BookingService.
+        modelBuilder.Entity<PreferredSlot>()
+            .HasOne(ps => ps.Booking)
+            .WithMany()
+            .HasForeignKey(ps => ps.BookingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // FK → appointment_slots: Restrict so the slot row cannot be deleted while a preferred
+        // slot references it (data integrity).
+        modelBuilder.Entity<PreferredSlot>()
+            .HasOne(ps => ps.Slot)
+            .WithMany()
+            .HasForeignKey(ps => ps.SlotId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // UNIQUE index on BookingId — enforces at-most-one preferred slot per booking (AC-002)
+        modelBuilder.Entity<PreferredSlot>()
+            .HasIndex(ps => ps.BookingId)
+            .IsUnique();
+
+        // Non-unique index on SlotId for FK look-up efficiency
+        modelBuilder.Entity<PreferredSlot>()
+            .HasIndex(ps => ps.SlotId);
+
+        // ── AppointmentReminderJob (us_027; AC-001, AC-002) ───────────────────────
+        // Index on slot_start supports the ±5-minute window range query executed on every tick.
+        modelBuilder.Entity<AppointmentSlot>()
+            .HasIndex(s => s.SlotStart)
+            .HasDatabaseName("ix_appointment_slots_slot_start");
+
+        // ── PatientCalendarToken (us_028; AC-001, AC-002) ─────────────────────────────────────
+        // FK → Patient: cascade delete removes token rows when the patient is deleted (data hygiene).
+        // EncryptedAccessToken/EncryptedRefreshToken: stored as bytea; CalendarSyncService encrypts
+        // via IPhiEncryptionService.Encrypt() before saving (OWASP A02; HIPAA minimum-necessary).
+        modelBuilder.Entity<PatientCalendarToken>()
+            .HasOne(t => t.Patient)
+            .WithMany()
+            .HasForeignKey(t => t.PatientId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // UNIQUE (PatientId, Provider) — one token row per patient per provider (Google / Outlook)
+        modelBuilder.Entity<PatientCalendarToken>()
+            .HasIndex(t => new { t.PatientId, t.Provider })
+            .IsUnique()
+            .HasDatabaseName("uq_patient_calendar_tokens_patient_provider");
+
+        // ── BookingCalendarSync (us_028; AC-001–AC-005) ───────────────────────────────────────
+        // FK → Booking: cascade delete removes sync rows if the booking row is hard-deleted.
+        // Business-logic cancellation sets Status = "Deleted" without hard-deleting (AC-004).
+        modelBuilder.Entity<BookingCalendarSync>()
+            .HasOne(s => s.Booking)
+            .WithMany()
+            .HasForeignKey(s => s.BookingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // UNIQUE (BookingId, Provider) — one sync row per (booking, provider) pair (AC-001, AC-002)
+        modelBuilder.Entity<BookingCalendarSync>()
+            .HasIndex(s => new { s.BookingId, s.Provider })
+            .IsUnique()
+            .HasDatabaseName("uq_booking_calendar_syncs_booking_provider");
+
+        // Non-unique index on BookingId for efficient look-up in UpdateAsync / DeleteAsync hooks
+        modelBuilder.Entity<BookingCalendarSync>()
+            .HasIndex(s => s.BookingId)
+            .HasDatabaseName("ix_booking_calendar_syncs_booking_id");
+
+        // ── PatientPreferences (us_029; AC-004) ─────────────────────────────────────────────────
+        // FK → Patient: cascade delete removes preference row when the patient account is deleted.
+        // UNIQUE on PatientId: one preference row per patient enforced at the DB level.
+        // HasDefaultValue on all five bool columns so rows inserted outside EF (e.g. seed scripts)
+        // also receive the correct opt-in / opt-out starting state (AC-004; task spec).
+        modelBuilder.Entity<PatientPreferences>()
+            .HasOne(p => p.Patient)
+            .WithMany()
+            .HasForeignKey(p => p.PatientId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PatientPreferences>()
+            .HasIndex(p => p.PatientId)
+            .IsUnique()
+            .HasDatabaseName("uq_patient_preferences_patient_id");
+
+        // Notification channels: opt-in by default (HasDefaultValue(true) → DB column DEFAULT true)
+        modelBuilder.Entity<PatientPreferences>()
+            .Property(p => p.EmailNotificationsEnabled)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<PatientPreferences>()
+            .Property(p => p.SmsNotificationsEnabled)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<PatientPreferences>()
+            .Property(p => p.SlotSwapNotificationsEnabled)
+            .HasDefaultValue(true);
+
+        // Calendar sync channels: opt-out by default (HasDefaultValue(false) → DB column DEFAULT false)
+        modelBuilder.Entity<PatientPreferences>()
+            .Property(p => p.GoogleCalendarSyncEnabled)
+            .HasDefaultValue(false);
+        modelBuilder.Entity<PatientPreferences>()
+            .Property(p => p.OutlookCalendarSyncEnabled)
+            .HasDefaultValue(false);
 
         // ── AuditLog (us_014/task_002) ─────────────────────────────────────────────
         // BIGSERIAL PK: monotonically increasing sequence eliminates B-tree page-splits caused

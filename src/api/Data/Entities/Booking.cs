@@ -20,6 +20,14 @@ public class Booking
     // AC-003: structured risk factor key/value data stored as jsonb; JsonDocument maps to Npgsql jsonb directly
     public JsonDocument? RiskFactors { get; set; }
 
+    // ── Reminder tracking columns (us_027; AC-001, AC-002) ───────────────────────────────────────
+    // Populated by AppointmentReminderJob after a successful notification dispatch.
+    // Non-null = reminder was already sent for that tier; prevents duplicate fires on subsequent ticks.
+    // NOTE: When BookingService.RescheduleAsync is implemented, it MUST reset both columns to null
+    //       so the job re-evaluates both windows from the new appointment_datetime (Edge: reschedule).
+    public DateTimeOffset? Reminder24hSentAt { get; set; }
+    public DateTimeOffset? Reminder2hSentAt  { get; set; }
+
     public Patient Patient { get; set; } = null!;
     public AppointmentSlot AppointmentSlot { get; set; } = null!;
 }

@@ -108,6 +108,23 @@ public sealed class AuthController : ControllerBase
 
         await _db.SaveChangesAsync();
 
+        // AC-004: insert a PatientPreferences row with default opt-in/opt-out values for the
+        // newly created patient. EF Core HasDefaultValue config enforces these at the DB level;
+        // the explicit C# assignment below provides correct runtime defaults without a second
+        // SaveChangesAsync round-trip (consistent with EF Core HasDefaultValue pattern).
+        var prefs = new Data.Entities.PatientPreferences
+        {
+            PatientId                    = newPatient.Id,
+            EmailNotificationsEnabled    = true,
+            SmsNotificationsEnabled      = true,
+            SlotSwapNotificationsEnabled = true,
+            GoogleCalendarSyncEnabled    = false,
+            OutlookCalendarSyncEnabled   = false,
+        };
+        _db.PatientPreferences.Add(prefs);
+
+        await _db.SaveChangesAsync();
+
         // AC-001: audit log written after successful SaveChangesAsync — no audit entry for failed
         // registrations (OWASP A09 audit completeness; edge: partial write never audited).
         _auditLogger.Log(newUser.Id.ToString(), "PatientRegistration", newPatient.Id.ToString());

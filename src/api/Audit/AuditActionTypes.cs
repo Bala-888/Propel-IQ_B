@@ -22,4 +22,6 @@ public static class AuditActionTypes
     public const string IntakeCompleted       = "IntakeCompleted";
     // Insurance pre-check audit event (us_023/AC-004; OWASP A09)
     public const string InsurancePreCheck     = "InsurancePreCheck";
+    // Notification/calendar-sync preference updated (us_029/AC-003; OWASP A02 — field name only, no value)
+    public const string PreferenceUpdated     = "PreferenceUpdated";
 }

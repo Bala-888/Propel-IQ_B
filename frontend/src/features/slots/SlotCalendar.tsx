@@ -8,6 +8,7 @@ import { SlotCell } from './SlotCell'
 import { SlotPagination } from './SlotPagination'
 import { BookingConfirmDialog } from '../bookings/BookingConfirmDialog'
 import { BookingAlternatives } from '../bookings/BookingAlternatives'
+import { PreferredSlotSelectionModal } from '../bookings/PreferredSlotSelectionModal'
 
 const PAGE_SIZE = 10
 
@@ -130,8 +131,14 @@ export function SlotCalendar() {
   const [fetchError,     setFetchError]     = useState<string | null>(null)
 
   // ── Dialog + booking error state ─────────────────────────────────────────────────────────
-  const [isDialogOpen,      setIsDialogOpen]      = useState(false)
-  const [bookingError,      setBookingError]      = useState<BookingConflictError | null>(null)
+  const [isDialogOpen,         setIsDialogOpen]         = useState(false)
+  const [bookingError,         setBookingError]         = useState<BookingConflictError | null>(null)
+
+  // ── Confirmed booking state (us_024) — set when createBooking resolves successfully ───────
+  // Drives the success view in BookingConfirmDialog and the preferred slot modal (MOD-003).
+  const [confirmedBookingId,   setConfirmedBookingId]   = useState<number | null>(null)
+  const [confirmedSlot,        setConfirmedSlot]        = useState<SlotDto | null>(null)
+  const [isPreferredModalOpen, setIsPreferredModalOpen] = useState(false)
 
   // ── Insurance pre-check state (us_023; AC-002; AC-003) ────────────────────────
   // null = pre-check not yet run or failed silently (dialog opens without alert)
@@ -199,15 +206,35 @@ export function SlotCalendar() {
     if (selectedSlotId === null || !accessToken) return
     try {
       const res = await createBooking(accessToken, selectedSlotId)
-      setIsDialogOpen(false)
-      setSelectedSlotId(null) // clear so back-navigation doesn't re-trigger the flow (AC-001)
-      navigate('/booking/confirmation', { state: { bookingId: res.bookingId, slot: res.slot } })
+      // Keep dialog open — transition to success view (us_024; AC-001).
+      // Navigation to the confirmation page happens only when the patient dismisses the dialog.
+      setConfirmedBookingId(res.bookingId)
+      setConfirmedSlot(res.slot)
+      setSelectedSlotId(null) // clear so slot list is no longer highlighted
     } catch (err) {
       setIsDialogOpen(false)
       if (isBookingConflictError(err)) {
         setBookingError(err)
       }
     }
+  }
+
+  // ── Close MOD-002 — navigates to confirmation page if a booking was just made (us_024) ───
+
+  function handleDialogClose() {
+    setIsDialogOpen(false)
+    if (confirmedBookingId !== null && confirmedSlot !== null) {
+      navigate('/booking/confirmation', { state: { bookingId: confirmedBookingId, slot: confirmedSlot } })
+      setConfirmedBookingId(null)
+      setConfirmedSlot(null)
+    }
+  }
+
+  // ── "Choose a Preferred Slot" — closes MOD-002, opens MOD-003 (us_024) ──────────────────
+
+  function handleOpenPreferredModal() {
+    setIsDialogOpen(false) // close MOD-002 without navigating
+    setIsPreferredModalOpen(true)
   }
 
   // ── Alternative slot selected from BookingAlternatives ────────────────────────────────────
@@ -534,19 +561,38 @@ export function SlotCalendar() {
         </div>
       )}
 
-      {/* ── MOD-002 Booking Confirmation Dialog (us_020; AC-001) ─────────────── */}
-      {isDialogOpen && selectedSlotId !== null && (() => {
-        const selectedSlot = slots.find(s => s.id === selectedSlotId)
-        if (!selectedSlot) return null
+      {/* ── MOD-002 Booking Confirmation Dialog (us_020; AC-001; us_024) ───── */}
+      {/* When confirmedSlot is set, the selected slot was cleared; fall back to confirmedSlot. */}
+      {isDialogOpen && (confirmedSlot !== null || selectedSlotId !== null) && (() => {
+        const dialogSlot = confirmedSlot ?? slots.find(s => s.id === selectedSlotId)
+        if (!dialogSlot) return null
         return (
           <BookingConfirmDialog
-            slot={selectedSlot}
+            slot={dialogSlot}
             insuranceStatus={insuranceStatus}
             onConfirm={handleConfirmBooking}
-            onClose={() => setIsDialogOpen(false)}
+            onClose={handleDialogClose}
+            confirmedBookingId={confirmedBookingId}
+            onPreferredSlot={handleOpenPreferredModal}
           />
         )
       })()}
+
+      {/* ── MOD-003 Preferred Slot Selection Modal (us_024; AC-001; AC-003) ── */}
+      {isPreferredModalOpen && confirmedBookingId !== null && confirmedSlot !== null && (
+        <PreferredSlotSelectionModal
+          isOpen={isPreferredModalOpen}
+          bookingId={confirmedBookingId}
+          currentSlotId={confirmedSlot.id}
+          accessToken={accessToken ?? ''}
+          onClose={() => {
+            setIsPreferredModalOpen(false)
+            navigate('/booking/confirmation', { state: { bookingId: confirmedBookingId, slot: confirmedSlot } })
+            setConfirmedBookingId(null)
+            setConfirmedSlot(null)
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
+import { CalendarSyncSection } from '../components/calendar/CalendarSyncSection'
+import { useAuth } from '../context/AuthContext'
 import type { SlotDto } from '../api/slotsApi'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────────────────────────
@@ -60,6 +62,7 @@ interface BookingConfirmationState {
 export function BookingConfirmationPage() {
   const location = useLocation()
   const state    = location.state as BookingConfirmationState | null
+  const { accessToken } = useAuth()
 
   return (
     <>
@@ -181,6 +184,18 @@ export function BookingConfirmationPage() {
               Book another appointment
             </Link>
           </div>
+
+          {/* ── Calendar sync section ────────────────────────────────────────────
+               Rendered as a sibling to the booking details — never blocks or delays
+               the visibility of the confirmation content (Edge: non-blocking; AC-005).
+               AC-001, AC-002: independent per-provider buttons with inline status.
+          ─────────────────────────────────────────────────────────────────────── */}
+          {state && (
+            <CalendarSyncSection
+              bookingId={state.bookingId}
+              accessToken={accessToken}
+            />
+          )}
         </div>
       </main>
     </>

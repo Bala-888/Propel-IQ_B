@@ -192,6 +192,10 @@ builder.Services.AddScoped<SlotsService>();
 builder.Services.AddScoped<BookingService>();
 // InsurancePreCheckService: insurance completeness check for GET /api/insurance/pre-check (us_023)
 builder.Services.AddScoped<IInsurancePreCheckService, InsurancePreCheckService>();
+// PreferredSlotService: preferred alternative slot registration for POST /api/bookings/{id}/preferred-slot (us_024)
+builder.Services.AddScoped<IPreferredSlotService, PreferredSlotService>();
+// PatientPreferencesService: partial update for PATCH /api/patients/{id}/preferences (us_029)
+builder.Services.AddScoped<IPatientPreferencesService, PatientPreferencesService>();
 
 // ── No-show risk scoring pipeline (us_021) ───────────────────────────────────────────────────────
 // Bounded channel: capacity=1000, FullMode=Wait means writes block if full — TryWrite is used from
@@ -225,6 +229,71 @@ builder.Services.AddSingleton(
 builder.Services.AddHostedService<ConfirmationEmailWorker>();
 // Service: scoped so each worker-created scope resolves a fresh instance (OWASP A04)
 builder.Services.AddScoped<IConfirmationEmailService, ConfirmationEmailService>();
+
+// ── Preferred slot released event channel (us_024) ───────────────────────────────────────────────
+// Bounded channel consumed by the us_025 monitoring worker; capacity=500, FullMode=Wait.
+// TryWrite from BookingService.CancelBookingAsync is fire-and-forget (AC-003).
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<PreferredSlotReleasedEvent>(
+        new System.Threading.Channels.BoundedChannelOptions(500)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.Wait,
+        }));
+
+// ── Preferred slot monitor job (us_025) ──────────────────────────────────────────────────────────
+// Bind PreferredSlotMonitorOptions from config; set "PreferredSlotMonitor:IntervalMinutes" to 1 in
+// test environments to verify swap behaviour without waiting 5 minutes (AC-001 validation plan).
+builder.Services.Configure<PreferredSlotMonitorOptions>(
+    builder.Configuration.GetSection("PreferredSlotMonitor"));
+// Bounded channel: capacity=500, FullMode=Wait; consumed by the us_026 notification worker (AC-005)
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<SlotSwapCompletedEvent>(
+        new System.Threading.Channels.BoundedChannelOptions(500)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.Wait,
+        }));
+// Worker: singleton BackgroundService; creates a fresh scope per tick via IServiceScopeFactory (DI lifetime; OWASP A04)
+builder.Services.AddHostedService<PreferredSlotMonitorJob>();
+// Swap service: scoped so each job scope resolves a fresh instance with its own AppDbContext (OWASP A04)
+builder.Services.AddScoped<IPreferredSlotSwapService, PreferredSlotSwapService>();
+
+// ── Slot swap notification pipeline (us_026) ─────────────────────────────────────────────────────
+// Bind SmsSettings from config; set "Sms:SmsGatewayDomain" in appsettings / env (AC-002; OWASP A02)
+builder.Services.Configure<SmsSettings>(builder.Configuration.GetSection("Sms"));
+// Worker: singleton BackgroundService; creates a fresh scope per event via IServiceScopeFactory (OWASP A04)
+builder.Services.AddHostedService<SlotSwapNotificationWorker>();
+// Notification service: scoped so each worker scope resolves a fresh AppDbContext instance (OWASP A04)
+builder.Services.AddScoped<ISlotSwapNotificationService, SlotSwapNotificationService>();
+
+// ── Appointment reminder job (us_027; AC-001, AC-002) ─────────────────────────────────────────────
+// PeriodicTimer job that fires 24-hour and 2-hour pre-appointment reminder notifications.
+// Scoped reminder service resolves a fresh AppDbContext per tick via IServiceScopeFactory (OWASP A04).
+// SmsSettings already registered above (us_026 — shared by both services).
+builder.Services.AddHostedService<AppointmentReminderJob>();
+builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();
+
+// ── Calendar sync pipeline (us_028; AC-001–AC-005) ────────────────────────────────────────────────
+// Named HttpClients for Google Calendar API v3 and Microsoft Graph API.
+// Base addresses are validated/set at startup — no new HttpClient() in service code (OWASP A03;
+// socket exhaustion prevention; TR-013).
+builder.Services.AddHttpClient("GoogleCalendar",
+    c => c.BaseAddress = new Uri("https://www.googleapis.com/"));
+builder.Services.AddHttpClient("MicrosoftGraph",
+    c => c.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/"));
+
+// Bounded channel (500) for calendar sync commands — CalendarSyncWorker consumes asynchronously
+// so POST /api/calendar/sync always returns 202 immediately (Edge: SCR-007; AC-005).
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<CalendarSyncCommand>(
+        new System.Threading.Channels.BoundedChannelOptions(500)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.Wait
+        }));
+
+// Worker: singleton BackgroundService; creates a fresh scope per command via IServiceScopeFactory
+builder.Services.AddHostedService<CalendarSyncWorker>();
+// Service: scoped so each worker scope and controller request resolves a fresh AppDbContext (OWASP A04)
+builder.Services.AddScoped<ICalendarSyncService, CalendarSyncService>();
 
 var app = builder.Build();
 
