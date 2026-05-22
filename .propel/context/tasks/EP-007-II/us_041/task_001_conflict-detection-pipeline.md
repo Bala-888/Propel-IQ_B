@@ -149,13 +149,13 @@ src/
 ---
 
 ## Implementation Validation Strategy
-- [ ] Run the full pipeline (us_035–us_038) for a patient with a Medication (Amoxicillin) and an Allergy (Penicillin); verify `ConflictDetectionWorker` receives `PatientEntitiesUpdatedEvent` and inserts a `DrugAllergyConflict` row in `clinical_conflicts` with `status = 'Open'` (AC-001, AC-002)
-- [ ] Run the conflict detection job twice for the same patient; verify `SELECT COUNT(*) FROM clinical_conflicts WHERE patient_id = <id> AND entity_a_id = <x> AND entity_b_id = <y>` returns 1 (AC-004 — idempotency)
-- [ ] Call `GET /patients/{id}/summary` after a conflict is detected; verify `conflicts` array contains the conflict with `entityA`, `entityB`, `conflictType`, `description`, and `severity` (AC-003)
-- [ ] Stub Ollama to return invalid JSON for conflict analysis; verify `Log.Error("ConflictDetectionSchemaError")` is emitted and zero rows are inserted in `clinical_conflicts` (Edge: invalid JSON — no partial data)
-- [ ] Run conflict detection for a patient with exactly 1 entity; verify `Log.Information("ConflictDetectionSkipped", reason=InsufficientEntities)` is emitted and Ollama is not called (Edge: < 2 entities)
-- [ ] Verify entity values and conflict descriptions do not appear in any Serilog log output; only `PatientId` UUID appears in log entries for `ConflictDetectionWorker` (OWASP A02 — PHI audit)
-- [ ] Verify `OLLAMA_BASE_URL` is read from IConfiguration only; hard-coded URL in `"ollama-conflicts"` client causes test failure (OWASP A02)
+- [x] Run the full pipeline (us_035–us_038) for a patient with a Medication (Amoxicillin) and an Allergy (Penicillin); verify `ConflictDetectionWorker` receives `PatientEntitiesUpdatedEvent` and inserts a `DrugAllergyConflict` row in `clinical_conflicts` with `status = 'Open'` (AC-001, AC-002)
+- [x] Run the conflict detection job twice for the same patient; verify `SELECT COUNT(*) FROM clinical_conflicts WHERE patient_id = <id> AND entity_a_id = <x> AND entity_b_id = <y>` returns 1 (AC-004 — idempotency)
+- [x] Call `GET /patients/{id}/summary` after a conflict is detected; verify `conflicts` array contains the conflict with `entityA`, `entityB`, `conflictType`, `description`, and `severity` (AC-003)
+- [x] Stub Ollama to return invalid JSON for conflict analysis; verify `Log.Error("ConflictDetectionSchemaError")` is emitted and zero rows are inserted in `clinical_conflicts` (Edge: invalid JSON — no partial data)
+- [x] Run conflict detection for a patient with exactly 1 entity; verify `Log.Information("ConflictDetectionSkipped", reason=InsufficientEntities)` is emitted and Ollama is not called (Edge: < 2 entities)
+- [x] Verify entity values and conflict descriptions do not appear in any Serilog log output; only `PatientId` UUID appears in log entries for `ConflictDetectionWorker` (OWASP A02 — PHI audit)
+- [x] Verify `OLLAMA_BASE_URL` is read from IConfiguration only; hard-coded URL in `"ollama-conflicts"` client causes test failure (OWASP A02)
 
 ---
 

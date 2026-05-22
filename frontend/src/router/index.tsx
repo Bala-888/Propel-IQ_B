@@ -17,6 +17,9 @@ import { BookingConfirmationPage } from '../pages/BookingConfirmationPage'
 import { PatientSettingsPage } from '../pages/PatientSettingsPage'
 import { DocumentUploadPage }   from '../pages/DocumentUploadPage'
 import { DocumentStatusPage }   from '../pages/DocumentStatusPage'
+import { PatientSearchPage }    from '../pages/PatientSearchPage'
+import { PatientViewPage }      from '../pages/PatientViewPage'
+import { MedicalCodePage }      from '../pages/MedicalCodePage'
 
 export const router = createBrowserRouter([
   {
@@ -99,5 +102,20 @@ export const router = createBrowserRouter([
   {
     path: '/documents',
     element: <ProtectedRoute><DocumentStatusPage /></ProtectedRoute>,
+  },
+  // SCR-013 — Patient search: Staff/Admin/Clinician only; role guard inside page (us_040/task_002; AC-001, AC-004)
+  {
+    path: '/patients/search',
+    element: <ProtectedRoute><PatientSearchPage /></ProtectedRoute>,
+  },
+  // SCR-014 — 360° Patient view: Staff/Admin/Clinician only; role guard inside page (us_040/task_002; AC-002, AC-004)
+  {
+    path: '/patients/:id/view',
+    element: <ProtectedRoute><PatientViewPage /></ProtectedRoute>,
+  },
+  // SCR-015 — Medical Code Review: Clinician/Admin only; role guard inside page (us_043/task_002; AC-001, AC-005)
+  {
+    path: '/patients/:id/codes',
+    element: <ProtectedRoute><MedicalCodePage /></ProtectedRoute>,
   },
 ])

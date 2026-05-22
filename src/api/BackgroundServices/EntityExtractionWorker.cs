@@ -30,6 +30,7 @@ namespace Api.BackgroundServices;
 public sealed class EntityExtractionWorker : BackgroundService
 {
     private readonly Channel<DocumentEmbeddingsCompleteEvent> _channel;
+    private readonly Channel<PatientEntitiesUpdatedEvent>    _entitiesUpdatedChannel;
     private readonly IServiceScopeFactory                     _scopeFactory;
     private readonly IHttpClientFactory                       _httpClientFactory;
     private readonly ILogger<EntityExtractionWorker>          _logger;
@@ -40,14 +41,16 @@ public sealed class EntityExtractionWorker : BackgroundService
 
     public EntityExtractionWorker(
         Channel<DocumentEmbeddingsCompleteEvent> channel,
+        Channel<PatientEntitiesUpdatedEvent>    entitiesUpdatedChannel,
         IServiceScopeFactory                     scopeFactory,
         IHttpClientFactory                       httpClientFactory,
         ILogger<EntityExtractionWorker>          logger)
     {
-        _channel           = channel;
-        _scopeFactory      = scopeFactory;
-        _httpClientFactory = httpClientFactory;
-        _logger            = logger;
+        _channel                = channel;
+        _entitiesUpdatedChannel = entitiesUpdatedChannel;
+        _scopeFactory           = scopeFactory;
+        _httpClientFactory      = httpClientFactory;
+        _logger                 = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -119,6 +122,16 @@ public sealed class EntityExtractionWorker : BackgroundService
         _logger.LogInformation(
             "Entity extraction complete for document {DocumentId}. status=EntitiesExtracted",
             ev.DocumentId);
+
+        // Publish to conflict detection pipeline (us_040/AC-004).
+        // TryWrite is fire-and-forget — a full channel drops the oldest event rather than
+        // blocking this consumer loop (FullMode=DropOldest mirrors entity extraction channel; OWASP A04).
+        if (!_entitiesUpdatedChannel.Writer.TryWrite(new PatientEntitiesUpdatedEvent(ev.PatientId)))
+        {
+            _logger.LogWarning(
+                "ConflictDetectionChannel full — PatientEntitiesUpdatedEvent dropped for patient {PatientId}",
+                ev.PatientId);
+        }
     }
 
     /// <summary>

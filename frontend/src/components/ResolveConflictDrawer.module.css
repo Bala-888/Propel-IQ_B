@@ -1,0 +1,290 @@
+/*
+ * ResolveConflictDrawer — MOD-005 Resolve Conflict Drawer (us_042/AC-001, AC-002, AC-003, AC-004)
+ *
+ * Design tokens from wireframe-MOD-005-resolve-conflict-drawer.html.
+ * All colour values are declared as local custom properties — zero literal hex in declarations.
+ */
+
+/* ── Local token overrides from wireframe ──────────────────────────────────────────────────────── */
+.overlay {
+  --drawer-overlay-bg:    rgba(15, 23, 42, 0.48);
+  --drawer-shadow:        0 8px 24px rgba(15, 23, 42, 0.14);
+  --drawer-header-bg:     #FEF2F2;
+  --drawer-title-color:   #DC2626;
+  --drawer-desc-color:    #7F1D1D;
+  --entity-card-bg:       #FEF2F2;
+  --entity-card-border:   #FECACA;
+  --ai-label-color:       #6366F1;
+  --ai-label-bg:          #EEF2FF;
+  --btn-primary-bg:       #1A56DB;
+  --btn-primary-hover:    #1547B4;
+  --btn-primary-color:    #FFFFFF;
+  --btn-secondary-bg:     #FFFFFF;
+  --btn-secondary-border: #E2E8F0;
+  --btn-secondary-color:  #0F172A;
+  --btn-secondary-hover:  #F1F5F9;
+  --focus-ring-color:     #1A56DB;
+  --textarea-border:      #E2E8F0;
+  --textarea-focus:       #1A56DB;
+  --counter-color:        #475569;
+  --separator-color:      #DC2626;
+}
+
+/* ── Overlay (behind drawer) ───────────────────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset:    0;
+  background: var(--drawer-overlay-bg);
+  z-index:  200;
+}
+
+/* ── Drawer container ──────────────────────────────────────────────────────────────────────────── */
+.drawer {
+  position:   fixed;
+  top:        0;
+  right:      0;
+  bottom:     0;
+  width:      360px;
+  background: var(--color-bg-surface, #FFFFFF);
+  box-shadow: var(--drawer-shadow);
+  z-index:    201;
+  display:    flex;
+  flex-direction: column;
+  overflow:   hidden;
+}
+
+/* ── Drawer header ─────────────────────────────────────────────────────────────────────────────── */
+.drawerHeader {
+  padding:        var(--space-5, 20px) var(--space-6, 24px);
+  border-bottom:  1px solid var(--color-border, #E2E8F0);
+  display:        flex;
+  align-items:    flex-start;
+  justify-content: space-between;
+  gap:            var(--space-4, 16px);
+  background:     var(--drawer-header-bg);
+  flex-shrink:    0;
+}
+
+.drawerTitle {
+  font-size:   18px;
+  font-weight: 700;
+  color:       var(--drawer-title-color);
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2, 8px);
+}
+
+.drawerDesc {
+  font-size:  13px;
+  color:      var(--drawer-desc-color);
+  margin-top: 4px;
+}
+
+.closeBtn {
+  background:    none;
+  border:        none;
+  cursor:        pointer;
+  font-size:     20px;
+  color:         #94A3B8;
+  min-height:    44px;
+  min-width:     44px;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  border-radius: var(--radius-xs, 2px);
+  flex-shrink:   0;
+}
+
+.closeBtn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.closeBtn:focus-visible {
+  outline:        2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+/* ── Drawer body ───────────────────────────────────────────────────────────────────────────────── */
+.drawerBody {
+  flex:       1;
+  overflow-y: auto;
+  padding:    var(--space-6, 24px);
+}
+
+/* ── AI label badge ────────────────────────────────────────────────────────────────────────────── */
+.aiLabel {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           4px;
+  font-size:     11px;
+  font-weight:   600;
+  color:         var(--ai-label-color);
+  background:    var(--ai-label-bg);
+  padding:       2px 8px;
+  border-radius: 9999px;
+  margin-bottom: var(--space-4, 16px);
+}
+
+/* ── Conflict entities section ─────────────────────────────────────────────────────────────────── */
+.conflictEntities {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-3, 12px);
+  margin-bottom:  var(--space-6, 24px);
+}
+
+.entityCard {
+  background:    var(--entity-card-bg);
+  border:        1px solid var(--entity-card-border);
+  border-radius: var(--radius-sm, 4px);
+  padding:       var(--space-4, 16px);
+}
+
+.entityLabel {
+  font-size:      11px;
+  font-weight:    600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color:          var(--color-text-secondary, #475569);
+  margin-bottom:  4px;
+}
+
+.entityName {
+  font-size:   15px;
+  font-weight: 600;
+}
+
+.entityValue {
+  font-size:   13px;
+  color:       var(--color-text-secondary, #475569);
+  margin-top:  4px;
+}
+
+.conflictSeparator {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       13px;
+  font-weight:     500;
+  color:           var(--separator-color);
+  padding:         var(--space-2, 8px);
+}
+
+/* ── Resolution note form ──────────────────────────────────────────────────────────────────────── */
+.formGroup {
+  margin-bottom: var(--space-5, 20px);
+}
+
+.formLabel {
+  font-size:     14px;
+  font-weight:   500;
+  display:       block;
+  margin-bottom: var(--space-2, 8px);
+  color:         var(--color-text-primary, #0F172A);
+}
+
+.optionalHint {
+  font-size:   12px;
+  font-weight: 400;
+  color:       var(--color-text-secondary, #475569);
+}
+
+.formTextarea {
+  font-family:  var(--font-sans, system-ui, sans-serif);
+  font-size:    14px;
+  padding:      var(--space-3, 12px) var(--space-4, 16px);
+  border:       1px solid var(--textarea-border);
+  border-radius: var(--radius-sm, 4px);
+  width:        100%;
+  outline:      none;
+  resize:       vertical;
+  min-height:   80px;
+  line-height:  1.5;
+  box-sizing:   border-box;
+}
+
+.formTextarea:focus {
+  border-color: var(--textarea-focus);
+  box-shadow:   0 0 0 3px rgba(26, 86, 219, 0.18);
+}
+
+.charCounter {
+  font-size:  12px;
+  color:      var(--counter-color);
+  margin-top: var(--space-2, 8px);
+  display:    block;
+}
+
+/* ── Inline error (role="alert") ───────────────────────────────────────────────────────────────── */
+.inlineError {
+  background:    var(--entity-card-bg);
+  border:        1px solid var(--entity-card-border);
+  border-radius: var(--radius-sm, 4px);
+  padding:       var(--space-3, 12px) var(--space-4, 16px);
+  font-size:     13px;
+  color:         var(--drawer-title-color);
+  margin-bottom: var(--space-4, 16px);
+  min-height:    1em; /* always in DOM — never conditionally removed (WCAG SC 4.1.3) */
+}
+
+/* ── Drawer footer ─────────────────────────────────────────────────────────────────────────────── */
+.drawerFooter {
+  padding:      var(--space-5, 20px) var(--space-6, 24px);
+  border-top:   1px solid var(--color-border, #E2E8F0);
+  display:      flex;
+  gap:          var(--space-3, 12px);
+  flex-shrink:  0;
+}
+
+.btn {
+  font-family:  var(--font-sans, system-ui, sans-serif);
+  font-size:    14px;
+  font-weight:  600;
+  padding:      var(--space-3, 12px) var(--space-5, 20px);
+  border-radius: var(--radius-sm, 4px);
+  border:        none;
+  cursor:        pointer;
+  display:       inline-flex;
+  align-items:   center;
+  justify-content: center;
+  gap:           var(--space-2, 8px);
+  min-height:    44px;
+  flex:          1;
+  transition:    background 0.15s;
+}
+
+.btn:focus-visible {
+  outline:        2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor:  not-allowed;
+}
+
+.btnPrimary {
+  background: var(--btn-primary-bg);
+  color:      var(--btn-primary-color);
+}
+
+.btnPrimary:not(:disabled):hover {
+  background: var(--btn-primary-hover);
+}
+
+.btnSecondary {
+  background: var(--btn-secondary-bg);
+  color:      var(--btn-secondary-color);
+  border:     1px solid var(--btn-secondary-border);
+}
+
+.btnSecondary:not(:disabled):hover {
+  background: var(--btn-secondary-hover);
+}
+
+/* ── Responsive: full-width on very narrow viewports ──────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .drawer {
+    width: 100%;
+  }
+}

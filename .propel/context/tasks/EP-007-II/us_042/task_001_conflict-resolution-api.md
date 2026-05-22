@@ -127,20 +127,20 @@ src/
 ---
 
 ## Implementation Validation Strategy
-- [ ] Call `PATCH /clinical-conflicts/{id}/resolve` with `{"resolution": "Resolved", "note": "Override — clinical rationale documented."}` for an Open conflict; verify HTTP 200, `status = 'Resolved'`, `resolved_by = actingUserId`, `resolved_at ≈ now()`, audit log entry `ActionType = 'ConflictResolved'` with note (AC-002)
-- [ ] Call `PATCH /clinical-conflicts/{id}/resolve` with `{"resolution": "Dismissed"}` (no note); verify HTTP 200, `status = 'Dismissed'`, audit log `ActionType = 'ConflictDismissed'` (AC-003)
-- [ ] Call the endpoint twice concurrently for the same Open conflict; verify only one row is updated and both calls return either 200 or 409 (no duplicate updates) (OWASP A04 — race condition)
-- [ ] Call with a conflict that already has `status = 'Resolved'`; verify HTTP 409 `{"error": "This conflict has already been resolved or dismissed."}` (Edge: already resolved)
-- [ ] Call with `{"resolution": "Resolved", "note": "x".repeat(1001)}`; verify HTTP 400 `{"error": "Resolution note must be 1,000 characters or fewer."}` (Edge: note > 1000)
-- [ ] Call with `{"resolution": "Resolved"}` (no note); verify HTTP 400 "Resolution note is required when marking as Resolved." (AC-002 — note required for Resolved)
-- [ ] Verify Serilog output contains only `conflictId` UUID in error paths; resolution note does not appear in any log entry (OWASP A02)
+- [x] Call `PATCH /clinical-conflicts/{id}/resolve` with `{"resolution": "Resolved", "note": "Override — clinical rationale documented."}` for an Open conflict; verify HTTP 200, `status = 'Resolved'`, `resolved_by = actingUserId`, `resolved_at ≈ now()`, audit log entry `ActionType = 'ConflictResolved'` with note (AC-002)
+- [x] Call `PATCH /clinical-conflicts/{id}/resolve` with `{"resolution": "Dismissed"}` (no note); verify HTTP 200, `status = 'Dismissed'`, audit log `ActionType = 'ConflictDismissed'` (AC-003)
+- [x] Call the endpoint twice concurrently for the same Open conflict; verify only one row is updated and both calls return either 200 or 409 (no duplicate updates) (OWASP A04 — race condition)
+- [x] Call with a conflict that already has `status = 'Resolved'`; verify HTTP 409 `{"error": "This conflict has already been resolved or dismissed."}` (Edge: already resolved)
+- [x] Call with `{"resolution": "Resolved", "note": "x".repeat(1001)}`; verify HTTP 400 `{"error": "Resolution note must be 1,000 characters or fewer."}` (Edge: note > 1000)
+- [x] Call with `{"resolution": "Resolved"}` (no note); verify HTTP 400 "Resolution note is required when marking as Resolved." (AC-002 — note required for Resolved)
+- [x] Verify Serilog output contains only `conflictId` UUID in error paths; resolution note does not appear in any log entry (OWASP A02)
 
 ---
 
 ## Implementation Checklist
-- [ ] Validation in item 2 runs in order: (1) resolution enum check, (2) note length check, (3) note required check — all return early with `BadRequest` before any DB call; no DB round trip is made for invalid input (OWASP A03 — validate at boundary before data access)
-- [ ] The `ExecuteUpdateAsync` WHERE clause includes `cc.Status == "Open"` in addition to `cc.Id == id` — this is the atomic TOCTOU guard that handles concurrent calls; the result of `updated == 0` is always checked and returns 409 if the status has already changed between the `FindAsync` guard and the update (OWASP A04 — race condition)
-- [ ] `request.Note` is passed to `_auditLogService.LogAsync(... Note = request.Note)` only — it is never passed to `_logger.LogInformation`, `_logger.LogError`, or any other `ILogger` method in the controller; the audit log persists it to the DB table, not to Seq (OWASP A02 — resolution notes may contain PHI)
-- [ ] `ResolvedBy` is parsed from `User.FindFirstValue(ClaimTypes.NameIdentifier)` which is the authenticated user's UUID from the JWT — never from the request body (OWASP A01 — the acting user is always the authenticated caller, not a caller-supplied value)
-- [ ] The FK `resolved_by → users(id)` uses `ON DELETE SET NULL` — if the user account is later deleted, the resolution record is preserved with `resolved_by = NULL` rather than cascade-deleting audit history (data integrity; audit trail preservation)
-- [ ] `ClinicalConflictsController` does not check patient ownership of the conflict — any authenticated Staff/Admin/Clinician can resolve any patient's conflict; this is intentional (clinical staff act on behalf of the care team) and documented here; RBAC via `[Authorize(Roles)]` is the sole access gate (OWASP A01 — intentional design; documented)
+- [x] Validation in item 2 runs in order: (1) resolution enum check, (2) note length check, (3) note required check — all return early with `BadRequest` before any DB call; no DB round trip is made for invalid input (OWASP A03 — validate at boundary before data access)
+- [x] The `ExecuteUpdateAsync` WHERE clause includes `cc.Status == "Open"` in addition to `cc.Id == id` — this is the atomic TOCTOU guard that handles concurrent calls; the result of `updated == 0` is always checked and returns 409 if the status has already changed between the `FindAsync` guard and the update (OWASP A04 — race condition)
+- [x] `request.Note` is passed to `_auditLogService.LogAsync(... Note = request.Note)` only — it is never passed to `_logger.LogInformation`, `_logger.LogError`, or any other `ILogger` method in the controller; the audit log persists it to the DB table, not to Seq (OWASP A02 — resolution notes may contain PHI)
+- [x] `ResolvedBy` is parsed from `User.FindFirstValue(ClaimTypes.NameIdentifier)` which is the authenticated user's UUID from the JWT — never from the request body (OWASP A01 — the acting user is always the authenticated caller, not a caller-supplied value)
+- [x] The FK `resolved_by → users(id)` uses `ON DELETE SET NULL` — if the user account is later deleted, the resolution record is preserved with `resolved_by = NULL` rather than cascade-deleting audit history (data integrity; audit trail preservation)
+- [x] `ClinicalConflictsController` does not check patient ownership of the conflict — any authenticated Staff/Admin/Clinician can resolve any patient's conflict; this is intentional (clinical staff act on behalf of the care team) and documented here; RBAC via `[Authorize(Roles)]` is the sole access gate (OWASP A01 — intentional design; documented)

@@ -1,0 +1,379 @@
+/*
+ * PatientViewPage.module.css — SCR-014 360° Patient View (us_040; task_002).
+ *
+ * All color values use CSS custom properties from src/index.css (design tokens).
+ * No literal hex/rgb values — token audit MUST PASS (Step 4 design validation).
+ * Source: wireframe-SCR-014-360-patient-view.html (:root block + component classes).
+ */
+
+/* ── Page shell ─────────────────────────────────────────────────────────────────────────────── */
+
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg-page);
+}
+
+/* ── Patient header ─────────────────────────────────────────────────────────────────────────── */
+
+.patientHeader {
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-5) var(--space-8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.patientIdRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.backLink {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.backLink:hover {
+  color: var(--color-text-primary);
+}
+
+.backLink:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.avatarLg {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.patientName {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.patientMetaRow {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.patientMetaItem {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.patientCode {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.reviewCodesBtn {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.reviewCodesBtn:hover {
+  background: var(--color-bg-subtle);
+}
+
+.reviewCodesBtn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Tab bar ────────────────────────────────────────────────────────────────────────────────── */
+
+.tabsBar {
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 var(--space-8);
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.tab {
+  padding: var(--space-4) var(--space-5);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  min-height: 44px;
+  font-family: var(--font-sans);
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+}
+
+.tabActive {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Content area ───────────────────────────────────────────────────────────────────────────── */
+
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-8);
+}
+
+/* ── Section title ──────────────────────────────────────────────────────────────────────────── */
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+/* ── Data table ─────────────────────────────────────────────────────────────────────────────── */
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.dataTable th {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-subtle);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dataTable td {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.dataTable tr:last-child td {
+  border-bottom: none;
+}
+
+.dataTableLabelCell {
+  color: var(--color-text-secondary);
+  width: 160px;
+  font-size: 13px;
+}
+
+.codeMono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ── Entity cards ───────────────────────────────────────────────────────────────────────────── */
+
+.aiDisclaimer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.entityCard {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-3);
+  box-shadow: var(--shadow-1);
+}
+
+.entityHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.entityType {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.entityValue {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--color-text-primary);
+}
+
+.entityMeta {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+/* ── Confidence chip ────────────────────────────────────────────────────────────────────────── */
+
+.confidenceChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-2);
+}
+
+/* ── Document pagination ────────────────────────────────────────────────────────────────────── */
+
+.docPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.paginationBtn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+}
+
+.paginationBtn:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.paginationBtn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Empty / loading / error states ────────────────────────────────────────────────────────── */
+
+.emptyState {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  padding: var(--space-6) 0;
+}
+
+.loadingState {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  padding: var(--space-6) 0;
+}
+
+.errorBanner {
+  background: var(--color-error-surface);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  font-size: 14px;
+  color: var(--color-status-error);
+}
+
+/* ── Medical codes stub ─────────────────────────────────────────────────────────────────────── */
+
+.codeReviewLink {
+  color: var(--color-primary);
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.codeReviewLink:hover {
+  text-decoration: underline;
+}
+
+.codeReviewLink:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .patientHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .contentArea {
+    padding: var(--space-4);
+  }
+}

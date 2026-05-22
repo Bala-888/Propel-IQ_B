@@ -1,0 +1,110 @@
+/*
+ * ConflictBanner — SCR-014 Extracted data panel conflict banner (us_041/AC-003; UXR-105)
+ *
+ * Local palette tokens keep zero literal hex values in property declarations.
+ * All conflict-specific colours are declared once here and referenced via var().
+ */
+
+/* Local conflict palette — declared at component scope (no :root pollution) */
+.banner {
+  --conflict-bg:      #FEF2F2;
+  --conflict-border:  #FECACA;
+  --conflict-icon-bg: #FEE2E2;
+}
+
+/* ── Banner container ──────────────────────────────────────────────────────────────────────────── */
+.banner {
+  background:    var(--conflict-bg);
+  border:        1px solid var(--conflict-border);
+  border-radius: var(--radius-md);
+  padding:       var(--space-4) var(--space-5);
+  margin-bottom: var(--space-6);
+  display:       flex;
+  align-items:   flex-start;
+  gap:           var(--space-3);
+}
+
+/* ── Icon circle ───────────────────────────────────────────────────────────────────────────────── */
+.iconCircle {
+  width:         36px;
+  height:        36px;
+  border-radius: 50%;
+  background:    var(--conflict-icon-bg);
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  flex-shrink:   0;
+}
+
+/* ── Text content ──────────────────────────────────────────────────────────────────────────────── */
+.content {
+  flex: 1;
+}
+
+.title {
+  font-size:     14px;
+  font-weight:   700;
+  color:         var(--color-status-error);
+  margin-bottom: 4px;
+}
+
+.desc {
+  font-size: 13px;
+  color:     var(--color-text-secondary);
+}
+
+.actions {
+  margin-top: var(--space-3);
+}
+
+/* ── Resolve stub button (wireframe btn-danger) ────────────────────────────────────────────────── */
+.resolveBtn {
+  font-family:  var(--font-sans);
+  font-size:    13px;
+  font-weight:  600;
+  padding:      8px 16px;
+  min-height:   44px;                   /* WCAG 2.1 AA SC 2.5.5 — 44px touch target */
+  border-radius: var(--radius-sm);
+  border:       1px solid var(--conflict-border);
+  background:   var(--conflict-bg);
+  color:        var(--color-status-error);
+  cursor:       pointer;
+  display:      inline-flex;
+  align-items:  center;
+}
+
+.resolveBtn:hover {
+  background: var(--conflict-icon-bg);
+}
+
+.resolveBtn:focus-visible {
+  outline:        2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── SeverityBadge ─────────────────────────────────────────────────────────────────────────────── */
+.severityBadge {
+  display:     inline-flex;
+  align-items: center;
+  gap:         4px;
+  font-size:   12px;
+  font-weight: 600;
+  padding:     2px 8px;
+  border-radius: var(--radius-full);
+  margin-top:  var(--space-2);
+}
+
+.severityHigh {
+  background: var(--conflict-bg);
+  color:      var(--color-status-error);
+}
+
+.severityMedium {
+  background: #FFF7ED;                  /* amber-50 tint — UXR-105 badge tint for medium */
+  color:      #92400E;                  /* amber-800 — adequate contrast against amber-50 */
+}
+
+.severityLow {
+  background: var(--color-bg-subtle);
+  color:      var(--color-text-secondary);
+}

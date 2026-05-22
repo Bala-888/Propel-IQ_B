@@ -277,6 +277,33 @@ builder.Services.AddHttpClient("ollama-generate", c =>
     c.BaseAddress = new Uri(ollamaBaseUrl);
     c.Timeout     = TimeSpan.FromSeconds(120); // generate inference is slower than embeddings
 });
+
+// ── Conflict detection pipeline (us_040/AC-004) ───────────────────────────────────────────────
+// Bounded channel: capacity=1000, FullMode=DropOldest — EntityExtractionWorker publishes after all
+// entities are persisted; ConflictDetectionWorker consumes (OWASP A04 — non-blocking; checklist).
+builder.Services.AddSingleton(
+    System.Threading.Channels.Channel.CreateBounded<Api.Features.Documents.PatientEntitiesUpdatedEvent>(
+        new System.Threading.Channels.BoundedChannelOptions(1000)
+        {
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.DropOldest,
+        }));
+// ConflictDetectionWorker: singleton BackgroundService; IServiceScopeFactory + IHttpClientFactory (AC-004; OWASP A04)
+builder.Services.AddHostedService<Api.BackgroundServices.ConflictDetectionWorker>();
+// Named "ollama-conflicts" HTTP client for ConflictDetectionWorker (us_040/AC-004).
+// Base URL from same OLLAMA_BASE_URL env var — never hard-coded (OWASP A02; checklist).
+builder.Services.AddHttpClient("ollama-conflicts", c =>
+{
+    c.BaseAddress = new Uri(ollamaBaseUrl);
+    c.Timeout     = TimeSpan.FromSeconds(35); // 35s outer safety net; worker CTS fires at 30s (AC-004)
+});
+// Named "ollama-suggestions" HTTP client for CodeSuggestionsController (us_043/AC-001).
+// Handles both /api/embeddings (query vector) and /api/generate (RAG) calls in a single request.
+// 12 s timeout — 10 s SLA (AC-001) + 2 s network buffer; never hard-coded (OWASP A02; checklist).
+builder.Services.AddHttpClient("ollama-suggestions", c =>
+{
+    c.BaseAddress = new Uri(ollamaBaseUrl);
+    c.Timeout     = TimeSpan.FromSeconds(12); // 10 s SLA (AC-001) + 2 s buffer
+});
 // EmbeddingSearchService: scoped — each call site resolves a fresh AppDbContext for HNSW cosine search (AC-003; OWASP A04)
 builder.Services.AddScoped<Api.Features.Embeddings.EmbeddingSearchService>();
 

@@ -43,4 +43,7 @@ public static class Roles
 
     /// <summary>Admin role — full system access including user management and admin metrics.</summary>
     public const string Admin = "Admin";
+
+    /// <summary>Clinician role — read access to patient 360° summaries and clinical data.</summary>
+    public const string Clinician = "Clinician";
 }

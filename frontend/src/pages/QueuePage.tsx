@@ -62,11 +62,6 @@ function patientInitials(name: string): string {
   return name.split(' ').map(w => w[0] ?? '').join('').slice(0, 2).toUpperCase()
 }
 
-function formatStatus(status: string): string {
-  if (status === 'CheckedIn') return 'Checked In'
-  return status
-}
-
 // ── Styles (exact wireframe tokens — SCR-011) ─────────────────────────────────────────────────────
 
 const styles = {
@@ -214,7 +209,6 @@ export function QueuePage() {
       void connection.stop()
     }
   }, [accessToken])
-  const [toastMsg,    setToastMsg]    = useState<string | null>(null)
 
   async function handleMarkArrived(entry: QueueEntry) {
     setLoadingRows(prev => new Set([...prev, entry.id]))
@@ -413,14 +407,13 @@ export function QueuePage() {
           </table>
         </div>
       )}
-    </div>
 
-    {/* Toast notification for PATCH failure (Edge: network failure; AC-001 — button reappears naturally) */}
-    {toastMsg && (
-      <div role="alert" aria-live="assertive" style={styles.toast}>
-        {toastMsg}
-      </div>
-    )}
-  </div>
+      {/* Toast notification for PATCH failure (Edge: network failure; AC-001 — button reappears naturally) */}
+      {toastMsg && (
+        <div role="alert" aria-live="assertive" style={styles.toast}>
+          {toastMsg}
+        </div>
+      )}
+    </div>
   )
 }

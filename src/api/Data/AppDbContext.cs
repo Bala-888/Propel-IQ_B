@@ -1,4 +1,6 @@
 using Api.Data.Entities;
+using Api.Features.Codes;
+using Api.Features.Conflicts;
 using Api.Features.Documents;
 using Api.Features.Embeddings;
 using Api.Features.Entities;
@@ -45,6 +47,12 @@ public class AppDbContext : DbContext
     public DbSet<DocumentChunkEmbedding> DocumentChunkEmbeddings => Set<DocumentChunkEmbedding>();
     // Deduplicated clinical entities extracted by EntityExtractionWorker (us_038/AC-003, AC-004; AIR-003)
     public DbSet<PatientEntity>          PatientEntities          => Set<PatientEntity>();
+    // Clinical conflicts detected by ConflictDetectionWorker (us_040/AC-004)
+    public DbSet<ClinicalConflict>       ClinicalConflicts        => Set<ClinicalConflict>();
+    // RAG-generated code suggestions persisted by CodeSuggestionsController (us_043/AC-002, us_044/AC-001)
+    public DbSet<CodeSuggestion>         CodeSuggestions          => Set<CodeSuggestion>();
+    // Clinician-accepted/corrected medical codes (us_044/AC-001)
+    public DbSet<PatientMedicalCode>     PatientMedicalCodes      => Set<PatientMedicalCode>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -366,5 +374,159 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<PatientEntity>()
             .Property(e => e.Type)
             .HasMaxLength(50);
+
+        // ── PatientEntity → Patient FK (us_040/AC-003) ─────────────────────────────────────────
+        // HasConstraintName matches the FK created in migration 20260521152232_AddPatientEntitiesTable
+        // so EF Core does not attempt to DROP/RE-CREATE the existing constraint.
+        // WithMany(p => p.PatientEntities) enables Include-based RT1 JOIN in PatientsController (AC-003).
+        modelBuilder.Entity<PatientEntity>()
+            .HasOne<Patient>()
+            .WithMany(p => p.PatientEntities)
+            .HasForeignKey(pe => pe.PatientId)
+            .HasConstraintName("fk_patient_entities_patients_patient_id")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // ── ClinicalConflict (us_040/AC-004) ──────────────────────────────────────────────────
+        // UNIQUE constraint on (patient_id, entity_a_id, entity_b_id): idempotent ON CONFLICT DO NOTHING
+        // semantics — re-running conflict detection never inserts duplicate rows (AC-004).
+        // Two explicit HasForeignKey configurations are required because EF Core cannot infer
+        // which of the two Guid FK columns maps to EntityA vs EntityB without explicit guidance.
+        modelBuilder.Entity<ClinicalConflict>()
+            .HasIndex(c => new { c.PatientId, c.EntityAId, c.EntityBId })
+            .IsUnique()
+            .HasDatabaseName("uq_clinical_conflicts_patient_entity_pair");
+
+        modelBuilder.Entity<ClinicalConflict>()
+            .Property(c => c.Description)
+            .HasMaxLength(1000);
+
+        // EntityA FK — explicit because two navigations target the same PatientEntity table (AC-004)
+        modelBuilder.Entity<ClinicalConflict>()
+            .HasOne(c => c.EntityA)
+            .WithMany()
+            .HasForeignKey(c => c.EntityAId)
+            .HasConstraintName("fk_clinical_conflicts_entity_a")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // EntityB FK — explicit for the same reason
+        modelBuilder.Entity<ClinicalConflict>()
+            .HasOne(c => c.EntityB)
+            .WithMany()
+            .HasForeignKey(c => c.EntityBId)
+            .HasConstraintName("fk_clinical_conflicts_entity_b")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // ResolvedBy FK → users.id (int?): ON DELETE SET NULL preserves conflict record and audit
+        // history if the resolving user account is later deleted (us_042/AC-003; OWASP A02).
+        // No navigation property on User is required — scalar FK only.
+        modelBuilder.Entity<ClinicalConflict>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(c => c.ResolvedBy)
+            .HasConstraintName("fk_clinical_conflicts_users_resolved_by")
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<ClinicalConflict>()
+            .Property(c => c.ResolutionNote)
+            .HasMaxLength(1000);
+
+        // ── CodeSuggestion (us_043/us_044) ──────────────────────────────────────────────────────
+        // ToTable required: Npgsql snake_case naming would produce "code_suggestion" (singular);
+        // migration uses the plural "code_suggestions" (AC-001).
+        modelBuilder.Entity<CodeSuggestion>()
+            .ToTable("code_suggestions");
+
+        modelBuilder.Entity<CodeSuggestion>()
+            .Property(cs => cs.Id)
+            .HasDefaultValueSql("gen_random_uuid()");
+
+        modelBuilder.Entity<CodeSuggestion>()
+            .Property(cs => cs.ReviewStatus)
+            .HasDefaultValue("Pending")
+            .HasMaxLength(20);
+
+        modelBuilder.Entity<CodeSuggestion>()
+            .Property(cs => cs.CodeType)
+            .HasMaxLength(10);
+
+        modelBuilder.Entity<CodeSuggestion>()
+            .Property(cs => cs.Code)
+            .HasMaxLength(20);
+
+        modelBuilder.Entity<CodeSuggestion>()
+            .Property(cs => cs.CreatedAt)
+            .HasDefaultValueSql("now()");
+
+        // UNIQUE (patient_id, code_type, code) — ON CONFLICT target for idempotent upserts (AC-002)
+        modelBuilder.Entity<CodeSuggestion>()
+            .HasIndex(cs => new { cs.PatientId, cs.CodeType, cs.Code })
+            .IsUnique()
+            .HasDatabaseName("uq_code_suggestions_patient_code_type_code");
+
+        // FK → patients.id (int): Restrict — preserves suggestion history on patient changes
+        modelBuilder.Entity<CodeSuggestion>()
+            .HasOne<Patient>()
+            .WithMany()
+            .HasForeignKey(cs => cs.PatientId)
+            .HasConstraintName("fk_code_suggestions_patients_patient_id")
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // FK → users.id (int): SetNull — preserves rows when a reviewer account is deleted (AC-003)
+        modelBuilder.Entity<CodeSuggestion>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(cs => cs.ReviewedBy)
+            .HasConstraintName("fk_code_suggestions_users_reviewed_by")
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // ── PatientMedicalCode (us_044/AC-001) ───────────────────────────────────────────────
+        modelBuilder.Entity<PatientMedicalCode>()
+            .ToTable("patient_medical_codes");
+
+        modelBuilder.Entity<PatientMedicalCode>()
+            .Property(pmc => pmc.Id)
+            .HasDefaultValueSql("gen_random_uuid()");
+
+        modelBuilder.Entity<PatientMedicalCode>()
+            .Property(pmc => pmc.CodeType)
+            .HasMaxLength(10);
+
+        modelBuilder.Entity<PatientMedicalCode>()
+            .Property(pmc => pmc.Code)
+            .HasMaxLength(20);
+
+        modelBuilder.Entity<PatientMedicalCode>()
+            .Property(pmc => pmc.OriginalCode)
+            .HasMaxLength(20);
+
+        modelBuilder.Entity<PatientMedicalCode>()
+            .Property(pmc => pmc.Source)
+            .HasMaxLength(20);
+
+        modelBuilder.Entity<PatientMedicalCode>()
+            .Property(pmc => pmc.ReviewStatus)
+            .HasMaxLength(20);
+
+        modelBuilder.Entity<PatientMedicalCode>()
+            .Property(pmc => pmc.CreatedAt)
+            .HasDefaultValueSql("now()");
+
+        // FK → patients.id (int): Restrict — medical code records must not be orphaned
+        modelBuilder.Entity<PatientMedicalCode>()
+            .HasOne<Patient>()
+            .WithMany()
+            .HasForeignKey(pmc => pmc.PatientId)
+            .HasConstraintName("fk_patient_medical_codes_patients_patient_id")
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // FK → users.id (int): Restrict — preserves historical record (AC-003; HIPAA)
+        modelBuilder.Entity<PatientMedicalCode>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(pmc => pmc.ReviewedBy)
+            .HasConstraintName("fk_patient_medical_codes_users_reviewed_by")
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

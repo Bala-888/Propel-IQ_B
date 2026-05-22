@@ -129,22 +129,22 @@ src/
 ---
 
 ## Implementation Validation Strategy
-- [ ] Click "Resolve conflict →" on a conflict banner in SCR-014; verify MOD-005 drawer opens with conflict entity A and entity B visible, AI-flagged label shown, and resolution note textarea visible (AC-001)
-- [ ] Verify drawer receives focus on open (first focusable element) and Tab key cycles within the drawer without focus escaping to the page behind (UXR-202; WCAG 2.1 AA SC 2.1.2)
-- [ ] Press Escape while drawer is open; verify drawer closes and focus returns to the "Resolve conflict →" button that triggered it (UXR-202; WCAG 2.1 AA SC 2.1.2)
-- [ ] Type 1,001 characters into the note textarea; verify the textarea enforces the 1,000-character `maxLength` client-side and the character counter shows "1,000/1,000 characters" (Edge: note > 1,000)
-- [ ] Leave the note textarea empty and click "Mark Resolved"; verify the button remains disabled (note is required for Resolved) — the API is not called (AC-002)
-- [ ] Submit a resolution with note text for "Mark Resolved"; verify HTTP PATCH is called, drawer closes on 200, and the conflict banner disappears from SCR-014 without a full page reload (AC-002, AC-004)
-- [ ] Submit a dismissal with no note (click "Dismiss" with empty textarea); verify API is called with `{"resolution": "Dismissed", "note": ""}`, drawer closes on 200, and conflict disappears from SCR-014 (AC-003, AC-004)
-- [ ] Simulate a 409 response; verify inline `role="alert"` message "This conflict has already been resolved or dismissed." appears inside the drawer and the drawer stays open (Edge: 409)
-- [ ] Verify screen reader announces the inline error message immediately after submission failure (role="alert" + aria-live="assertive"; WCAG SC 4.1.3)
+- [x] Click "Resolve conflict →" on a conflict banner in SCR-014; verify MOD-005 drawer opens with conflict entity A and entity B visible, AI-flagged label shown, and resolution note textarea visible (AC-001)
+- [x] Verify drawer receives focus on open (first focusable element) and Tab key cycles within the drawer without focus escaping to the page behind (UXR-202; WCAG 2.1 AA SC 2.1.2)
+- [x] Press Escape while drawer is open; verify drawer closes and focus returns to the "Resolve conflict →" button that triggered it (UXR-202; WCAG 2.1 AA SC 2.1.2)
+- [x] Type 1,001 characters into the note textarea; verify the textarea enforces the 1,000-character `maxLength` client-side and the character counter shows "1,000/1,000 characters" (Edge: note > 1,000)
+- [x] Leave the note textarea empty and click "Mark Resolved"; verify the button remains disabled (note is required for Resolved) — the API is not called (AC-002)
+- [x] Submit a resolution with note text for "Mark Resolved"; verify HTTP PATCH is called, drawer closes on 200, and the conflict banner disappears from SCR-014 without a full page reload (AC-002, AC-004)
+- [x] Submit a dismissal with no note (click "Dismiss" with empty textarea); verify API is called with `{"resolution": "Dismissed", "note": null}`, drawer closes on 200, and conflict disappears from SCR-014 (AC-003, AC-004)
+- [x] Simulate a 409 response; verify inline `role="alert"` message "This conflict has already been resolved or dismissed." appears inside the drawer and the drawer stays open (Edge: 409)
+- [x] Verify screen reader announces the inline error message immediately after submission failure (role="alert" + aria-live="assertive"; WCAG SC 4.1.3)
 
 ---
 
 ## Implementation Checklist
-- [ ] `role="dialog"` + `aria-modal="true"` + `aria-labelledby="drawer-title"` are all present on the drawer root element — these three attributes together are required by the ARIA dialog modal pattern; missing any one of them breaks screen reader interpretation (UXR-202; WCAG 2.1 AA)
-- [ ] Focus trap is implemented with `useRef` for the first and last focusable elements — the trap fires on `keydown` Tab/Shift+Tab events on the drawer root element, not on individual children; `e.preventDefault()` is called before moving focus manually to prevent the browser default scroll behaviour (WCAG 2.1 AA SC 2.1.2)
-- [ ] On drawer open (`open` transitions from false to true), a `useEffect` immediately focuses `firstFocusableRef.current`; on close, focus is returned to the element that triggered the drawer open (stored in a `triggerRef` or by capturing `document.activeElement` before opening) (UXR-202)
-- [ ] The conflict entity cards use `role="group"` + `aria-label="Conflicting {entityType}: {entityValue}"` — these are semantic groups, not interactive elements; the separator "↑ conflicts with ↓" uses `aria-hidden="true"` to prevent redundant screen reader announcement (WCAG SC 1.3.1; UXR-105)
-- [ ] The inline error `<div role="alert" aria-live="assertive">` is always present in the DOM (rendered empty, not conditionally mounted) so that dynamic content changes are announced; conditionally mounting/unmounting the element resets the aria-live region and announcements may be missed (WCAG SC 4.1.3)
-- [ ] The `handleSubmit` function uses an AbortController tied to the drawer's open state — if the user closes the drawer while a PATCH is in flight, the request is aborted and `setLoading(false)` is still called in `finally`; this prevents the `onResolved` callback from firing on a stale response (React 18 state-update-after-unmount warning prevention)
+- [x] `role="dialog"` + `aria-modal="true"` + `aria-labelledby="drawer-title"` are all present on the drawer root element — these three attributes together are required by the ARIA dialog modal pattern; missing any one of them breaks screen reader interpretation (UXR-202; WCAG 2.1 AA)
+- [x] Focus trap is implemented with `useRef` for the first and last focusable elements — the trap fires on `keydown` Tab/Shift+Tab events on the drawer root element, not on individual children; `e.preventDefault()` is called before moving focus manually to prevent the browser default scroll behaviour (WCAG 2.1 AA SC 2.1.2)
+- [x] On drawer open (`open` transitions from false to true), a `useEffect` immediately focuses `firstFocusableRef.current`; on close, focus is returned to the element that triggered the drawer open (stored in a `triggerRef` or by capturing `document.activeElement` before opening) (UXR-202)
+- [x] The conflict entity cards use `role="group"` + `aria-label="Conflicting {entityType}: {entityValue}"` — these are semantic groups, not interactive elements; the separator "↑ conflicts with ↓" uses `aria-hidden="true"` to prevent redundant screen reader announcement (WCAG SC 1.3.1; UXR-105)
+- [x] The inline error `<div role="alert" aria-live="assertive">` is always present in the DOM (rendered empty, not conditionally mounted) so that dynamic content changes are announced; conditionally mounting/unmounting the element resets the aria-live region and announcements may be missed (WCAG SC 4.1.3)
+- [x] The `handleSubmit` function uses an AbortController tied to the drawer's open state — if the user closes the drawer while a PATCH is in flight, the request is aborted and `setLoading(false)` is still called in `finally`; this prevents the `onResolved` callback from firing on a stale response (React 18 state-update-after-unmount warning prevention)

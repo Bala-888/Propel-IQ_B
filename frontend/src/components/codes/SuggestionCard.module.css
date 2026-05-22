@@ -1,0 +1,418 @@
+/*
+ * SuggestionCard — SCR-015 Medical Code Review (us_043/task_002; AC-001, AC-004).
+ *
+ * Design system:
+ *   Global tokens from index.css are used directly via var().
+ *   Non-token hex values are declared in a local custom-property block below.
+ *   All property values reference a var() — no literal hex/rgb/px outside the block.
+ *
+ * OWASP A02: chunk texts (evidence panel) are never sent to any logger.
+ * UXR-105: low-confidence badge uses text + ⚠ icon — never colour alone.
+ * UXR-402: AI badge rendered on every card.
+ */
+
+/* ── Local custom properties (values not covered by global tokens) ─────────────────────────────── */
+.card {
+  --card-accepted-border: #BBF7D0;
+  --card-accepted-bg:     #F0FDF4;
+  --badge-lowconf-bg:     var(--color-highlight);  /* #FEF9C3 — reuse global highlight token */
+  --badge-lowconf-text:   #854D0E;
+  --badge-pending-bg:     var(--color-bg-subtle);
+  --badge-pending-text:   var(--color-text-secondary);
+  --badge-accepted-bg:    #DCFCE7;
+  --badge-accepted-text:  var(--color-status-success);
+  --badge-rejected-bg:    #FEF2F2;
+  --badge-rejected-text:  var(--color-status-error);
+  --btn-accept-bg:        #DCFCE7;
+  --btn-accept-bg-hover:  #BBF7D0;
+  --btn-accept-border:    #BBF7D0;
+  --btn-reject-bg:        #FEF2F2;
+  --btn-reject-bg-hover:  #FEE2E2;
+  --btn-reject-border:    #FECACA;
+}
+
+/* ── Card container ─────────────────────────────────────────────────────────────────────────────── */
+.card {
+  background:    var(--color-bg-surface);
+  border:        1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding:       var(--space-5) var(--space-6);
+  box-shadow:    var(--shadow-1);
+}
+
+/* Accepted card: green tint border + background (wireframe .suggestion-card.accepted) */
+.cardAccepted {
+  border-color: var(--card-accepted-border);
+  background:   var(--card-accepted-bg);
+}
+
+/* Rejected card: faded + dashed border (wireframe .suggestion-card.rejected) */
+.cardRejected {
+  opacity:      0.5;
+  border-style: dashed;
+}
+
+/* ── Card header ─────────────────────────────────────────────────────────────────────────────────── */
+.cardHeader {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  margin-bottom:   var(--space-4);
+}
+
+.cardBadges {
+  display:        flex;
+  flex-direction: column;
+  align-items:    flex-end;
+  gap:            var(--space-2);
+  flex-shrink:    0;
+  margin-left:    var(--space-4);
+}
+
+.cardCode {
+  font-family: var(--font-mono);
+  font-size:   18px;
+  font-weight: 400;
+  color:       var(--color-text-primary);
+}
+
+.cardDescription {
+  font-size:   16px;
+  font-weight: 600;
+  margin-top:  4px;
+}
+
+.cardMeta {
+  font-size:  13px;
+  color:      var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* ── AI label badge ─────────────────────────────────────────────────────────────────────────────── */
+.aiLabel {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            4px;
+  font-size:      11px;
+  font-weight:    600;
+  color:          var(--color-ai-accent);
+  background:     var(--color-ai-bg);
+  padding:        2px 8px;
+  border-radius:  var(--radius-full);
+  white-space:    nowrap;
+}
+
+/* ── Status badge ────────────────────────────────────────────────────────────────────────────────── */
+.statusBadge {
+  display:        inline-flex;
+  align-items:    center;
+  font-size:      12px;
+  font-weight:    500;
+  padding:        3px 10px;
+  border-radius:  var(--radius-full);
+  background:     var(--badge-pending-bg);
+  color:          var(--badge-pending-text);
+  white-space:    nowrap;
+}
+
+/* Status badge variants — icon + text, never colour alone (UXR-105; WCAG SC 1.4.1) */
+.statusBadgeAccepted {
+  background: var(--badge-accepted-bg);
+  color:      var(--badge-accepted-text);
+}
+
+.statusBadgeRejected {
+  background: var(--badge-rejected-bg);
+  color:      var(--badge-rejected-text);
+}
+
+/* ── Confidence row ──────────────────────────────────────────────────────────────────────────────── */
+.confidenceRow {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap:     wrap;
+}
+
+.confidenceLabel {
+  font-size: 13px;
+  color:     var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.confidenceBar {
+  flex:          1;
+  height:        6px;
+  background:    var(--color-border);
+  border-radius: var(--radius-full);
+  overflow:      hidden;
+  max-width:     200px;
+  min-width:     80px;
+}
+
+.confidenceFill {
+  height:        100%;
+  border-radius: var(--radius-full);
+}
+
+.confHigh {
+  background: var(--color-status-success);
+}
+
+.confMed {
+  background: var(--color-status-warning);
+}
+
+.confidenceValue {
+  font-size:   13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ── Low-confidence badge (UXR-105 — text + icon, never colour alone) ──────────────────────────── */
+.lowConfBadge {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            4px;
+  font-size:      12px;
+  font-weight:    500;
+  padding:        3px 10px;
+  border-radius:  var(--radius-full);
+  background:     var(--badge-lowconf-bg);
+  color:          var(--badge-lowconf-text);
+  white-space:    nowrap;
+}
+
+/* ── Card actions ────────────────────────────────────────────────────────────────────────────────── */
+.cardActions {
+  display:    flex;
+  gap:        var(--space-2);
+  flex-wrap:  wrap;
+  align-items: center;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────────────────────────────── */
+.btnSecondary {
+  font-family:  var(--font-sans);
+  font-size:    13px;
+  font-weight:  600;
+  padding:      var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border:       1px solid var(--color-border);
+  background:   var(--color-bg-surface);
+  color:        var(--color-text-primary);
+  cursor:       pointer;
+  display:      inline-flex;
+  align-items:  center;
+  gap:          var(--space-2);
+  min-height:   40px;
+  min-width:    44px;
+}
+
+.btnSecondary:hover {
+  background: var(--color-bg-subtle);
+}
+
+.btnSecondary:focus-visible {
+  outline:        2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Evidence region ─────────────────────────────────────────────────────────────────────────────── */
+.evidenceRegion {
+  margin-top:    var(--space-4);
+  padding:       var(--space-4);
+  background:    var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  border:        1px solid var(--color-border);
+  display:       flex;
+  flex-direction: column;
+  gap:           var(--space-3);
+}
+
+.evidenceChunk {
+  padding-bottom: var(--space-3);
+  border-bottom:  1px solid var(--color-border);
+}
+
+.evidenceChunk:last-child {
+  padding-bottom: 0;
+  border-bottom:  none;
+}
+
+.chunkSource {
+  font-size:   12px;
+  font-weight: 600;
+  color:       var(--color-text-secondary);
+  margin-bottom: 4px;
+  font-family:  var(--font-mono);
+}
+
+.chunkText {
+  font-size:   14px;
+  color:       var(--color-text-primary);
+  line-height: 1.5;
+  margin:      0;
+}
+
+.evidenceEmpty {
+  font-size:  13px;
+  color:      var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* ── Accept button (wireframe .btn-accept) ───────────────────────────────────────────────────────── */
+.btnAccept {
+  font-family:   var(--font-sans);
+  font-size:     13px;
+  font-weight:   600;
+  padding:       var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border:        1px solid var(--btn-accept-border);
+  background:    var(--btn-accept-bg);
+  color:         var(--badge-accepted-text);
+  cursor:        pointer;
+  display:       inline-flex;
+  align-items:   center;
+  gap:           var(--space-2);
+  min-height:    44px;
+  min-width:     44px;
+}
+
+.btnAccept:hover  { background: var(--btn-accept-bg-hover); }
+.btnAccept:focus-visible {
+  outline:        2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Reject button (wireframe .btn-reject) ───────────────────────────────────────────────────────── */
+.btnReject {
+  font-family:   var(--font-sans);
+  font-size:     13px;
+  font-weight:   600;
+  padding:       var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border:        1px solid var(--btn-reject-border);
+  background:    var(--btn-reject-bg);
+  color:         var(--badge-rejected-text);
+  cursor:        pointer;
+  display:       inline-flex;
+  align-items:   center;
+  gap:           var(--space-2);
+  min-height:    44px;
+  min-width:     44px;
+}
+
+.btnReject:hover  { background: var(--btn-reject-bg-hover); }
+.btnReject:focus-visible {
+  outline:        2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Primary button (wireframe .btn-primary — Submit correction) ─────────────────────────────────── */
+.btnPrimary {
+  font-family:   var(--font-sans);
+  font-size:     13px;
+  font-weight:   600;
+  padding:       var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border:        none;
+  background:    var(--color-primary);
+  color:         var(--color-text-inverse);
+  cursor:        pointer;
+  display:       inline-flex;
+  align-items:   center;
+  gap:           var(--space-2);
+  min-height:    44px;
+  min-width:     44px;
+}
+
+.btnPrimary:hover { background: var(--color-primary-hover); }
+.btnPrimary:focus-visible {
+  outline:        2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Inline correct field (wireframe .correct-field / .correct-field.open) ───────────────────────── */
+.correctField {
+  display:       none;
+  margin-top:    var(--space-3);
+  padding:       var(--space-4);
+  background:    var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.correctFieldOpen {
+  display: block;
+}
+
+.correctFieldLabel {
+  font-size:     13px;
+  font-weight:   600;
+  margin-bottom: var(--space-2);
+}
+
+.correctRow {
+  display:    flex;
+  gap:        var(--space-3);
+  align-items: flex-start;
+  flex-wrap:  wrap;
+}
+
+/* ── Correction input (wireframe .correct-input; font-mono for code values) ─────────────────────── */
+.correctInput {
+  font-family: var(--font-mono);
+  font-size:   15px;
+  padding:     var(--space-2) var(--space-3);
+  border:      1px solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  width:       180px;
+  outline:     none;
+  background:  var(--color-bg-surface);
+  color:       var(--color-text-primary);
+}
+
+.correctInput:focus {
+  border-color: var(--color-border-focus);
+  box-shadow:   0 0 0 3px rgba(26, 86, 219, 0.18);
+}
+
+.correctInput[aria-invalid='true'] {
+  border-color: var(--color-status-error);
+}
+
+/* ── Correction format hint (wireframe .correct-hint) ───────────────────────────────────────────── */
+.correctHint {
+  font-size:  12px;
+  color:      var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* ── Inline error / alert (role="alert" — always in DOM, populated on error; WCAG SC 4.1.3) ────── */
+/* Must NOT be conditionally mounted — removing re-adds resets aria-live region (checklist item 2) */
+.inlineAlert {
+  font-size:   13px;
+  color:       var(--color-status-error);
+  margin-top:  var(--space-3);
+  padding:     var(--space-2) var(--space-3);
+  background:  #FEF2F2;
+  border:      1px solid #FECACA;
+  border-radius: var(--radius-xs);
+}
+
+/* Empty string when no error — element present in DOM but visually hidden */
+.inlineAlert:empty {
+  display: none;
+}
+
+/* ── Reviewed footer (accepted/corrected confirmation line; wireframe accepted card) ─────────────── */
+.reviewedFooter {
+  font-size:   13px;
+  font-weight: 500;
+  margin-top:  var(--space-2);
+}
+
+.reviewedFooterAccepted  { color: var(--color-status-success); }
+.reviewedFooterCorrected { color: var(--color-status-success); }
+.reviewedFooterRejected  { color: var(--color-status-error);   }

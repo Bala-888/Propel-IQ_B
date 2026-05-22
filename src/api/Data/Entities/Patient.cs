@@ -1,3 +1,5 @@
+using Api.Features.Entities;
+
 namespace Api.Data.Entities;
 
 public class Patient
@@ -28,4 +30,6 @@ public class Patient
 
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<InsuranceRecord> InsuranceRecords { get; set; } = new List<InsuranceRecord>();
+    // Navigation for Include-based RT1 join in patient 360° summary (us_040/AC-003)
+    public ICollection<PatientEntity> PatientEntities { get; set; } = new List<PatientEntity>();
 }

@@ -30,4 +30,14 @@ public static class AuditActionTypes
     public const string WalkinPatientCreated  = "WalkinPatientCreated";
     // Patient marked as arrived by staff (us_032/AC-002; OWASP A02 — staffId + bookingId only, no PHI)
     public const string PatientMarkedArrived  = "PatientMarkedArrived";
+    // Clinical conflict resolved by staff/clinician (us_042/AC-002; OWASP A02 — conflictId only, no PHI)
+    public const string ConflictResolved      = "ConflictResolved";
+    // Clinical conflict dismissed by staff/clinician (us_042/AC-003; OWASP A02 — conflictId only, no PHI)
+    public const string ConflictDismissed     = "ConflictDismissed";
+    // RAG-generated code suggestion accepted by clinician (us_044/AC-001; OWASP A02 — suggestionId only, no PHI)
+    public const string MedicalCodeAccepted   = "MedicalCodeAccepted";
+    // RAG-generated code suggestion rejected by clinician (us_044/AC-001; OWASP A02 — suggestionId only, no PHI)
+    public const string MedicalCodeRejected   = "MedicalCodeRejected";
+    // RAG-generated code suggestion corrected by clinician (us_044/AC-001; OWASP A02 — suggestionId only, no PHI)
+    public const string MedicalCodeCorrected  = "MedicalCodeCorrected";
 }
