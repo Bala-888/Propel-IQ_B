@@ -27,4 +27,12 @@ public sealed class WalkinBookingRequest
     /// banner (AC-003; edge: duplicate walk-in).
     /// </summary>
     public bool OverrideDuplicate { get; init; } = false;
+
+    /// <summary>Patient phone number captured at the desk — written to <c>patients.phone</c> after booking commits.</summary>
+    [MaxLength(30)]
+    public string? Phone { get; init; }
+
+    /// <summary>Insurance provider name selected by staff — written to <c>patients.insurance_provider</c> after booking commits.</summary>
+    [MaxLength(100)]
+    public string? InsuranceProvider { get; init; }
 }

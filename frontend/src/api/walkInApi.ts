@@ -80,6 +80,8 @@ export interface WalkinBookingRequest {
   reasonForVisit?:    string
   priority?:          string
   overrideDuplicate?: boolean
+  phone?:             string
+  insuranceProvider?: string
 }
 
 export interface WalkinBookingResponse {

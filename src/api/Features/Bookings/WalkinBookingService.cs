@@ -114,6 +114,21 @@ public sealed class WalkinBookingService : IWalkinBookingService
             await _db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
 
+            // ── Patch patient contact info captured at walk-in (outside slot-lock tx; best-effort) ──────
+            // Runs after the booking commits so a failure here does not roll back the confirmed booking.
+            if (!string.IsNullOrWhiteSpace(request.Phone) || !string.IsNullOrWhiteSpace(request.InsuranceProvider))
+            {
+                var patient = await _db.Patients.FindAsync(new object[] { request.PatientId }, ct);
+                if (patient is not null)
+                {
+                    if (!string.IsNullOrWhiteSpace(request.Phone))
+                        patient.Phone = request.Phone;
+                    if (!string.IsNullOrWhiteSpace(request.InsuranceProvider))
+                        patient.InsuranceProvider = request.InsuranceProvider;
+                    await _db.SaveChangesAsync(ct);
+                }
+            }
+
             // ── Queue position: count of Confirmed bookings for today, committed at or before this one ──
             var queuePosition = await _db.Bookings
                 .Include(b => b.AppointmentSlot)

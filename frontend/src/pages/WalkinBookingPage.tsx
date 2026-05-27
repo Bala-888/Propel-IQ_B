@@ -109,11 +109,13 @@ export function WalkinBookingPage() {
   }, [accessToken])
 
   // ── Form state ────────────────────────────────────────────────────────────────────────────────
-  const [selectedPatient, setSelectedPatient] = useState<PatientSearchResult | null>(null)
-  const [slotId,          setSlotId]          = useState<number | ''>('')
-  const [reason,          setReason]          = useState('')
-  const [priority,        setPriority]        = useState<'Normal' | 'Urgent'>('Normal')
-  const [isModalOpen,     setIsModalOpen]     = useState(false)
+  const [selectedPatient,   setSelectedPatient]   = useState<PatientSearchResult | null>(null)
+  const [slotId,            setSlotId]            = useState<number | ''>('')
+  const [reason,            setReason]            = useState('')
+  const [priority,          setPriority]          = useState<'Normal' | 'Urgent'>('Normal')
+  const [phone,             setPhone]             = useState('')
+  const [insuranceProvider, setInsuranceProvider] = useState('')
+  const [isModalOpen,       setIsModalOpen]       = useState(false)
 
   // ── Error / status state ──────────────────────────────────────────────────────────────────────
   const [fieldErrors,         setFieldErrors]         = useState<Record<string, string>>({})
@@ -152,6 +154,8 @@ export function WalkinBookingPage() {
         reasonForVisit:   reason.trim(),
         priority,
         overrideDuplicate,
+        phone:             phone.trim()             || undefined,
+        insuranceProvider: insuranceProvider.trim() || undefined,
       })
       // AC-003: navigate to queue with queue position in state for toast display
       navigate('/queue', {
@@ -218,7 +222,55 @@ export function WalkinBookingPage() {
 
           <hr className="section-divider" />
 
-          {/* ── 2. Slot assignment ────────────────────────────────────────────────────────── */}
+          {/* ── 2. Patient contact ─────────────────────────────────────────────── */}
+          <section aria-labelledby="section-contact">
+            <h2 id="section-contact" className="section-heading">Patient contact</h2>
+
+            <div className="form-grid form-grid--2col">
+              {/* Phone number */}
+              <div className="form-field">
+                <label htmlFor="phone-input" className="field-label">
+                  Phone <span className="field-optional">(optional)</span>
+                </label>
+                <input
+                  id="phone-input"
+                  type="tel"
+                  autoComplete="tel"
+                  className="field-input"
+                  placeholder="+1 (555) 000-0000"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                />
+              </div>
+
+              {/* Insurance provider */}
+              <div className="form-field">
+                <label htmlFor="insurance-select" className="field-label">
+                  Insurance <span className="field-optional">(optional)</span>
+                </label>
+                <select
+                  id="insurance-select"
+                  className="field-input field-select"
+                  value={insuranceProvider}
+                  onChange={e => setInsuranceProvider(e.target.value)}
+                >
+                  <option value="">Select insurance…</option>
+                  <option value="Medicare">Medicare</option>
+                  <option value="Medicaid">Medicaid</option>
+                  <option value="Blue Cross Blue Shield">Blue Cross Blue Shield</option>
+                  <option value="Aetna">Aetna</option>
+                  <option value="UnitedHealthcare">UnitedHealthcare</option>
+                  <option value="Cigna">Cigna</option>
+                  <option value="Self-pay">Self-pay</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <hr className="section-divider" />
+
+          {/* ── 3. Slot assignment ──────────────────────────────────────────────────── */}
           <section aria-labelledby="section-slot">
             <h2 id="section-slot" className="section-heading">Appointment slot</h2>
 
@@ -267,7 +319,7 @@ export function WalkinBookingPage() {
 
           <hr className="section-divider" />
 
-          {/* ── 3. Visit details ──────────────────────────────────────────────────────────── */}
+          {/* ── 4. Visit details ──────────────────────────────────────────────────────────── */}
           <section aria-labelledby="section-visit">
             <h2 id="section-visit" className="section-heading">Visit details</h2>
 
