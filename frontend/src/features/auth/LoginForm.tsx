@@ -207,7 +207,7 @@ export function LoginForm() {
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={!isValid || isSubmitting}
+              disabled={isSubmitting}
               aria-label="Sign in"
             >
               {isSubmitting ? (
