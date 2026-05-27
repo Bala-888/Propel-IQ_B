@@ -95,10 +95,10 @@ export function WalkinBookingPage() {
     async function fetchTodaySlots() {
       setSlotsLoading(true)
       try {
-        // Fetch available slots; filter to today client-side (server has no date param)
-        const res = await getSlots(accessToken!, { page: 1, pageSize: 100 })
-        const today = todayIso()
-        setSlots(res.slots.filter(s => s.date === today))
+        // Fetch today's available slots server-side using the date param so we don't rely on
+        // client-side filtering of a fixed page — avoids missing slots when total count > pageSize
+        const res = await getSlots(accessToken!, { page: 1, pageSize: 100, date: todayIso() })
+        setSlots(res.slots)
       } catch {
         setSlots([])
       } finally {

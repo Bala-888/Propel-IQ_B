@@ -48,9 +48,10 @@ export interface SlotsResponse {
  */
 export async function getSlots(
   accessToken: string,
-  { page, pageSize }: { page: number; pageSize: number },
+  { page, pageSize, date }: { page: number; pageSize: number; date?: string },
 ): Promise<SlotsResponse> {
-  const url = `${API_BASE}/slots?available=true&page=${encodeURIComponent(page)}&pageSize=${encodeURIComponent(pageSize)}`
+  let url = `${API_BASE}/slots?available=true&page=${encodeURIComponent(page)}&pageSize=${encodeURIComponent(pageSize)}`
+  if (date) url += `&date=${encodeURIComponent(date)}`
 
   const res = await fetch(url, {
     method:  'GET',

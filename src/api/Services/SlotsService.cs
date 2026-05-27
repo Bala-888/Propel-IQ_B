@@ -47,6 +47,16 @@ public sealed class SlotsService
         if (query.Available)
             baseQuery = baseQuery.Where(s => s.IsAvailable);
 
+        // Optional date filter — applied at DB level to avoid full-table scan in application code
+        // (AC-001; performance). SlotStart is stored as UTC TIMESTAMPTZ; the supplied date is
+        // treated as a UTC calendar day boundary so the filter is timezone-consistent.
+        if (query.Date.HasValue)
+        {
+            var startUtc = query.Date.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            var endUtc   = startUtc.AddDays(1);
+            baseQuery = baseQuery.Where(s => s.SlotStart >= startUtc && s.SlotStart < endUtc);
+        }
+
         // COUNT before pagination — needed for TotalPages computation (AC-002)
         var total = await baseQuery.CountAsync(ct);
 
