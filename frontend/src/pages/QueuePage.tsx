@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getQueue, markArrived, type QueueEntry } from '../api/queueApi'
 import { RiskBadge } from '../components/queue/RiskBadge'
+import { Header } from '../components/layout/Header'
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 
 // ── Icon components (aria-hidden — text labels are the primary signal; UXR-105) ─────────────────────────
@@ -86,6 +87,11 @@ const styles = {
   markBtn:       { display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 600, padding: '5px 10px', borderRadius: '4px', border: '1px solid #E2E8F0', background: '#FFFFFF', color: '#0F172A', cursor: 'pointer', minHeight: '32px', minWidth: '44px' },
   markBtnDisabled: { opacity: 0.6, cursor: 'not-allowed' as const },
   toast:         { position: 'fixed' as const, bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: '#0F172A', color: '#FFFFFF', fontSize: '14px', padding: '12px 20px', borderRadius: '8px', zIndex: 1000, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' },
+  actionBar:     { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' },
+  pageTitle:     { display: 'flex', flexDirection: 'column' as const, gap: '2px' },
+  actionGroup:   { display: 'flex', alignItems: 'center', gap: '8px' },
+  btnWalkIn:     { display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', border: 'none', background: '#1A56DB', color: '#FFFFFF', cursor: 'pointer', textDecoration: 'none', minHeight: '36px' },
+  btnSignOut:    { display: 'inline-flex', alignItems: 'center', fontSize: '14px', fontWeight: 500, padding: '8px 14px', borderRadius: '6px', border: '1px solid #E2E8F0', background: '#FFFFFF', color: '#475569', cursor: 'pointer', minHeight: '36px' },
 } as const
 
 // ── Component ─────────────────────────────────────────────────────────────────────────────────────
@@ -99,13 +105,21 @@ const styles = {
  * (AC-003). Table columns are sorted client-side via useMemo (AC-004).
  */
 export function QueuePage() {
-  const { accessToken, role } = useAuth()
+  const { accessToken, role, setAuth } = useAuth()
   const navigate = useNavigate()
 
   // ── Role guard (OWASP A01; AC-001) ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (role === 'Patient') navigate('/intake', { replace: true })
   }, [role, navigate])
+
+  // ── Sign out ──────────────────────────────────────────────────────────────────────────────────
+  function handleSignOut() {
+    setAuth(null, null)
+    sessionStorage.removeItem('refreshToken')
+    sessionStorage.removeItem('redirectAfterLogin')
+    navigate('/login', { replace: true })
+  }
 
   // ── Queue data ────────────────────────────────────────────────────────────────────────────────
   const [queue,   setQueue]   = useState<QueueEntry[]>([])
@@ -286,11 +300,25 @@ export function QueuePage() {
   if (role === 'Patient') return null
 
   return (
-    <div style={styles.page}>
-      <h1 style={styles.heading}>Today's queue</h1>
-      <p style={styles.subheading}>
-        {new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
-      </p>
+    <div style={{ fontFamily: "'IBM Plex Sans', system-ui, -apple-system, sans-serif", background: '#F8FAFC', minHeight: '100vh' }}>
+      <Header />
+      <div style={styles.page}>
+        <div style={styles.actionBar}>
+          <div style={styles.pageTitle}>
+            <h1 style={{ ...styles.heading, marginBottom: 0 }}>Today's queue</h1>
+            <p style={{ ...styles.subheading, marginBottom: 0 }}>
+              {new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+          <div style={styles.actionGroup}>
+            <Link to="/walkin/new" style={styles.btnWalkIn} aria-label="Register new walk-in patient">
+              + New Walk-In
+            </Link>
+            <button style={styles.btnSignOut} onClick={handleSignOut} aria-label="Sign out">
+              Sign out
+            </button>
+          </div>
+        </div>
 
       {/* AC-005 — Summary bar; role="status" so screen readers announce count changes on update */}
       <div role="status" aria-live="polite" style={styles.summaryBar}>
@@ -414,6 +442,7 @@ export function QueuePage() {
           {toastMsg}
         </div>
       )}
+      </div>
     </div>
   )
 }
