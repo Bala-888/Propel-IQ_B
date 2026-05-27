@@ -39,3 +39,23 @@ export function decodeJwtSub(token: string): string | null {
     return null
   }
 }
+
+/**
+ * Decodes the `exp` claim from a JWT access token and returns it in milliseconds.
+ * Returns null if the token is malformed or has no exp claim.
+ * Read-only — does NOT validate the signature.
+ */
+export function decodeJwtExp(token: string): number | null {
+  const segments = token.split('.')
+  if (segments.length !== 3) return null
+  try {
+    const b64 = segments[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4)
+    const payload = JSON.parse(atob(padded)) as Record<string, unknown>
+    const exp = payload['exp']
+    if (typeof exp !== 'number') return null
+    return exp * 1000 // JWT exp is in seconds; convert to ms
+  } catch {
+    return null
+  }
+}

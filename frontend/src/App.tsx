@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { router } from './router'
 import { useInactivityTimer } from './hooks/useInactivityTimer'
 import { SessionTimeoutModal } from './features/session/SessionTimeoutModal'
+import { decodeJwtExp, decodeJwtRole } from './utils/jwt'
 
 const WARNING_AT_MS = 14 * 60 * 1000
 const TIMEOUT_AT_MS = 15 * 60 * 1000
@@ -18,8 +19,38 @@ const TIMEOUT_AT_MS = 15 * 60 * 1000
  * exposes .navigate() directly without requiring the React Router context.
  */
 function AppSessionManager() {
-  const { setAuth } = useAuth()
+  const { setAuth, accessToken } = useAuth()
   const [showModal, setShowModal] = useState(false)
+
+  // ── Proactive silent refresh ────────────────────────────────────────────────
+  // Fires 2 min before JWT expiry, independent of the inactivity timer.
+  // An actively-using patient would otherwise have their token expire mid-session
+  // with no refresh triggered (inactivity timer only fires after 14 min idle).
+  useEffect(() => {
+    if (!accessToken) return
+    const expMs = decodeJwtExp(accessToken)
+    if (!expMs) return
+    const refreshInMs = expMs - Date.now() - 2 * 60 * 1000 // 2 min before expiry
+    if (refreshInMs <= 0) return // already expired or < 2 min left — inactivity path handles it
+    const timer = setTimeout(async () => {
+      const storedRefresh = sessionStorage.getItem('refreshToken')
+      if (!storedRefresh) return
+      try {
+        const res = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken: storedRefresh }),
+        })
+        if (!res.ok) return // silently fail — inactivity timer handles forced logout
+        const body = await res.json() as { accessToken: string; refreshToken: string }
+        setAuth(body.accessToken, decodeJwtRole(body.accessToken))
+        sessionStorage.setItem('refreshToken', body.refreshToken)
+      } catch {
+        // Network error — silently ignore; inactivity timer handles forced logout
+      }
+    }, refreshInMs)
+    return () => clearTimeout(timer)
+  }, [accessToken, setAuth])
 
   const handleTimeout = useCallback(() => {
     setAuth(null, null)
