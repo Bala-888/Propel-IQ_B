@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Channels;
 using Api.Constants;
@@ -19,7 +20,7 @@ namespace Api.Controllers;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/documents")]
+[Route("documents")]
 [Authorize(Roles = Roles.Patient)]
 public sealed class DocumentsController : ControllerBase
 {
@@ -178,7 +179,7 @@ public sealed class DocumentsController : ControllerBase
     /// <summary>Parses the numeric patient ID from the JWT <c>sub</c> claim.</summary>
     private int? GetPatientId()
     {
-        var raw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var raw = User.FindFirstValue("pid") ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
         return int.TryParse(raw, out var id) ? id : null;
     }
 }

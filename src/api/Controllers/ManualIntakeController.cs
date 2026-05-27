@@ -1,9 +1,10 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Api.Constants;
 using Api.DTOs;
 using Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Api.Controllers;
 
@@ -155,7 +156,9 @@ public sealed class ManualIntakeController : ControllerBase
     /// </summary>
     private int? GetPatientId()
     {
-        var raw = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        // pid claim contains patients.id for Patient-role users (set during registration).
+        // Falls back to sub (user id) for backward-compat with tokens issued before pid was added.
+        var raw = User.FindFirstValue("pid") ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
         return int.TryParse(raw, out var id) ? id : null;
     }
 }

@@ -13,9 +13,14 @@ export const registrationSchema = z.object({
     .refine((val) => !isNaN(new Date(val).getTime()), 'A valid date of birth is required'),
   email: z.string().email('Enter a valid email address'),
   phone: z.string().min(1, 'Phone number is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
   // Insurance fields optional — omitting does not trigger client-side errors (Edge: insurance optional)
   insuranceProvider: z.string().optional(),
   insuranceId: z.string().optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 })
 
 export type RegisterFormValues = z.infer<typeof registrationSchema>

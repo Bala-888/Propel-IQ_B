@@ -17,6 +17,10 @@ public sealed class RegisterPatientRequest
     [Required]
     public string Phone { get; set; } = string.Empty;
 
+    [Required]
+    [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
+    public string Password { get; set; } = string.Empty;
+
     // Insurance fields are optional — null and empty-string are both treated as absent (Edge: insurance optional)
     public string? InsuranceProvider { get; set; }
 

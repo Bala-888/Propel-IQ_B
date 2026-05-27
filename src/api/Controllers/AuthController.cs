@@ -85,7 +85,7 @@ public sealed class AuthController : ControllerBase
         {
             Username     = request.Email,
             Name         = request.Name,  // stored for user management table (us_011/task_002)
-            PasswordHash = string.Empty,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Role         = "Patient",
             CreatedAt    = DateTime.UtcNow
         };
@@ -107,6 +107,9 @@ public sealed class AuthController : ControllerBase
         _db.Patients.Add(newPatient);
 
         await _db.SaveChangesAsync();
+
+        // Back-link the patient id onto the user so the pid JWT claim is set correctly (OWASP A01).
+        newUser.PatientId = newPatient.Id;
 
         // AC-004: insert a PatientPreferences row with default opt-in/opt-out values for the
         // newly created patient. EF Core HasDefaultValue config enforces these at the DB level;
@@ -130,8 +133,9 @@ public sealed class AuthController : ControllerBase
         _auditLogger.Log(newUser.Id.ToString(), "PatientRegistration", newPatient.Id.ToString());
 
         // AC-001: HTTP 201; response contains only userId + role — no PHI (OWASP A02).
-        return CreatedAtAction(
-            nameof(RegisterAsync),
+        // CreatedAtAction cannot resolve here because there is no corresponding resource GET route.
+        return StatusCode(
+            StatusCodes.Status201Created,
             new RegisterPatientResponse { UserId = newUser.Id, Role = "Patient" });
     }
 

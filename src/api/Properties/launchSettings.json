@@ -1,0 +1,39 @@
+{
+  "profiles": {
+    "Api": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWT_SECRET": "EN6PYFuBMoZ0zVAq9LpHiQSlway2jtRmkrnfdgc81bIKW35hXUev7sCx4DJGTO",
+        "PHI_ENCRYPTION_KEY": "/b+k16PObETq0rKhXSCsbtzRw9RgUafGYyr2WkyycvA=",
+        "DOCUMENT_MASTER_KEY": "tO4tGKcAbWDHV2UuLF5Ak+++S1JLxPaq720aDl0P73M=",
+        "POSTGRES_CONNECTION_STRING": "Host=localhost;Port=5432;Database=upacip;Username=postgres;Password=admin;",
+        "OLLAMA_BASE_URL": "http://localhost:11434",
+        "DOCUMENT_BLOB_DIR": "C:\\Temp\\upacip-docs"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:8080"
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWT_SECRET": "EN6PYFuBMoZ0zVAq9LpHiQSlway2jtRmkrnfdgc81bIKW35hXUev7sCx4DJGTO",
+        "PHI_ENCRYPTION_KEY": "/b+k16PObETq0rKhXSCsbtzRw9RgUafGYyr2WkyycvA=",
+        "DOCUMENT_MASTER_KEY": "tO4tGKcAbWDHV2UuLF5Ak+++S1JLxPaq720aDl0P73M=",
+        "POSTGRES_CONNECTION_STRING": "Host=localhost;Port=5432;Database=upacip;Username=postgres;Password=admin;",
+        "OLLAMA_BASE_URL": "http://localhost:11434",
+        "DOCUMENT_BLOB_DIR": "C:\\Temp\\upacip-docs"
+      }
+    }
+  },
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:58395/",
+      "sslPort": 44392
+    }
+  }
+}

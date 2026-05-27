@@ -22,7 +22,7 @@ namespace Api.Features.Patients;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/patients")]
+[Route("patients")]
 [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
 public sealed class PatientSearchController : ControllerBase
 {

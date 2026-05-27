@@ -103,14 +103,6 @@ export function LoginForm() {
       // Store refresh token in sessionStorage — scope-limited to tab session
       sessionStorage.setItem('refreshToken', refreshToken)
 
-      // Restore stored redirect first (set by ProtectedRoute when an auth-required route was accessed)
-      const stored = sessionStorage.getItem('redirectAfterLogin')
-      if (stored) {
-        sessionStorage.removeItem('redirectAfterLogin')
-        navigate(stored, { replace: true })
-        return
-      }
-
       // Role-based default redirect — unknown role falls back to /login (AC-002, AC-003, AC-004)
       const dest = ROLE_DESTINATIONS[role]
       if (!dest) {
@@ -118,6 +110,16 @@ export function LoginForm() {
         navigate('/login', { replace: true })
         return
       }
+
+      // Restore stored redirect only if it lives within the user's role area
+      // (prevents e.g. an Admin landing on /intake because a Patient visit was cached)
+      const stored = sessionStorage.getItem('redirectAfterLogin')
+      sessionStorage.removeItem('redirectAfterLogin')
+      if (stored && stored.startsWith(dest)) {
+        navigate(stored, { replace: true })
+        return
+      }
+
       navigate(dest, { replace: true })
     } catch {
       setError('root', { message: 'Network error. Please try again.' })

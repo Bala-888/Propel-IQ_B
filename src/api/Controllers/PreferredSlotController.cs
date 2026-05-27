@@ -17,7 +17,7 @@ namespace Api.Controllers;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/bookings")]
+[Route("bookings")]
 [Authorize(Roles = Roles.Patient)]
 public sealed class PreferredSlotController : ControllerBase
 {

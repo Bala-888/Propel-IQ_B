@@ -1,6 +1,8 @@
 using Api.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Api.Features.Admin;
 
@@ -14,7 +16,7 @@ namespace Api.Features.Admin;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/admin/metrics")]
+[Route("admin/metrics")]
 [Authorize(Roles = Roles.Admin)]
 public sealed class AdminMetricsController : ControllerBase
 {
@@ -53,6 +55,13 @@ public sealed class AdminMetricsController : ControllerBase
         catch (MetricsTimeoutException)
         {
             // Edge: aggregation query > 5s — no stack trace in response body (OWASP A04, A09).
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { error = "Metrics temporarily unavailable." });
+        }
+        catch (Exception ex) when (ex is NpgsqlException || ex is DbUpdateException)
+        {
+            // BUG-001: unhandled NpgsqlException previously leaked full stack trace (OWASP A04, A09).
+            // Catch DB-level failures and return a safe 503 — no internal detail exposed.
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 new { error = "Metrics temporarily unavailable." });
         }

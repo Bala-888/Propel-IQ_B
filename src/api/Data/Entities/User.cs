@@ -17,4 +17,7 @@ public class User
     // Decision[2026-05-21]: Added for AC-001 (us_011) to flag admin-created accounts that
     // require a password change on first login. Default false keeps existing rows unchanged.
     public bool MustChangePassword { get; set; } = false;
+    // Decision[2026-05-27]: Added to embed the patients.id in the JWT pid claim so
+    // patient-facing controllers can resolve patient_id without a DB round-trip (OWASP A01).
+    public int? PatientId { get; set; }
 }

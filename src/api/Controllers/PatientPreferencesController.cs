@@ -13,7 +13,7 @@ namespace Api.Controllers;
 /// to the {id} route parameter before any DB access (OWASP A01; AC-002).
 /// </summary>
 [ApiController]
-[Route("api/patients/{id:int}/preferences")]
+[Route("patients/{id:int}/preferences")]
 [Authorize(Roles = Roles.Patient)]
 public sealed class PatientPreferencesController : ControllerBase
 {

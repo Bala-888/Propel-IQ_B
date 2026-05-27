@@ -30,20 +30,20 @@ public sealed class TokenService : ITokenService
         var now = DateTime.UtcNow;
 
         // AC-001: sub, role, iat, exp claims — exp = iat + 900s (15 minutes exactly)
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            // Short-form "role" claim (not ClaimTypes.Role URL) so the SPA can read
-            // payload.role with atob/JSON.parse without a library (task_003/AC-002..AC-004).
-            // RoleClaimType = "role" is set in TokenValidationParameters so [Authorize(Roles="...")]
-            // and User.IsInRole() still work (OWASP A01).
             new Claim("role", user.Role),
-            // iat as integer — ClaimValueTypes.Integer64 serialises as JSON number, not string
             new Claim(
                 JwtRegisteredClaimNames.Iat,
                 new DateTimeOffset(now).ToUnixTimeSeconds().ToString(),
                 ClaimValueTypes.Integer64),
         };
+
+        // pid claim: the patients.id for Patient-role users so controllers can look up
+        // patient rows directly without a DB round-trip (OWASP A01; AC-001).
+        if (user.PatientId.HasValue)
+            claims.Add(new Claim("pid", user.PatientId.Value.ToString()));
 
         var credentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
 

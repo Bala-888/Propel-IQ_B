@@ -59,6 +59,7 @@ export function RegistrationForm() {
           dateOfBirth: values.dateOfBirth,
           email: values.email,
           phone: values.phone,
+          password: values.password,
           // Omit empty-string insurance fields so server stores NULL, not empty string (Edge: insurance optional)
           ...(values.insuranceProvider ? { insuranceProvider: values.insuranceProvider } : {}),
           ...(values.insuranceId ? { insuranceId: values.insuranceId } : {}),
@@ -233,6 +234,50 @@ export function RegistrationForm() {
               <span id="phone-error" className="inline-error" role="alert">
                 <WarningIcon />
                 {errors.phone.message}
+              </span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="password">
+              Password <span className="required" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="password"
+              className={`form-input${errors.password ? ' error' : ''}`}
+              type="password"
+              autoComplete="new-password"
+              placeholder="Min. 8 characters"
+              aria-required="true"
+              aria-describedby={errors.password ? 'password-error' : undefined}
+              {...register('password')}
+            />
+            {errors.password && (
+              <span id="password-error" className="inline-error" role="alert">
+                <WarningIcon />
+                {errors.password.message}
+              </span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="confirmPassword">
+              Confirm password <span className="required" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="confirmPassword"
+              className={`form-input${errors.confirmPassword ? ' error' : ''}`}
+              type="password"
+              autoComplete="new-password"
+              placeholder="Re-enter your password"
+              aria-required="true"
+              aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
+              {...register('confirmPassword')}
+            />
+            {errors.confirmPassword && (
+              <span id="confirmPassword-error" className="inline-error" role="alert">
+                <WarningIcon />
+                {errors.confirmPassword.message}
               </span>
             )}
           </div>

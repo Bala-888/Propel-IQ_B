@@ -1,5 +1,7 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from '../components/ProtectedRoute'
+import { ErrorPage } from '../pages/ErrorPage'
+import { NotFoundPage } from '../pages/NotFoundPage'
 import { LoginForm } from '../features/auth/LoginForm'
 import { IntakePage } from '../pages/IntakePage'
 import { QueuePage } from '../pages/QueuePage'
@@ -22,6 +24,11 @@ import { PatientViewPage }      from '../pages/PatientViewPage'
 import { MedicalCodePage }      from '../pages/MedicalCodePage'
 
 export const router = createBrowserRouter([
+  {
+    path: '/',
+    errorElement: <ErrorPage />,
+    children: [
+      { index: true, element: <Navigate to="/login" replace /> },
   {
     path: '/login',
     element: <LoginForm />,
@@ -117,5 +124,8 @@ export const router = createBrowserRouter([
   {
     path: '/patients/:id/codes',
     element: <ProtectedRoute><MedicalCodePage /></ProtectedRoute>,
+  },
+  { path: '*', element: <NotFoundPage /> },
+  ],
   },
 ])

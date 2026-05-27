@@ -17,7 +17,7 @@ namespace Api.Controllers;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/insurance")]
+[Route("insurance")]
 [Authorize(Roles = Roles.Patient)]
 public sealed class InsuranceController : ControllerBase
 {

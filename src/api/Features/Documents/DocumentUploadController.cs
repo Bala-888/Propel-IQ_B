@@ -14,7 +14,7 @@ namespace Api.Features.Documents;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/documents")]
+[Route("documents")]
 [Authorize(Roles = Roles.Patient)]
 public sealed class DocumentUploadController : ControllerBase
 {
@@ -45,9 +45,10 @@ public sealed class DocumentUploadController : ControllerBase
         IFormFile file,
         CancellationToken ct)
     {
-        // patientId from JWT sub claim only — never from request body (OWASP A01; AC-004; checklist)
-        var sub = User.FindFirstValue("sub");
-        if (!int.TryParse(sub, out var patientId))
+        // patientId from JWT pid claim (patients.id) — falls back to sub for backward compat.
+        // Never accepted from request body or query string (OWASP A01; AC-004; checklist).
+        var raw = User.FindFirstValue("pid") ?? User.FindFirstValue("sub");
+        if (!int.TryParse(raw, out var patientId))
             return Unauthorized();
 
         try

@@ -26,7 +26,7 @@ namespace Api.Controllers;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/calendar")]
+[Route("calendar")]
 [Authorize(Roles = Roles.Patient)]
 public sealed class CalendarSyncController : ControllerBase
 {

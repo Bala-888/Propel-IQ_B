@@ -16,7 +16,7 @@ namespace Api.Features.Bookings;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/bookings")]
+[Route("bookings")]
 [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
 public sealed class WalkinBookingController : ControllerBase
 {

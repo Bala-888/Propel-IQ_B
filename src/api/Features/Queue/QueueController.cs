@@ -13,7 +13,7 @@ namespace Api.Features.Queue;
 /// </para>
 /// </summary>
 [ApiController]
-[Route("api/queue")]
+[Route("queue")]
 [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
 public sealed class QueueController : ControllerBase
 {

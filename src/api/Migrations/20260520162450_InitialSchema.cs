@@ -15,7 +15,8 @@ namespace Api.Migrations
         {
             // AC-001: enable required PostgreSQL extensions before any table creation
             migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
-            migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS vector;");
+            // pgvector is optional — AI embedding features are disabled when the extension is absent
+            migrationBuilder.Sql(@"DO $$ BEGIN CREATE EXTENSION IF NOT EXISTS vector; EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'pgvector not available, skipping'; END $$;");
 
             migrationBuilder.CreateTable(
                 name: "appointment_slots",
