@@ -107,13 +107,19 @@ public sealed class PatientsController : ControllerBase
                 EF.Functions.ILike(p.LastName,  pattern, "\\") ||
                 EF.Functions.ILike(p.FirstName, pattern, "\\"))
             .AsNoTracking()
+            .OrderBy(p => p.LastName).ThenBy(p => p.FirstName)
             .Take(20)
-            .Select(p => new PatientSearchResultDto
+            .Select(p => new
             {
-                Id          = p.Id,
-                FullName    = p.FirstName + " " + p.LastName,
-                DateOfBirth = p.DateOfBirth, // decrypted by EF Core PHI value converter
-                PatientCode = $"P{p.Id:D6}",
+                // Fields for PatientSearchPage (us_040/AC-001)
+                id          = p.Id,
+                fullName    = p.FirstName + " " + p.LastName,
+                dateOfBirth = p.DateOfBirth, // decrypted by EF Core PHI value converter
+                patientCode = $"P{p.Id:D6}",
+                // Fields for walk-in typeahead (us_030/AC-002) — avoids duplicate route conflict
+                patientId   = p.Id,
+                firstName   = p.FirstName,
+                lastName    = p.LastName,
             })
             .ToListAsync(ct);
 
