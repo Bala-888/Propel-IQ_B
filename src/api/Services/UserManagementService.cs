@@ -48,8 +48,11 @@ public sealed class UserManagementService : IUserManagementService
         if (exists)
             throw new DuplicateEmailException(request.Email);
 
-        // AC-001: generate cryptographically random 12-character temporary password.
-        var tempPassword = GenerateTempPassword(12);
+        // AC-001: use admin-provided password when given, otherwise generate a cryptographically
+        // random 12-character temporary password (OWASP A02: never persist plaintext).
+        var tempPassword = !string.IsNullOrWhiteSpace(request.Password)
+            ? request.Password
+            : GenerateTempPassword(12);
 
         // OWASP A02: hash before storing — never persist plaintext.
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(tempPassword);

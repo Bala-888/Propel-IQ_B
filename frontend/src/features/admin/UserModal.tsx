@@ -21,6 +21,11 @@ const createSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('A valid email address is required'),
   role: z.enum(ROLES),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string(),
+}).refine(d => d.password === d.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 })
 
 const editSchema = z.object({
@@ -54,7 +59,7 @@ export function UserModal({ mode, user, accessToken, onSuccess, onClose }: UserM
   } = useForm<CreateFormValues | EditFormValues>({
     resolver: zodResolver(isCreate ? createSchema : editSchema),
     defaultValues: isCreate
-      ? { name: '', email: '', role: 'Staff' }
+      ? { name: '', email: '', role: 'Staff', password: '', confirmPassword: '' }
       : { name: user?.name ?? '', email: user?.email ?? '', role: (user?.role ?? 'Staff') as typeof ROLES[number] },
   })
 
@@ -96,7 +101,7 @@ export function UserModal({ mode, user, accessToken, onSuccess, onClose }: UserM
     try {
       if (isCreate) {
         const v = values as CreateFormValues
-        const body: CreateUserBody = { name: v.name, email: v.email, role: v.role }
+        const body: CreateUserBody = { name: v.name, email: v.email, role: v.role, password: v.password }
         const { userId } = await createUser(accessToken, body)
         const newUser: AdminUser = {
           id: userId,
@@ -188,6 +193,45 @@ export function UserModal({ mode, user, accessToken, onSuccess, onClose }: UserM
               </span>
             )}
           </div>
+
+          {isCreate && (
+            <div className="um-modal__field">
+              <label className="um-modal__label" htmlFor="um-password">Password</label>
+              <input
+                id="um-password"
+                type="password"
+                className={`um-modal__input${'password' in errors && errors.password ? ' um-modal__input--error' : ''}`}
+                aria-describedby={'password' in errors && errors.password ? 'um-password-err' : 'um-password-hint'}
+                autoComplete="new-password"
+                {...register('password')}
+              />
+              <span id="um-password-hint" className="um-modal__hint">Minimum 8 characters.</span>
+              {'password' in errors && errors.password && (
+                <span id="um-password-err" className="um-modal__field-error" role="alert">
+                  {errors.password.message as string}
+                </span>
+              )}
+            </div>
+          )}
+
+          {isCreate && (
+            <div className="um-modal__field">
+              <label className="um-modal__label" htmlFor="um-confirm-password">Confirm password</label>
+              <input
+                id="um-confirm-password"
+                type="password"
+                className={`um-modal__input${'confirmPassword' in errors && errors.confirmPassword ? ' um-modal__input--error' : ''}`}
+                aria-describedby={'confirmPassword' in errors && errors.confirmPassword ? 'um-confirm-password-err' : undefined}
+                autoComplete="new-password"
+                {...register('confirmPassword')}
+              />
+              {'confirmPassword' in errors && errors.confirmPassword && (
+                <span id="um-confirm-password-err" className="um-modal__field-error" role="alert">
+                  {errors.confirmPassword.message as string}
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="um-modal__field">
             <label className="um-modal__label" htmlFor="um-role">Role</label>
