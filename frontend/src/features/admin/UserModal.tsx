@@ -15,7 +15,7 @@ import { z } from 'zod'
 import { createUser, patchUser, DuplicateEmailError, type AdminUser, type CreateUserBody } from '../../api/adminUsersApi'
 import './UserModal.css'
 
-const ROLES = ['Patient', 'Staff', 'Admin'] as const
+const ROLES = ['Staff', 'Admin'] as const
 
 const createSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -60,7 +60,7 @@ export function UserModal({ mode, user, accessToken, onSuccess, onClose }: UserM
     resolver: zodResolver(isCreate ? createSchema : editSchema),
     defaultValues: isCreate
       ? { name: '', email: '', role: 'Staff', password: '', confirmPassword: '' }
-      : { name: user?.name ?? '', email: user?.email ?? '', role: (user?.role ?? 'Staff') as typeof ROLES[number] },
+      : { name: user?.name ?? '', email: user?.email ?? '', role: (['Staff', 'Admin'].includes(user?.role ?? '') ? user!.role : 'Staff') as typeof ROLES[number] },
   })
 
   // Focus the first focusable element when modal opens

@@ -17,7 +17,7 @@ public sealed class CreateUserRequest
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Role is required")]
-    [AllowedValues("Patient", "Staff", "Admin", ErrorMessage = "Invalid role value")]
+    [AllowedValues("Staff", "Admin", ErrorMessage = "Invalid role value")]
     public string Role { get; set; } = string.Empty;
 
     /// <summary>

@@ -9,7 +9,7 @@ namespace Api.DTOs;
 public sealed class PatchUserRequest
 {
     /// <summary>
-    /// New role assignment. Must be one of <c>Patient</c>, <c>Staff</c>, or <c>Admin</c>
+    /// New role assignment. Must be one of <c>Staff</c> or <c>Admin</c>
     /// when present. Validated in the controller before the service is called (AC-002).
     /// </summary>
     public string? Role { get; set; }

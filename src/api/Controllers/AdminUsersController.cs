@@ -18,8 +18,11 @@ namespace Api.Controllers;
 [Authorize(Roles = Roles.Admin)]
 public sealed class AdminUsersController : ControllerBase
 {
+    // Patients self-register through the public Registration endpoint (SCR-002 / FL-001).
+    // Admin-created Patient accounts would have no patients row and no patient_id, making
+    // intake and booking impossible. Admins may only create Staff and Admin accounts.
     private static readonly HashSet<string> AllowedRoles =
-        new(StringComparer.Ordinal) { "Patient", "Staff", "Admin" };
+        new(StringComparer.Ordinal) { "Staff", "Admin" };
 
     private readonly IUserManagementService _userManagement;
 
