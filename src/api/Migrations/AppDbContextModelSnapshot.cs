@@ -815,6 +815,10 @@ namespace Api.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password_hash");
 
+                    b.Property<int?>("PatientId")
+                        .HasColumnType("integer")
+                        .HasColumnName("patient_id");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("text")
@@ -827,6 +831,9 @@ namespace Api.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_users");
+
+                    b.HasIndex("PatientId")
+                        .HasDatabaseName("ix_users_patient_id");
 
                     b.ToTable("users", (string)null);
                 });
