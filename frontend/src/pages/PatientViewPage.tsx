@@ -20,6 +20,7 @@ import { getPatientSummary }                        from '../api/patientApi'
 import { AiLabel }                                  from '../components/AiLabel'
 import { ConflictBanner }                           from '../components/ConflictBanner'
 import { ResolveConflictDrawer }                    from '../components/ResolveConflictDrawer'
+import { StaffSidebar }                             from '../components/layout/StaffSidebar'
 import { getConfidenceLabel }                       from '../types/patient'
 import type {
   PatientSummaryDto,
@@ -247,7 +248,9 @@ export function PatientViewPage() {
   const toDoc     = Math.min(docPage * 20, totalDocs)
 
   return (
-    <div className={styles.page}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg-page)' }}>
+      <StaffSidebar />
+      <div className={styles.page} style={{ flex: 1, minWidth: 0 }}>
 
       {/* ── Patient header ──────────────────────────────────────────────────────────────── */}
       <div className={styles.patientHeader}>
@@ -383,6 +386,7 @@ export function PatientViewPage() {
         onResolved={handleConflictResolved}
       />
 
+      </div>
     </div>
   )
 }

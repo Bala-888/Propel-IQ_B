@@ -12,6 +12,7 @@ import {
 } from '../api/walkInApi'
 import { PatientTypeahead } from '../components/walkin/PatientTypeahead'
 import { WalkinAccountCreationModal } from '../components/walkin/WalkinAccountCreationModal'
+import { StaffSidebar } from '../components/layout/StaffSidebar'
 import '../features/walkin/walkin.css'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────────────────────────
@@ -183,14 +184,8 @@ export function WalkinBookingPage() {
   const noSlotsToday = !slotsLoading && slots.length === 0
 
   return (
-    <div className="walkin-page">
-      {/* Sidebar */}
-      <div className="walkin-page__sidebar">
-        <h2 className="walkin-page__sidebar-title">Walk-in</h2>
-        <nav aria-label="Walk-in navigation">
-          <a href="/queue" className="walkin-page__nav-link">← Back to queue</a>
-        </nav>
-      </div>
+    <div className="walkin-page" style={{ display: 'flex', minHeight: '100vh' }}>
+      <StaffSidebar />
 
       <main className="walkin-page__content" aria-labelledby="scr012-heading">
         <div className="walkin-form-card">

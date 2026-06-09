@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getQueue, markArrived, type QueueEntry } from '../api/queueApi'
 import { RiskBadge } from '../components/queue/RiskBadge'
-import { Header } from '../components/layout/Header'
+import { StaffSidebar } from '../components/layout/StaffSidebar'
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 
 // ── Icon components (aria-hidden — text labels are the primary signal; UXR-105) ─────────────────────────
@@ -300,8 +300,9 @@ export function QueuePage() {
   if (role === 'Patient') return null
 
   return (
-    <div style={{ fontFamily: "'IBM Plex Sans', system-ui, -apple-system, sans-serif", background: '#F8FAFC', minHeight: '100vh' }}>
-      <Header />
+    <div style={{ fontFamily: "'IBM Plex Sans', system-ui, -apple-system, sans-serif", background: '#F8FAFC', minHeight: '100vh', display: 'flex' }}>
+      <StaffSidebar />
+      <div style={{ flex: 1, minWidth: 0 }}>
       <div style={styles.page}>
         <div style={styles.actionBar}>
           <div style={styles.pageTitle}>
@@ -314,9 +315,6 @@ export function QueuePage() {
             <Link to="/walkin/new" style={styles.btnWalkIn} aria-label="Register new walk-in patient">
               + New Walk-In
             </Link>
-            <button style={styles.btnSignOut} onClick={handleSignOut} aria-label="Sign out">
-              Sign out
-            </button>
           </div>
         </div>
 
@@ -442,6 +440,7 @@ export function QueuePage() {
           {toastMsg}
         </div>
       )}
+      </div>
       </div>
     </div>
   )

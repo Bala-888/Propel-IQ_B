@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, Link }           from 'react-router-dom'
 import { useAuth }                     from '../context/AuthContext'
 import { searchPatients }              from '../api/patientApi'
+import { StaffSidebar }               from '../components/layout/StaffSidebar'
 import type { PatientSearchResultDto } from '../types/patient'
 
 // ── Date formatter ────────────────────────────────────────────────────────────────────────────────
@@ -89,25 +90,10 @@ export function PatientSearchPage() {
       : ''
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)', display: 'flex' }}>
+      <StaffSidebar />
 
-      {/* ── Page header ───────────────────────────────────────────────────────────────────── */}
-      <header
-        style={{
-          height:         '56px',
-          background:     'var(--color-bg-surface)',
-          borderBottom:   '1px solid var(--color-border)',
-          display:        'flex',
-          alignItems:     'center',
-          padding:        '0 var(--space-8)',
-          boxShadow:      'var(--shadow-1)',
-          flexShrink:     0,
-        }}
-      >
-        <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-          Patient search
-        </span>
-      </header>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
       {/* ── Search form ───────────────────────────────────────────────────────────────────── */}
       <main
@@ -244,14 +230,6 @@ export function PatientSearchPage() {
         )}
       </main>
 
-      {/* ── Back to queue ─────────────────────────────────────────────────────────────────── */}
-      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 var(--space-6)' }}>
-        <Link
-          to="/queue"
-          style={{ fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'none' }}
-        >
-          ← Back to queue
-        </Link>
       </div>
     </div>
   )
