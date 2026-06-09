@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\AjayPrakash\\Desktop\\Propell\\Propel-IQ_B\\src\\seed\\Seed.csproj": {}
+    "C:\\Users\\BalasubramanianShank\\Desktop\\Propel IQ\\PropelIQ-Stub-Copilot\\src\\seed\\Seed.csproj": {}
   },
   "projects": {
-    "C:\\Users\\AjayPrakash\\Desktop\\Propell\\Propel-IQ_B\\src\\seed\\Seed.csproj": {
+    "C:\\Users\\BalasubramanianShank\\Desktop\\Propel IQ\\PropelIQ-Stub-Copilot\\src\\seed\\Seed.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\AjayPrakash\\Desktop\\Propell\\Propel-IQ_B\\src\\seed\\Seed.csproj",
+        "projectUniqueName": "C:\\Users\\BalasubramanianShank\\Desktop\\Propel IQ\\PropelIQ-Stub-Copilot\\src\\seed\\Seed.csproj",
         "projectName": "Seed",
-        "projectPath": "C:\\Users\\AjayPrakash\\Desktop\\Propell\\Propel-IQ_B\\src\\seed\\Seed.csproj",
-        "packagesPath": "C:\\Users\\AjayPrakash\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\AjayPrakash\\Desktop\\Propell\\Propel-IQ_B\\src\\seed\\obj\\",
+        "projectPath": "C:\\Users\\BalasubramanianShank\\Desktop\\Propel IQ\\PropelIQ-Stub-Copilot\\src\\seed\\Seed.csproj",
+        "packagesPath": "C:\\Users\\BalasubramanianShank\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\BalasubramanianShank\\Desktop\\Propel IQ\\PropelIQ-Stub-Copilot\\src\\seed\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\AjayPrakash\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\BalasubramanianShank\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -31,7 +31,6 @@
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -45,12 +44,10 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "10.0.300"
+        }
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Npgsql": {
@@ -74,7 +71,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
